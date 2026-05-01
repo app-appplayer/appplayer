@@ -1,0 +1,773 @@
+{
+  "type": "page",
+  "version": "1.1",
+  "metadata": {
+    "title": "Client Resources",
+    "description": "Server-initiated use of client-side capabilities (v1.1)"
+  },
+  "state": {
+    "initial": {
+      "sysInfo": {},
+      "sysStatus": "Not fetched",
+      "clipInput": "",
+      "clipReadback": "",
+      "clipStatus": "Idle",
+      "httpResponse": "",
+      "httpStatus": "Not called",
+      "pickedFilePath": "",
+      "fileContent": "",
+      "fileStatus": "No file",
+      "storageKey": "demo.note",
+      "storageValue": "",
+      "storageReadback": "",
+      "storageStatus": "Idle",
+      "notifyMessage": "Hello from the server",
+      "notifyStatus": "Idle"
+    }
+  },
+  "content": {
+    "type": "singleChildScrollView",
+    "padding": {
+      "all": 16
+    },
+    "child": {
+      "type": "linear",
+      "direction": "vertical",
+      "spacing": 20,
+      "children": [
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 16
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 6,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "About this page",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "color": "primary"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "text",
+                  "text": "Each section below fires a `client.*` action. The runtime checks the permission declared on this page, then prompts for consent before touching your machine. Results are bound back into this page's state so every capability is visible as a pure data flow.",
+                  "style": {
+                    "fontSize": 13,
+                    "color": "onSurface"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 16
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 6,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "client.getSystemInfo",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "color": "primary"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "text",
+                  "text": "Reads platform, architecture, memory, and CPU count from the host.",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "linear",
+                  "direction": "horizontal",
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "type": "button",
+                      "label": "Fetch system info",
+                      "variant": "filled",
+                      "onTap": {
+                        "type": "client.getSystemInfo",
+                        "params": {},
+                        "onSuccess": {
+                          "type": "batch",
+                          "actions": [
+                            {
+                              "type": "state",
+                              "action": "set",
+                              "binding": "sysInfo",
+                              "value": "{{response}}"
+                            },
+                            {
+                              "type": "state",
+                              "action": "set",
+                              "binding": "sysStatus",
+                              "value": "Received"
+                            }
+                          ]
+                        },
+                        "onError": {
+                          "type": "state",
+                          "action": "set",
+                          "binding": "sysStatus",
+                          "value": "Error: {{error.message}}"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "text": "Status: {{sysStatus}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Platform: {{sysInfo.platform}}\nArch: {{sysInfo.arch}}\nDevice: {{sysInfo.device}}\nModel: {{sysInfo.model}}\nOS: {{sysInfo.osVersion}}\nLocale: {{sysInfo.locale}}",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 16
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 6,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "client.clipboard",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "color": "primary"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "text",
+                  "text": "Write the input text to the OS clipboard, then read it back.",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "textInput",
+                  "label": "Text to copy",
+                  "placeholder": "Type something",
+                  "binding": "clipInput"
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "linear",
+                  "direction": "horizontal",
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "type": "button",
+                      "label": "Copy to clipboard",
+                      "variant": "filled",
+                      "onTap": {
+                        "type": "client.clipboard",
+                        "params": {
+                          "action": "write",
+                          "content": "{{clipInput}}"
+                        },
+                        "onSuccess": {
+                          "type": "state",
+                          "action": "set",
+                          "binding": "clipStatus",
+                          "value": "Copied"
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "label": "Read back",
+                      "variant": "outlined",
+                      "onTap": {
+                        "type": "client.clipboard",
+                        "params": {
+                          "action": "read"
+                        },
+                        "onSuccess": {
+                          "type": "batch",
+                          "actions": [
+                            {
+                              "type": "state",
+                              "action": "set",
+                              "binding": "clipReadback",
+                              "value": "{{response.content}}"
+                            },
+                            {
+                              "type": "state",
+                              "action": "set",
+                              "binding": "clipStatus",
+                              "value": "Read"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "text": "Status: {{clipStatus}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Readback: {{clipReadback}}",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 16
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 6,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "client.httpRequest",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "color": "primary"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "text",
+                  "text": "Client executes the HTTP call and streams the body back into state.",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "button",
+                  "label": "GET httpbin.org/get",
+                  "variant": "filled",
+                  "onTap": {
+                    "type": "client.httpRequest",
+                    "params": {
+                      "url": "https://httpbin.org/get",
+                      "method": "GET",
+                      "headers": {
+                        "Accept": "application/json"
+                      }
+                    },
+                    "onSuccess": {
+                      "type": "batch",
+                      "actions": [
+                        {
+                          "type": "state",
+                          "action": "set",
+                          "binding": "httpResponse",
+                          "value": "{{response.data}}"
+                        },
+                        {
+                          "type": "state",
+                          "action": "set",
+                          "binding": "httpStatus",
+                          "value": "HTTP {{response.status}} {{response.statusText}}"
+                        }
+                      ]
+                    },
+                    "onError": {
+                      "type": "state",
+                      "action": "set",
+                      "binding": "httpStatus",
+                      "value": "Error: {{error.message}}"
+                    }
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "text": "Status: {{httpStatus}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Body: {{httpResponse}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  },
+                  "maxLines": 6
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 16
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 6,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "client.selectFile + client.readFile",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "color": "primary"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "text",
+                  "text": "Open a system file picker, then read the chosen file as UTF-8.",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "button",
+                  "label": "Pick & read file",
+                  "variant": "filled",
+                  "onTap": {
+                    "type": "client.selectFile",
+                    "params": {
+                      "title": "Pick any small text file",
+                      "multiple": false
+                    },
+                    "onSuccess": {
+                      "type": "batch",
+                      "actions": [
+                        {
+                          "type": "state",
+                          "action": "set",
+                          "binding": "pickedFilePath",
+                          "value": "{{response.path}}"
+                        },
+                        {
+                          "type": "state",
+                          "action": "set",
+                          "binding": "fileStatus",
+                          "value": "Picked"
+                        },
+                        {
+                          "type": "client.readFile",
+                          "params": {
+                            "path": "{{response.path}}",
+                            "encoding": "utf-8"
+                          },
+                          "onSuccess": {
+                            "type": "batch",
+                            "actions": [
+                              {
+                                "type": "state",
+                                "action": "set",
+                                "binding": "fileContent",
+                                "value": "{{response.content}}"
+                              },
+                              {
+                                "type": "state",
+                                "action": "set",
+                                "binding": "fileStatus",
+                                "value": "Read {{response.size}} bytes"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "onError": {
+                      "type": "state",
+                      "action": "set",
+                      "binding": "fileStatus",
+                      "value": "Cancelled or error"
+                    }
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "text": "Path: {{pickedFilePath}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Status: {{fileStatus}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Content: {{fileContent}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  },
+                  "maxLines": 8
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 16
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 6,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "client.storage.{set,get}",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "color": "primary"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "text",
+                  "text": "Persist a value on the client — survives page reloads until the user clears local storage.",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "textInput",
+                  "label": "Value to store",
+                  "placeholder": "Anything",
+                  "binding": "storageValue"
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "linear",
+                  "direction": "horizontal",
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "type": "button",
+                      "label": "Save",
+                      "variant": "filled",
+                      "onTap": {
+                        "type": "client.storage.set",
+                        "params": {
+                          "key": "{{storageKey}}",
+                          "value": "{{storageValue}}"
+                        },
+                        "onSuccess": {
+                          "type": "state",
+                          "action": "set",
+                          "binding": "storageStatus",
+                          "value": "Saved"
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "label": "Load",
+                      "variant": "outlined",
+                      "onTap": {
+                        "type": "client.storage.get",
+                        "params": {
+                          "key": "{{storageKey}}"
+                        },
+                        "onSuccess": {
+                          "type": "batch",
+                          "actions": [
+                            {
+                              "type": "state",
+                              "action": "set",
+                              "binding": "storageReadback",
+                              "value": "{{response.value}}"
+                            },
+                            {
+                              "type": "state",
+                              "action": "set",
+                              "binding": "storageStatus",
+                              "value": "Loaded"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "label": "Remove",
+                      "variant": "outlined",
+                      "onTap": {
+                        "type": "client.storage.remove",
+                        "params": {
+                          "key": "{{storageKey}}"
+                        },
+                        "onSuccess": {
+                          "type": "batch",
+                          "actions": [
+                            {
+                              "type": "state",
+                              "action": "set",
+                              "binding": "storageReadback",
+                              "value": ""
+                            },
+                            {
+                              "type": "state",
+                              "action": "set",
+                              "binding": "storageStatus",
+                              "value": "Removed"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "text": "Key: {{storageKey}} — status: {{storageStatus}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Readback: {{storageReadback}}",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 16
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 6,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "client.notification",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold",
+                    "color": "primary"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "text",
+                  "text": "Post an OS-level notification. Implementation routes to the platform notification centre (macOS / Windows / Linux / Web).",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "onSurface"
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "textInput",
+                  "label": "Message",
+                  "binding": "notifyMessage"
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "button",
+                  "label": "Send notification",
+                  "variant": "filled",
+                  "onTap": {
+                    "type": "client.notification",
+                    "params": {
+                      "title": "MCP UI Showcase",
+                      "body": "{{notifyMessage}}"
+                    },
+                    "onSuccess": {
+                      "type": "state",
+                      "action": "set",
+                      "binding": "notifyStatus",
+                      "value": "Dispatched"
+                    },
+                    "onError": {
+                      "type": "state",
+                      "action": "set",
+                      "binding": "notifyStatus",
+                      "value": "Error: {{error.message}}"
+                    }
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "text": "Status: {{notifyStatus}}",
+                  "style": {
+                    "fontSize": 11,
+                    "color": "onSurface"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 24
+        }
+      ]
+    }
+  }
+}

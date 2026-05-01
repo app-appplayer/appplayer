@@ -1,0 +1,99 @@
+/// List widgets showcase: list, grid, listTile.
+Map<String, dynamic> listPage() => {
+      'type': 'page',
+      'metadata': {'title': 'List & Grid', 'description': 'List widget showcase'},
+      'state': {
+        'initial': {
+          'items': [
+            {'id': 1, 'title': 'Flutter', 'subtitle': 'UI framework', 'icon': 'phone_android'},
+            {'id': 2, 'title': 'Dart', 'subtitle': 'Programming language', 'icon': 'code'},
+            {'id': 3, 'title': 'MCP', 'subtitle': 'Model Context Protocol', 'icon': 'hub'},
+            {'id': 4, 'title': 'UI DSL', 'subtitle': 'Declarative UI language', 'icon': 'design_services'},
+            {'id': 5, 'title': 'AppPlayer', 'subtitle': 'Universal MCP client', 'icon': 'play_circle'},
+          ],
+          'gridItems': [
+            {'color': 'primary', 'label': 'Blue'},
+            {'color': 'secondary', 'label': 'Pink'},
+            {'color': '#4CAF50', 'label': 'Green'},
+            {'color': '#FFC107', 'label': 'Amber'},
+            {'color': '#9C27B0', 'label': 'Purple'},
+            {'color': '#FF5722', 'label': 'Orange'},
+          ],
+          'selectedIndex': -1,
+        },
+      },
+      'content': {
+        'type': 'linear',
+        'direction': 'vertical',
+        'children': [
+          {
+            'type': 'box',
+            'padding': {'all': 16},
+            'child': {
+              'type': 'text',
+              'text': 'List with itemTemplate',
+              'style': {'fontSize': 16, 'fontWeight': 'bold', 'color': 'primary'},
+            },
+          },
+          {
+            'type': 'expanded',
+            'flex': 3,
+            'child': {
+              'type': 'list',
+              'items': '{{items}}',
+              'itemTemplate': {
+                'type': 'listItem',
+                'leading': {'type': 'icon', 'icon': '{{item.icon}}', 'color': 'primary'},
+                'title': {'type': 'text', 'text': '{{item.title}}'},
+                'subtitle': {'type': 'text', 'text': '{{item.subtitle}}', 'style': {'color': 'onSurface'}},
+                'trailing': {'type': 'icon', 'icon': 'chevron_right'},
+                'onTap': {'type': 'state', 'action': 'set', 'binding': 'selectedIndex', 'value': '{{index}}'},
+              },
+            },
+          },
+          {
+            'type': 'box',
+            'padding': {'horizontal': 16, 'vertical': 8},
+            'child': {
+              'type': 'text',
+              'text': 'Selected index: {{selectedIndex}}',
+              'style': {'fontSize': 12, 'color': 'onSurface'},
+            },
+          },
+          {'type': 'divider'},
+          {
+            'type': 'box',
+            'padding': {'all': 16},
+            'child': {
+              'type': 'text',
+              'text': 'Grid (2 columns)',
+              'style': {'fontSize': 16, 'fontWeight': 'bold', 'color': 'primary'},
+            },
+          },
+          {
+            'type': 'expanded',
+            'flex': 2,
+            'child': {
+              'type': 'grid',
+              'items': '{{gridItems}}',
+              'columns': 3,
+              'spacing': 8,
+              'itemTemplate': {
+                'type': 'box',
+                'height': 80,
+                'decoration': {'color': '{{item.color}}', 'borderRadius': 8},
+                'child': {
+                  'type': 'center',
+                  'child': {
+                    'type': 'text',
+                    'text': '{{item.label}}',
+                    'style': {'color': '#FFFFFF', 'fontWeight': 'bold'},
+                  },
+                },
+              },
+            },
+          },
+          {'type': 'sizedBox', 'height': 16},
+        ],
+      },
+    };

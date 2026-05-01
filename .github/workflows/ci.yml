@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test --reporter expanded
+
+  build:
+    name: build (${{ matrix.target }})
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  target: web,     cmd: "flutter build web --no-tree-shake-icons" }
+          - { os: ubuntu-latest,  target: apk,     cmd: "flutter build apk --debug --no-tree-shake-icons" }
+          - { os: ubuntu-latest,  target: linux,   cmd: "flutter build linux --no-tree-shake-icons", apt: "ninja-build libgtk-3-dev clang cmake pkg-config libsecret-1-dev libjsoncpp-dev" }
+          - { os: macos-latest,   target: macos,   cmd: "flutter build macos --debug --no-tree-shake-icons" }
+          - { os: macos-latest,   target: ios,     cmd: "flutter build ios --no-codesign --debug --no-tree-shake-icons" }
+          - { os: windows-latest, target: windows, cmd: "flutter build windows --debug --no-tree-shake-icons" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - if: matrix.apt != ''
+        name: apt deps (linux)
+        run: sudo apt-get update && sudo apt-get install -y ${{ matrix.apt }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: ${{ matrix.cmd }}

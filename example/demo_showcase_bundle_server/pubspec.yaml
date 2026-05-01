@@ -1,0 +1,11 @@
+name: demo_showcase_bundle_server
+description: MCP server that loads a `.mbd` bundle via mcp_bundle and serves its UI as `ui://app` + `ui://pages/<id>` resources. Used as the "bundle-backed server" variant alongside the direct-install bundle and the original demo_showcase server.
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  mcp_server: ^2.0.0
+  mcp_bundle: ^0.3.0

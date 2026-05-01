@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifest": {
+    "id": "com.makemind.examples.demo_showcase",
+    "name": "UI Showcase",
+    "version": "1.0.0",
+    "schemaVersion": "1.0.0",
+    "type": "application",
+    "entryPoint": "ui.app",
+    "description": "MCP UI DSL widget showcase — the same content served by apps/demo_ui, packaged as a filesystem snapshot under ui/.",
+    "provider": "MakeMind",
+    "license": "MIT",
+    "icon": "https://flutter.github.io/assets-for-api-docs/assets/widgets/falcon.jpg",
+    "category": "developer",
+    "tags": [
+      "showcase",
+      "reference"
+    ],
+    "publisher": {
+      "name": "MakeMind Examples",
+      "email": "examples@makemind.dev"
+    }
+  }
+}

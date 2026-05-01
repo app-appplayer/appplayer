@@ -1,0 +1,247 @@
+{
+  "type": "page",
+  "metadata": {
+    "title": "Realtime",
+    "description": "Tool call vs. resource notification stream"
+  },
+  "state": {
+    "initial": {
+      "toolTemperature": 20.0,
+      "toolStatus": "Idle",
+      "streamTemperature": 17.4,
+      "streamStatus": "Not subscribed"
+    }
+  },
+  "channels": {
+    "tempPoll": {
+      "type": "client.poll",
+      "params": {
+        "interval": 1000
+      },
+      "onData": {
+        "type": "tool",
+        "tool": "getToolTemperature"
+      }
+    }
+  },
+  "content": {
+    "type": "singleChildScrollView",
+    "padding": {
+      "all": 24
+    },
+    "child": {
+      "type": "linear",
+      "direction": "vertical",
+      "spacing": 20,
+      "children": [
+        {
+          "type": "text",
+          "text": "Realtime primitives",
+          "style": {
+            "fontSize": 22,
+            "fontWeight": "bold"
+          }
+        },
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 20
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 10,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "Tool call polling (pseudo-stream)",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Standard MCP has no native streaming — the canonical workaround is client-side periodic tool calls (spec §8.6 client.poll channel). Start polling makes the runtime fire getToolTemperature every 1s; the response `{\"toolTemperature\": X}` auto-merges into state (§3.10), so the value updates as if it were a stream.",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "#666666"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "{{toolTemperature}}°C",
+                  "style": {
+                    "fontSize": 36,
+                    "fontWeight": "bold",
+                    "color": "#2196F3"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Status: {{toolStatus}}",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "#999999"
+                  }
+                },
+                {
+                  "type": "linear",
+                  "direction": "horizontal",
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "type": "button",
+                      "label": "Start polling",
+                      "variant": "filled",
+                      "onTap": {
+                        "type": "batch",
+                        "actions": [
+                          {
+                            "type": "channel",
+                            "action": "start",
+                            "channel": "tempPoll"
+                          },
+                          {
+                            "type": "state",
+                            "action": "set",
+                            "binding": "toolStatus",
+                            "value": "Polling every 1s"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "label": "Stop polling",
+                      "variant": "outlined",
+                      "onTap": {
+                        "type": "batch",
+                        "actions": [
+                          {
+                            "type": "channel",
+                            "action": "stop",
+                            "channel": "tempPoll"
+                          },
+                          {
+                            "type": "state",
+                            "action": "set",
+                            "binding": "toolStatus",
+                            "value": "Idle"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "card",
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 20
+            },
+            "child": {
+              "type": "linear",
+              "direction": "vertical",
+              "spacing": 10,
+              "alignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "Notification stream (makemind extension)",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": "bold"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Real server-push stream via the mcp_client notifications extension. Subscribe to data://streamTemperature — server emits notifications/resources/updated with URI + content every second. Runtime writes parsed[\"streamTemperature\"] into the streamTemperature binding without polling.",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "#666666"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "{{streamTemperature}}°C",
+                  "style": {
+                    "fontSize": 36,
+                    "fontWeight": "bold",
+                    "color": "#2196F3"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Status: {{streamStatus}}",
+                  "style": {
+                    "fontSize": 12,
+                    "color": "#999999"
+                  }
+                },
+                {
+                  "type": "linear",
+                  "direction": "horizontal",
+                  "spacing": 8,
+                  "children": [
+                    {
+                      "type": "button",
+                      "label": "Subscribe",
+                      "variant": "filled",
+                      "onTap": {
+                        "type": "batch",
+                        "actions": [
+                          {
+                            "type": "resource",
+                            "action": "subscribe",
+                            "uri": "data://streamTemperature",
+                            "binding": "streamTemperature"
+                          },
+                          {
+                            "type": "state",
+                            "action": "set",
+                            "binding": "streamStatus",
+                            "value": "Subscribed"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "label": "Unsubscribe",
+                      "variant": "outlined",
+                      "onTap": {
+                        "type": "batch",
+                        "actions": [
+                          {
+                            "type": "resource",
+                            "action": "unsubscribe",
+                            "uri": "data://streamTemperature"
+                          },
+                          {
+                            "type": "state",
+                            "action": "set",
+                            "binding": "streamStatus",
+                            "value": "Not subscribed"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

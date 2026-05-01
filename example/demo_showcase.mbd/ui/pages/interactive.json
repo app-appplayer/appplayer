@@ -1,0 +1,411 @@
+{
+  "type": "page",
+  "metadata": {
+    "title": "Interactive",
+    "description": "Interactive widget showcase"
+  },
+  "state": {
+    "initial": {
+      "tapCount": 0,
+      "lastGesture": "none",
+      "menuChoice": "",
+      "droppedItem": "none"
+    }
+  },
+  "content": {
+    "type": "singleChildScrollView",
+    "padding": {
+      "all": 16
+    },
+    "child": {
+      "type": "linear",
+      "direction": "vertical",
+      "spacing": 16,
+      "children": [
+        {
+          "type": "text",
+          "text": "gestureDetector",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "gestureDetector",
+          "onTap": {
+            "type": "state",
+            "action": "set",
+            "binding": "lastGesture",
+            "value": "tap"
+          },
+          "onDoubleTap": {
+            "type": "state",
+            "action": "set",
+            "binding": "lastGesture",
+            "value": "double-tap"
+          },
+          "onLongPress": {
+            "type": "state",
+            "action": "set",
+            "binding": "lastGesture",
+            "value": "long-press"
+          },
+          "child": {
+            "type": "box",
+            "height": 80,
+            "decoration": {
+              "color": "surfaceContainerHigh",
+              "borderRadius": 8
+            },
+            "child": {
+              "type": "center",
+              "child": {
+                "type": "text",
+                "text": "Tap / Double-tap / Long-press here",
+                "style": {
+                  "fontSize": 14
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "text": "Last gesture: {{lastGesture}}",
+          "style": {
+            "fontSize": 12,
+            "color": "onSurface"
+          }
+        },
+        {
+          "type": "text",
+          "text": "inkWell",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "inkWell",
+          "onTap": {
+            "type": "state",
+            "action": "increment",
+            "binding": "tapCount"
+          },
+          "child": {
+            "type": "box",
+            "padding": {
+              "all": 16
+            },
+            "decoration": {
+              "color": "surfaceContainerHigh",
+              "borderRadius": 8
+            },
+            "child": {
+              "type": "text",
+              "text": "Tap me (with ripple) — tapped {{tapCount}} times"
+            }
+          }
+        },
+        {
+          "type": "text",
+          "text": "tooltip",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "tooltip",
+          "message": "This is a tooltip! Hover or long-press to see it.",
+          "child": {
+            "type": "chip",
+            "label": "Hover for tooltip"
+          }
+        },
+        {
+          "type": "text",
+          "text": "popupMenuButton",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "popupMenuButton",
+          "icon": "more_vert",
+          "items": [
+            {
+              "value": "edit",
+              "label": "Edit"
+            },
+            {
+              "value": "copy",
+              "label": "Copy"
+            },
+            {
+              "value": "delete",
+              "label": "Delete"
+            }
+          ],
+          "onSelect": {
+            "type": "state",
+            "action": "set",
+            "binding": "menuChoice",
+            "value": "{{event.value}}"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Menu choice: {{menuChoice}}",
+          "style": {
+            "fontSize": 12,
+            "color": "onSurface"
+          }
+        },
+        {
+          "type": "text",
+          "text": "image",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "image",
+          "src": "https://placehold.co/200x100/2196F3/FFFFFF/png?text=Image+Demo",
+          "width": 200,
+          "height": 100,
+          "fit": "cover"
+        },
+        {
+          "type": "text",
+          "text": "placeholder",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "placeholder",
+          "fallbackWidth": 200,
+          "fallbackHeight": 60
+        },
+        {
+          "type": "text",
+          "text": "banner",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "banner",
+          "message": "This is an info banner message.",
+          "severity": "info"
+        },
+        {
+          "type": "text",
+          "text": "draggable + dragTarget",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "linear",
+          "direction": "horizontal",
+          "spacing": 24,
+          "children": [
+            {
+              "type": "draggable",
+              "data": "blue-box",
+              "child": {
+                "type": "box",
+                "width": 80,
+                "height": 80,
+                "decoration": {
+                  "color": "primary",
+                  "borderRadius": 8
+                },
+                "child": {
+                  "type": "center",
+                  "child": {
+                    "type": "text",
+                    "text": "Drag",
+                    "style": {
+                      "color": "#FFFFFF"
+                    }
+                  }
+                }
+              },
+              "feedback": {
+                "type": "box",
+                "width": 80,
+                "height": 80,
+                "decoration": {
+                  "color": "#64B5F6",
+                  "borderRadius": 8
+                },
+                "child": {
+                  "type": "center",
+                  "child": {
+                    "type": "text",
+                    "text": "...",
+                    "style": {
+                      "color": "#FFFFFF"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "dragTarget",
+              "onDrop": {
+                "type": "state",
+                "action": "set",
+                "binding": "droppedItem",
+                "value": "{{event.data}}"
+              },
+              "builder": {
+                "type": "conditional",
+                "condition": "{{dragData.hasCandidates}}",
+                "then": {
+                  "type": "box",
+                  "width": 120,
+                  "height": 80,
+                  "decoration": {
+                    "color": "#A5D6A7",
+                    "borderRadius": 8,
+                    "border": {
+                      "color": "#2E7D32",
+                      "width": 3
+                    }
+                  },
+                  "child": {
+                    "type": "center",
+                    "child": {
+                      "type": "text",
+                      "text": "Release to drop",
+                      "style": {
+                        "color": "#FFFFFF",
+                        "fontWeight": "bold"
+                      }
+                    }
+                  }
+                },
+                "else": {
+                  "type": "conditional",
+                  "condition": "{{droppedItem != \"none\"}}",
+                  "then": {
+                    "type": "box",
+                    "width": 120,
+                    "height": 80,
+                    "decoration": {
+                      "color": "primary",
+                      "borderRadius": 8,
+                      "border": {
+                        "color": "#0D47A1",
+                        "width": 2
+                      }
+                    },
+                    "child": {
+                      "type": "center",
+                      "child": {
+                        "type": "text",
+                        "text": "{{droppedItem}}",
+                        "style": {
+                          "color": "#FFFFFF",
+                          "fontWeight": "bold"
+                        }
+                      }
+                    }
+                  },
+                  "else": {
+                    "type": "box",
+                    "width": 120,
+                    "height": 80,
+                    "decoration": {
+                      "color": "surfaceContainerHigh",
+                      "borderRadius": 8,
+                      "border": {
+                        "color": "outlineVariant",
+                        "width": 2
+                      }
+                    },
+                    "child": {
+                      "type": "center",
+                      "child": {
+                        "type": "text",
+                        "text": "Drop here"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Dropped: {{droppedItem}}",
+          "style": {
+            "fontSize": 12,
+            "color": "onSurface"
+          }
+        },
+        {
+          "type": "text",
+          "text": "rich text",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "primary"
+          }
+        },
+        {
+          "type": "richText",
+          "spans": [
+            {
+              "text": "Rich ",
+              "style": {
+                "fontWeight": "bold"
+              }
+            },
+            {
+              "text": "text ",
+              "style": {
+                "color": "primary"
+              }
+            },
+            {
+              "text": "with ",
+              "style": {
+                "fontStyle": "italic"
+              }
+            },
+            {
+              "text": "spans",
+              "style": {
+                "color": "secondary",
+                "fontWeight": "bold"
+              }
+            }
+          ]
+        },
+        {
+          "type": "sizedBox",
+          "height": 24
+        }
+      ]
+    }
+  }
+}

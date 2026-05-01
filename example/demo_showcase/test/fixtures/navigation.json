@@ -1,0 +1,260 @@
+{
+  "type": "page",
+  "metadata": {
+    "title": "Navigation",
+    "description": "Navigation widget showcase"
+  },
+  "state": {
+    "initial": {
+      "tabIndex": 0,
+      "bottomIndex": 0,
+      "railIndex": 0,
+      "fabCount": 0
+    }
+  },
+  "content": {
+    "type": "singleChildScrollView",
+    "padding": {
+      "all": 16
+    },
+    "child": {
+      "type": "linear",
+      "direction": "vertical",
+      "spacing": 16,
+      "children": [
+        {
+          "type": "text",
+          "text": "tabBar + tabBarView",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "#2196F3"
+          }
+        },
+        {
+          "type": "tabBar",
+          "currentIndex": "{{tabIndex}}",
+          "tabs": [
+            {
+              "label": "Home",
+              "icon": "home"
+            },
+            {
+              "label": "Search",
+              "icon": "search"
+            },
+            {
+              "label": "Profile",
+              "icon": "person"
+            }
+          ],
+          "onChange": {
+            "type": "state",
+            "action": "set",
+            "binding": "tabIndex",
+            "value": "{{event.index}}"
+          }
+        },
+        {
+          "type": "box",
+          "height": 100,
+          "decoration": {
+            "color": "#F5F5F5",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "indexedStack",
+            "index": "{{tabIndex}}",
+            "children": [
+              {
+                "type": "center",
+                "child": {
+                  "type": "text",
+                  "text": "Home tab",
+                  "style": {
+                    "color": "#2196F3",
+                    "fontSize": 20,
+                    "fontWeight": "bold"
+                  }
+                }
+              },
+              {
+                "type": "center",
+                "child": {
+                  "type": "text",
+                  "text": "Search tab",
+                  "style": {
+                    "color": "#FF4081",
+                    "fontSize": 20,
+                    "fontWeight": "bold"
+                  }
+                }
+              },
+              {
+                "type": "center",
+                "child": {
+                  "type": "text",
+                  "text": "Profile tab",
+                  "style": {
+                    "color": "#4CAF50",
+                    "fontSize": 20,
+                    "fontWeight": "bold"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "text",
+          "text": "bottomNavigation (inline demo)",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "#2196F3"
+          }
+        },
+        {
+          "type": "box",
+          "height": 80,
+          "child": {
+            "type": "bottomNavigation",
+            "currentIndex": "{{bottomIndex}}",
+            "items": [
+              {
+                "icon": "home",
+                "label": "Home"
+              },
+              {
+                "icon": "favorite",
+                "label": "Favorites"
+              },
+              {
+                "icon": "settings",
+                "label": "Settings"
+              }
+            ],
+            "onChange": {
+              "type": "state",
+              "action": "set",
+              "binding": "bottomIndex",
+              "value": "{{event.index}}"
+            }
+          }
+        },
+        {
+          "type": "text",
+          "text": "Selected: {{bottomIndex}}",
+          "style": {
+            "fontSize": 12,
+            "color": "#666666"
+          }
+        },
+        {
+          "type": "text",
+          "text": "navigationRail (inline demo)",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "#2196F3"
+          }
+        },
+        {
+          "type": "box",
+          "height": 220,
+          "decoration": {
+            "color": "#F5F5F5",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "linear",
+            "direction": "horizontal",
+            "children": [
+              {
+                "type": "navigationRail",
+                "selectedIndex": "{{railIndex}}",
+                "items": [
+                  {
+                    "label": "Home",
+                    "icon": "home"
+                  },
+                  {
+                    "label": "Search",
+                    "icon": "search"
+                  },
+                  {
+                    "label": "Settings",
+                    "icon": "settings"
+                  }
+                ],
+                "onChange": {
+                  "type": "state",
+                  "action": "set",
+                  "binding": "railIndex",
+                  "value": "{{event.index}}"
+                }
+              },
+              {
+                "type": "expanded",
+                "child": {
+                  "type": "center",
+                  "child": {
+                    "type": "text",
+                    "text": "Rail index: {{railIndex}}"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "text",
+          "text": "floatingActionButton (inline)",
+          "style": {
+            "fontSize": 16,
+            "fontWeight": "bold",
+            "color": "#2196F3"
+          }
+        },
+        {
+          "type": "box",
+          "height": 80,
+          "decoration": {
+            "color": "#F5F5F5",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "stack",
+            "children": [
+              {
+                "type": "center",
+                "child": {
+                  "type": "text",
+                  "text": "FAB tapped: {{fabCount}} times"
+                }
+              },
+              {
+                "type": "positioned",
+                "bottom": 12,
+                "right": 12,
+                "child": {
+                  "type": "floatingActionButton",
+                  "icon": "add",
+                  "onTap": {
+                    "type": "state",
+                    "action": "increment",
+                    "binding": "fabCount"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 24
+        }
+      ]
+    }
+  }
+}
