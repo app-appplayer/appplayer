@@ -31,13 +31,28 @@ class AppRendererScreen extends StatefulWidget {
 
 @visibleForTesting
 class AppRendererScreenState extends State<AppRendererScreen> {
+  /// The build context may already be unmounted when `dispose` runs, so
+  /// the core reference is captured during `initState`. This lets us
+  /// call `core.setActiveSession(null)` safely on dispose.
+  AppPlayerCoreService? _coreRef;
+
   AppSession? _session;
   Object? _error;
 
   @override
   void initState() {
     super.initState();
+    _coreRef = context.read<AppPlayerCoreService>();
     _ensureSession();
+  }
+
+  @override
+  void dispose() {
+    // Renderer unmount = active context ends → tell the core with a
+    // null handle (back at launcher / home means master context).
+    // knowledge-operations.md §12.4.1.
+    _coreRef?.setActiveSession(null);
+    super.dispose();
   }
 
   Future<void> _ensureSession() async {
@@ -59,6 +74,11 @@ class AppRendererScreenState extends State<AppRendererScreen> {
         );
       }
       if (!mounted) return;
+      // Push the active context into the core — for bundle handles
+      // this enables the brain_kernel dispatch wrapper's automatic
+      // `<bundleId>.<id>` prefix composition; for server handles the
+      // core treats it as the master context (null).
+      _coreRef?.setActiveSession(session.handle);
       setState(() => _session = session);
     } catch (e) {
       if (!mounted) return;

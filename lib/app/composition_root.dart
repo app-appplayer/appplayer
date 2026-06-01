@@ -11,6 +11,7 @@ import '../adapters/http_bundle_fetcher.dart';
 import '../adapters/prefs_apps_registry.dart';
 import '../adapters/secure_credential_vault.dart';
 import '../adapters/shared_prefs_server_storage.dart';
+import '../adapters/shared_prefs_settings_store.dart';
 import '../models/app_config.dart';
 import '../models/apps_list_notifier.dart';
 import 'app_settings.dart';
@@ -116,6 +117,13 @@ class CompositionRoot {
       ),
     );
 
+    // Persist user-customized values of the bundle's
+    // `settings.sections` schema as per-bundle JSON in SharedPreferences.
+    // The core does not parse the schema — the host is responsible for
+    // both the UI rendering and the persistence side.
+    final settingsStore =
+        SharedPrefsSettingsStore(resolvedPrefs, logger: logger);
+
     final core = AppPlayerCoreService();
     await core.initialize(
       storage: storage,
@@ -125,6 +133,7 @@ class CompositionRoot {
       appMetadataSink: metadataSink,
       logger: logger,
       hostBrightness: hostBrightness,
+      settingsStore: settingsStore,
       // MCP `notifications/message` (logging spec) → in-app LogBuffer
       // as a LogSource.mcp entry. Core diagnostics are pushed
       // separately as LogSource.core via the CompositeLogger above.

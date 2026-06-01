@@ -43,6 +43,7 @@ void main() {
         const serverId = 'srv-ok';
         final session = MockAppSession();
 
+        when(() => session.handle).thenReturn(const AppHandle.server(serverId));
         when(() => session.buildWidget(
               context: any(named: 'context'),
               onExit: any(named: 'onExit'),
