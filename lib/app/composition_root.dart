@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:appplayer_core/appplayer_core.dart';
+
+import '../adapters/io_capability.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
@@ -141,6 +143,12 @@ class CompositionRoot {
         logBuffer.add(LogEntry.fromMcp(serverId: serverId, params: params));
       },
     );
+
+    // Desktop io capability — exposes the io.* tool surface backed by the
+    // process adapter (and future device adapters). Desktop-only: a no-op on
+    // web (compile-time) and mobile (runtime guard). The bundle install root
+    // is the default sandbox working root.
+    registerIoCapability(core, allowedRoots: [bundleInstallRoot]);
 
     return AppContext(
       core: core,

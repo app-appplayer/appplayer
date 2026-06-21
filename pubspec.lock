@@ -4,11 +4,10 @@ packages:
   appplayer_core:
     dependency: "direct main"
     description:
-      name: appplayer_core
-      sha256: a3c8d12f55a6f969d3714c3741e97339943a9af55f3d16901a670546df0baeae
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.7"
+      path: "../../../core/appplayer/dart"
+      relative: true
+    source: path
+    version: "0.1.8"
   archive:
     dependency: transitive
     description:
@@ -33,6 +32,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.1"
+  bluez:
+    dependency: transitive
+    description:
+      name: bluez
+      sha256: "61a7204381925896a374301498f2f5399e59827c6498ae1e924aaa598751b545"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.3"
   boolean_selector:
     dependency: transitive
     description:
@@ -42,13 +49,12 @@ packages:
     source: hosted
     version: "2.1.2"
   brain_kernel:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: brain_kernel
-      sha256: f1c9eb4129b82c11895aa5795a0d497fbf002ea474342f1b1b63562810fadbfd
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.1"
+      path: "../../../core/brain_kernel/dart"
+      relative: true
+    source: path
+    version: "0.1.2"
   characters:
     dependency: transitive
     description:
@@ -57,6 +63,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  clib_serialport_dart:
+    dependency: transitive
+    description:
+      name: clib_serialport_dart
+      sha256: "4a406c71fd69bd4766f932a86a74fd446fdb6c8138d1c02158b0dbe8754cb762"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   clock:
     dependency: transitive
     description:
@@ -97,6 +111,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
+  dart_libusb:
+    dependency: transitive
+    description:
+      name: dart_libusb
+      sha256: "6d15c7b788aad3353b23a3fc4c746a761f860053be936fd61f72d221256ef02e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
+  dbus:
+    dependency: transitive
+    description:
+      name: dbus
+      sha256: "0ce9b0a839e6dee59a37a623d2fc26a35bbbe6404213e419b0d6411023d62645"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.14"
   device_info_plus:
     dependency: transitive
     description:
@@ -170,13 +200,12 @@ packages:
     source: hosted
     version: "1.1.1"
   flowbrain_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flowbrain_core
-      sha256: ef5ce3c035e03d0f9793312081bad303dfea87793f76d784361b84a60bdee377
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.3"
+      path: "../../../core/flowbrain/dart"
+      relative: true
+    source: path
+    version: "0.1.4"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -204,20 +233,18 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_mcp_ui_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flutter_mcp_ui_core
-      sha256: f79b89a014a9a112285d58b7a17bd9bd33023715df8f589783869ee7777035c5
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../../../packages/mcp_ui/1.3/flutter_mcp_ui_core"
+      relative: true
+    source: path
     version: "0.4.1"
   flutter_mcp_ui_runtime:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flutter_mcp_ui_runtime
-      sha256: "8ebe1cad9710f2979f861562b1bc0e426be1f9f662f45b373e17dc024091d76c"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../../../packages/mcp_ui/1.3/flutter_mcp_ui_runtime"
+      relative: true
+    source: path
     version: "0.5.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
@@ -309,6 +336,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.0"
+  http2:
+    dependency: transitive
+    description:
+      name: http2
+      sha256: "382d3aefc5bd6dc68c6b892d7664f29b5beb3251611ae946a98d35158a82bbfa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   http_parser:
     dependency: transitive
     description:
@@ -421,14 +456,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
-  mcp_bundle:
-    dependency: transitive
+  mcp_bridge:
+    dependency: "direct dev"
     description:
-      name: mcp_bundle
-      sha256: "7f7b9c1035215ab96715a6d629ade61985c7a58c868dfc4121415537372fe614"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.1"
+      path: "../../../../packages/mcp_bridge/dart"
+      relative: true
+    source: path
+    version: "0.2.0-rc.2"
+  mcp_bundle:
+    dependency: "direct main"
+    description:
+      path: "../../../../packages/mcp_bundle/dart"
+      relative: true
+    source: path
+    version: "0.4.3"
   mcp_client:
     dependency: transitive
     description:
@@ -438,28 +479,67 @@ packages:
     source: hosted
     version: "2.0.0"
   mcp_fact_graph:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: mcp_fact_graph
-      sha256: fe0580fb1392af32b2561a9dd29baf31e8a7bc9e2ee16c0e839395921ddfd40f
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../../../packages/mcp_fact_graph/dart"
+      relative: true
+    source: path
     version: "0.2.2"
-  mcp_knowledge:
-    dependency: transitive
+  mcp_io:
+    dependency: "direct main"
     description:
-      name: mcp_knowledge
-      sha256: "3c074a3ffc98a3c97c31d6a382602768514107978dfa72db998c2a2a8a9c28c6"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../../../packages/mcp_io/dart"
+      relative: true
+    source: path
+    version: "0.2.1"
+  mcp_io_http:
+    dependency: "direct main"
+    description:
+      path: "../../../../packages/mcp_io/mcp_io_http/dart"
+      relative: true
+    source: path
+    version: "0.2.1"
+  mcp_io_modbus:
+    dependency: "direct main"
+    description:
+      path: "../../../../packages/mcp_io/mcp_io_modbus/dart"
+      relative: true
+    source: path
+    version: "0.2.1"
+  mcp_io_mqtt:
+    dependency: "direct main"
+    description:
+      path: "../../../../packages/mcp_io/mcp_io_mqtt/dart"
+      relative: true
+    source: path
+    version: "0.2.1"
+  mcp_io_process:
+    dependency: "direct main"
+    description:
+      path: "../../../../packages/mcp_io/mcp_io_process/dart"
+      relative: true
+    source: path
+    version: "0.1.0"
+  mcp_io_scpi:
+    dependency: "direct main"
+    description:
+      path: "../../../../packages/mcp_io/mcp_io_scpi/dart"
+      relative: true
+    source: path
+    version: "0.2.1"
+  mcp_knowledge:
+    dependency: "direct overridden"
+    description:
+      path: "../../../../packages/mcp_knowledge/dart"
+      relative: true
+    source: path
     version: "0.2.4"
   mcp_knowledge_ops:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: mcp_knowledge_ops
-      sha256: ca14d413bd7c0064376c9de7905e8e996eca8a60cd3a5cf4e2747107c0d6bdc8
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../../../packages/mcp_knowledge_ops/dart"
+      relative: true
+    source: path
     version: "0.2.2"
   mcp_llm:
     dependency: transitive
@@ -486,12 +566,11 @@ packages:
     source: hosted
     version: "0.2.1"
   mcp_server:
-    dependency: transitive
+    dependency: "direct dev"
     description:
-      name: mcp_server
-      sha256: d5b2603a51b524c60753ea9031c52759f80b53dd6606f38ae70305b5eaa28d4d
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../../../packages/mcp_server/dart"
+      relative: true
+    source: path
     version: "2.0.0"
   mcp_skill:
     dependency: transitive
@@ -605,6 +684,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  petitparser:
+    dependency: transitive
+    description:
+      name: petitparser
+      sha256: "91bd59303e9f769f108f8df05e371341b15d59e995e6806aefab827b58336675"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.2"
   platform:
     dependency: transitive
     description:
@@ -874,6 +961,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  xml:
+    dependency: transitive
+    description:
+      name: xml
+      sha256: "971043b3a0d3da28727e40ed3e0b5d18b742fa5a68665cca88e74b7876d5e025"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.6.1"
   yaml:
     dependency: transitive
     description:
@@ -883,5 +978,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.10.3 <4.0.0"
+  dart: ">=3.11.0 <4.0.0"
   flutter: ">=3.38.4"

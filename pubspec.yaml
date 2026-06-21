@@ -22,12 +22,31 @@ dependencies:
   file_picker: ^8.1.6
   path_provider: ^2.1.5
   collection: ^1.19.0
+  # Desktop io capability (process + device adapters). dart:io-based, kept out
+  # of web builds via the conditional import in lib/adapters/io_capability.dart.
+  mcp_bundle: ^0.4.0
+  mcp_io: ^0.2.1
+  # io drivers — the wiring in lib/adapters/io_drivers/ is COPIED from the
+  # recipe (recipes are not published/depended); these are the real published
+  # driver packages it imports. process is desktop boot; modbus/mqtt/http/scpi
+  # are network (mobile + desktop). dart:io-based — excluded from web by the
+  # conditional import in io_capability.dart.
+  mcp_io_process: ^0.1.0
+  mcp_io_modbus: ^0.2.1
+  mcp_io_mqtt: ^0.2.1
+  mcp_io_http: ^0.2.1
+  mcp_io_scpi: ^0.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   mocktail: ^1.0.4
+  # Extension-transport integration test only — the standard app injects an
+  # mcp_bridge transport into appplayer_core's connectExtensionTransport.
+  # Resolved to the local checkout via pubspec_overrides.
+  mcp_bridge: any
+  mcp_server: ^2.0.0
 
 flutter:
   uses-material-design: true
