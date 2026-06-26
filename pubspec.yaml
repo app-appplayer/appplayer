@@ -1,7 +1,7 @@
 name: appplayer
 description: "AppPlayer (Standard) — reference product assembling AppPlayer Core with App Mode, Dashboard Mode, and bundle execution."
 publish_to: 'none'
-version: 0.1.1
+version: 0.1.2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.1.7
+  appplayer_core: ^0.1.9
 
   provider: ^6.1.2
   go_router: ^14.6.2
@@ -24,14 +24,14 @@ dependencies:
   collection: ^1.19.0
   # Desktop io capability (process + device adapters). dart:io-based, kept out
   # of web builds via the conditional import in lib/adapters/io_capability.dart.
-  mcp_bundle: ^0.4.0
-  mcp_io: ^0.2.1
+  mcp_bundle: ^0.4.5
+  mcp_io: ^0.2.2
   # io drivers — the wiring in lib/adapters/io_drivers/ is COPIED from the
   # recipe (recipes are not published/depended); these are the real published
   # driver packages it imports. process is desktop boot; modbus/mqtt/http/scpi
   # are network (mobile + desktop). dart:io-based — excluded from web by the
   # conditional import in io_capability.dart.
-  mcp_io_process: ^0.1.0
+  mcp_io_process: ^0.1.1
   mcp_io_modbus: ^0.2.1
   mcp_io_mqtt: ^0.2.1
   mcp_io_http: ^0.2.1

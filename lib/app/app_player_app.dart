@@ -15,6 +15,7 @@ import 'app_router.dart';
 import 'app_settings.dart';
 import 'app_theme.dart';
 import 'composition_root.dart';
+import 'host_system_chrome.dart';
 
 /// MOD-SHELL-001 — root widget wiring Core + settings into `MaterialApp.router`.
 class AppPlayerApp extends StatefulWidget {
@@ -62,7 +63,9 @@ class _AppPlayerAppState extends State<AppPlayerApp> {
           value: widget.ctx.appsRegistry,
         ),
       ],
-      child: Consumer<AppSettings>(
+      child: HostChromeBinder(
+        controller: widget.ctx.hostBrightness,
+        child: Consumer<AppSettings>(
         builder: (_, settings, __) {
           // Propagate log-level changes live.
           widget.ctx.logger.minLevel = settings.logLevel;
@@ -102,6 +105,7 @@ class _AppPlayerAppState extends State<AppPlayerApp> {
             },
           );
         },
+        ),
       ),
     );
   }

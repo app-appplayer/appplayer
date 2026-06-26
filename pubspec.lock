@@ -7,7 +7,7 @@ packages:
       path: "../../../core/appplayer/dart"
       relative: true
     source: path
-    version: "0.1.8"
+    version: "0.1.9"
   archive:
     dependency: transitive
     description:
@@ -54,7 +54,7 @@ packages:
       path: "../../../core/brain_kernel/dart"
       relative: true
     source: path
-    version: "0.1.2"
+    version: "0.1.4"
   characters:
     dependency: transitive
     description:
@@ -205,7 +205,7 @@ packages:
       path: "../../../core/flowbrain/dart"
       relative: true
     source: path
-    version: "0.1.4"
+    version: "0.1.6"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -469,7 +469,7 @@ packages:
       path: "../../../../packages/mcp_bundle/dart"
       relative: true
     source: path
-    version: "0.4.3"
+    version: "0.4.5"
   mcp_client:
     dependency: transitive
     description:
@@ -491,7 +491,7 @@ packages:
       path: "../../../../packages/mcp_io/dart"
       relative: true
     source: path
-    version: "0.2.1"
+    version: "0.2.2"
   mcp_io_http:
     dependency: "direct main"
     description:
@@ -519,7 +519,7 @@ packages:
       path: "../../../../packages/mcp_io/mcp_io_process/dart"
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.1"
   mcp_io_scpi:
     dependency: "direct main"
     description:
@@ -533,7 +533,7 @@ packages:
       path: "../../../../packages/mcp_knowledge/dart"
       relative: true
     source: path
-    version: "0.2.4"
+    version: "0.2.5"
   mcp_knowledge_ops:
     dependency: "direct overridden"
     description:
@@ -553,10 +553,10 @@ packages:
     dependency: transitive
     description:
       name: mcp_philosophy
-      sha256: a6afdd9611bdb745c3181b9ce18abcce5eb88f66251470f7cc7a2150fc9ee19d
+      sha256: f933f5fb737feb70169cd6eed7e86e5f3ca8023dff32d57270f660ea2c184ffe
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   mcp_profile:
     dependency: transitive
     description:
