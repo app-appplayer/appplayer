@@ -12,12 +12,14 @@ class AppSettings extends ChangeNotifier {
     required bool onboardingCompleted,
     required bool freshConnect,
     required ViewMode defaultViewMode,
+    required bool debugMcpEnabled,
   })  : _themeMode = themeMode,
         _locale = locale,
         _logLevel = logLevel,
         _onboardingCompleted = onboardingCompleted,
         _freshConnect = freshConnect,
-        _defaultViewMode = defaultViewMode;
+        _defaultViewMode = defaultViewMode,
+        _debugMcpEnabled = debugMcpEnabled;
 
   static const String _kThemeMode = 'settings.theme_mode';
   static const String _kLocale = 'settings.locale';
@@ -25,6 +27,11 @@ class AppSettings extends ChangeNotifier {
   static const String _kOnboarded = 'settings.onboarding_completed';
   static const String _kFreshConnect = 'settings.fresh_connect';
   static const String _kDefaultViewMode = 'settings.default_view_mode';
+
+  /// Desktop-only Debug MCP endpoint toggle. Public so the composition
+  /// root can read the pref before Core boots (core.initialize runs at
+  /// startup, ahead of any UI).
+  static const String kDebugMcpKey = 'settings.debug_mcp';
 
   static const ThemeMode defaultThemeMode = ThemeMode.system;
   /// 'auto' means follow system locale. Stored as language code string.
@@ -40,11 +47,16 @@ class AppSettings extends ChangeNotifier {
   bool _onboardingCompleted;
   bool _freshConnect;
   ViewMode _defaultViewMode;
+  bool _debugMcpEnabled;
 
   ThemeMode get themeMode => _themeMode;
   Locale get locale => _locale;
   LogLevel get logLevel => _logLevel;
   bool get onboardingCompleted => _onboardingCompleted;
+
+  /// Whether the desktop-only Debug MCP endpoint is enabled. Applied at
+  /// next launch (Core boots at the composition root).
+  bool get debugMcpEnabled => _debugMcpEnabled;
 
   /// true = always fresh connection, false = use cached runtime
   bool get freshConnect => _freshConnect;
@@ -64,6 +76,7 @@ class AppSettings extends ChangeNotifier {
       onboardingCompleted: prefs.getBool(_kOnboarded) ?? false,
       freshConnect: prefs.getBool(_kFreshConnect) ?? false,
       defaultViewMode: ViewMode.parse(prefs.getString(_kDefaultViewMode)),
+      debugMcpEnabled: prefs.getBool(kDebugMcpKey) ?? false,
     );
   }
 
@@ -95,6 +108,13 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setDebugMcpEnabled(bool v) async {
+    if (_debugMcpEnabled == v) return;
+    _debugMcpEnabled = v;
+    await _prefs.setBool(kDebugMcpKey, v);
+    notifyListeners();
+  }
+
   Future<void> setDefaultViewMode(ViewMode v) async {
     if (_defaultViewMode == v) return;
     _defaultViewMode = v;
@@ -119,11 +139,13 @@ class AppSettings extends ChangeNotifier {
     _logLevel = defaultLogLevel;
     _freshConnect = false;
     _defaultViewMode = defaultDefaultViewMode;
+    _debugMcpEnabled = false;
     await _prefs.remove(_kThemeMode);
     await _prefs.remove(_kLocale);
     await _prefs.remove(_kLogLevel);
     await _prefs.remove(_kFreshConnect);
     await _prefs.remove(_kDefaultViewMode);
+    await _prefs.remove(kDebugMcpKey);
     notifyListeners();
   }
 

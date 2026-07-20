@@ -1,4 +1,5 @@
 import 'package:appplayer_core/appplayer_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -197,6 +198,21 @@ class SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
 
+          // ── Developer ────────────────────────────────────────────────────
+          // Debug MCP endpoint — opt-in test-automation surface (non-web).
+          // Hidden on mobile / web where it never binds.
+          if (_isDesktop) ...<Widget>[
+            const _SectionTitle('Developer'),
+            SwitchListTile(
+              key: const Key('settings.debug_mcp'),
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Debug MCP'),
+              value: settings.debugMcpEnabled,
+              onChanged: (v) => settings.setDebugMcpEnabled(v),
+            ),
+            const Divider(),
+          ],
+
           // ── App info ─────────────────────────────────────────────────────
           _SectionTitle(S.get('settings.info')),
           const Text('App version: 0.1.0'),
@@ -212,6 +228,11 @@ class SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+
+/// True on every native platform where the Debug MCP endpoint can bind
+/// (desktop AND mobile — reach a mobile endpoint via adb forward / iOS-sim
+/// loopback). Only web is excluded (no dart:io HttpServer).
+bool get _isDesktop => !kIsWeb;
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle(this.text);

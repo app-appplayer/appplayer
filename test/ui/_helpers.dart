@@ -19,6 +19,17 @@ void stubCoreLifecycle(MockCore core) {
   when(() => core.isBundleLoaded(any())).thenReturn(false);
 }
 
+/// Stub the app shell's debug-capture wrap to pass its child straight through.
+/// The real core wraps in a `RepaintBoundary` only when the Debug MCP host is
+/// active (a no-op pass-through otherwise); in tests the host is off, so the
+/// mock must return the child. Without this the unstubbed mock returns `null`
+/// for the non-nullable `Widget` and the shell build throws.
+void stubCoreShell(MockCore core) {
+  registerFallbackValue(const SizedBox.shrink());
+  when(() => core.debugCaptureWrap(any()))
+      .thenAnswer((inv) => inv.positionalArguments.first as Widget);
+}
+
 Future<AppSettings> makeSettings({
   bool onboardingCompleted = true,
 }) async {

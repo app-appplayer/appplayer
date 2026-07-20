@@ -37,9 +37,7 @@ class _AppPlayerAppState extends State<AppPlayerApp> {
     _observer =
         AppLifecycleObserver(widget.ctx.core, logger: widget.ctx.logger)
           ..attach();
-    _router = AppRouter.build(
-      onboardingCompleted: widget.ctx.settings.onboardingCompleted,
-    );
+    _router = AppRouter.build(settings: widget.ctx.settings);
   }
 
   @override
@@ -99,9 +97,15 @@ class _AppPlayerAppState extends State<AppPlayerApp> {
             // as the resolver and the `FormFactor.of(context)` helper
             // falls back to window-width classification.
             builder: (ctx, child) {
+              if (child == null) return const SizedBox();
               final pin = settings.defaultViewMode.toFormFactor();
-              if (pin == null || child == null) return child ?? const SizedBox();
-              return FormFactorScope(formFactor: pin, child: child);
+              final content = pin == null
+                  ? child
+                  : FormFactorScope(formFactor: pin, child: child);
+              // Wrap in the debug capture boundary when the Debug MCP host
+              // is active (no-op pass-through otherwise) so screenshot /
+              // tap / tree tools read from a stable RepaintBoundary.
+              return widget.ctx.core.debugCaptureWrap(content);
             },
           );
         },

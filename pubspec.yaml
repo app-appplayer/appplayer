@@ -1,7 +1,7 @@
 name: appplayer
 description: "AppPlayer (Standard) — reference product assembling AppPlayer Core with App Mode, Dashboard Mode, and bundle execution."
 publish_to: 'none'
-version: 0.1.2
+version: 0.1.3
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.1.9
+  appplayer_core: ^0.1.13
 
   provider: ^6.1.2
   go_router: ^14.6.2
@@ -36,6 +36,17 @@ dependencies:
   mcp_io_mqtt: ^0.2.1
   mcp_io_http: ^0.2.1
   mcp_io_scpi: ^0.2.1
+  # BLE extension transport — the wiring in lib/adapters/ble_transport/ is
+  # COPIED from the recipe os/core/brain_kernel/recipes/ble_transport/
+  # (recipes are not published/depended); these are the real published
+  # packages it imports. universal_ble covers all six Flutter targets
+  # (web needs HTTPS + a user gesture to scan), so no conditional import
+  # is required. brain_kernel is already in the app's graph via
+  # appplayer_core; it is direct here because the BLE entry API
+  # (lib/adapters/ble_extension.dart) names KernelClientConnection.
+  mcp_client: ^2.1.0
+  brain_kernel: ^0.1.8
+  universal_ble: ^2.1.0
 
 dev_dependencies:
   flutter_test:

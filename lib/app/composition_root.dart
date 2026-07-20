@@ -142,6 +142,11 @@ class CompositionRoot {
       onMcpLogMessage: (serverId, params) {
         logBuffer.add(LogEntry.fromMcp(serverId: serverId, params: params));
       },
+      // Debug MCP (desktop-only, settings-gated). The desktop gate is
+      // enforced inside core, so pass the raw pref. Port 7931 keeps
+      // Standard clear of Pro's 7930 when both run on one machine.
+      enableDebugMcp: settings.debugMcpEnabled,
+      debugMcpPort: 7931,
     );
 
     // Desktop io capability — exposes the io.* tool surface backed by the

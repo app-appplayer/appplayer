@@ -327,18 +327,18 @@ class _AppFormScreenState extends State<AppFormScreen> {
         final serverCfg = _buildServerConfig(id: cfg.serverConfigId!);
         await core.saveServer(serverCfg);
 
-        // Registration-time metadata fetch: open a session solely to let
-        // AppMetadataProvider publish `ui://app/info` through the sink,
-        // then close immediately. Errors are swallowed — missing metadata
-        // must not block app creation; subsequent launches will retry.
+        // Registration-time metadata-only connect: connect, read
+        // `ui://app/info`, publish through the sink, and close — no runtime,
+        // no UI (install ≠ run; the app is rendered later, on tap). Errors
+        // are swallowed — missing metadata must not block app creation.
         _fetchInitialMetadata(core, cfg.serverConfigId!);
       }
 
       // Bundle-type apps: fire-and-forget metadata publish so the manifest
       // name + icon land on the registry tile right after install. The
       // installer writes to disk but does not push metadata to the sink —
-      // that only happens inside `openAppFromBundle`. Open a transient
-      // session purely to surface manifest-derived metadata, then close.
+      // the metadata-only primitive parses the manifest and publishes it
+      // WITHOUT building a runtime or rendering (install ≠ run).
       if (_selectedType == AppType.bundle && mounted) {
         final core = context.read<AppPlayerCoreService>();
         _fetchBundleMetadata(core, cfg.bundleId!);
@@ -414,8 +414,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
     // ignore: unawaited_futures
     Future(() async {
       try {
-        final session = await core.openAppFromServer(serverId);
-        await session.close();
+        await core.fetchServerMetadata(serverId);
       } catch (_) {
         // Silent: launcher falls back to the default icon until a later
         // launch succeeds.
@@ -425,16 +424,15 @@ class _AppFormScreenState extends State<AppFormScreen> {
 
   /// Fire-and-forget best-effort metadata publish for a freshly-installed
   /// bundle. `installBundleFromFile` writes to disk but does not push
-  /// metadata to the sink — that only happens inside `openAppFromBundle`.
-  /// Open a transient session purely to surface manifest-derived metadata
-  /// (name / icon / publisher) on the registry tile, then close.
+  /// metadata to the sink. Uses the metadata-only primitive — it reads the
+  /// manifest and publishes name / icon / publisher to the registry tile
+  /// WITHOUT building a runtime or rendering the app (install ≠ run). The
+  /// app is rendered later, on tap.
   void _fetchBundleMetadata(AppPlayerCoreService core, String bundleId) {
     // ignore: unawaited_futures
     Future(() async {
       try {
-        final session =
-            await core.openAppFromBundle(BundleInstalledRef(bundleId));
-        await session.close();
+        await core.fetchBundleMetadata(BundleInstalledRef(bundleId));
       } catch (_) {
         // Silent: launcher falls back to the bundleId-as-name + default
         // icon until a later launch succeeds.

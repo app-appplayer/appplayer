@@ -35,8 +35,10 @@ Future<AppContext> _buildCtx({
     encode: AppConfig.encodeList,
     idOf: (a) => a.id,
   );
+  final resolvedCore = core ?? MockCore();
+  if (resolvedCore is MockCore) stubCoreShell(resolvedCore);
   return AppContext(
-    core: core ?? MockCore(),
+    core: resolvedCore,
     settings: settings,
     serverStorage: storage,
     credentialVault: vault,

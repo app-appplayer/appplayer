@@ -26,13 +26,28 @@ class AppLifecycleObserver with WidgetsBindingObserver {
   }
 
   @override
+  void didHaveMemoryPressure() {
+    // Route the OS memory-pressure signal to the core so it can reclaim
+    // re-creatable memory (caches, inactive runtimes) — FR-MEM.
+    _core.onLifecyclePhase(AppLifecyclePhase.memoryPressure);
+  }
+
+  @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
       case AppLifecycleState.resumed:
         _logger.info('app.lifecycle.resumed');
+        await _core.onLifecyclePhase(AppLifecyclePhase.foreground);
         break;
       case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
         _logger.info('app.lifecycle.paused');
+        // Both map to background: the process may be suspended, so the core
+        // applies its BackgroundPolicy (pause / keepAlive) to connections.
+        await _core.onLifecyclePhase(AppLifecyclePhase.background);
+        break;
+      case AppLifecycleState.inactive:
+        await _core.onLifecyclePhase(AppLifecyclePhase.inactive);
         break;
       case AppLifecycleState.detached:
         if (_disposedByObserver) return;
@@ -42,9 +57,6 @@ class AppLifecycleObserver with WidgetsBindingObserver {
         } catch (e, st) {
           _logger.logError('app.lifecycle.dispose_failed', e, st);
         }
-        break;
-      case AppLifecycleState.inactive:
-      case AppLifecycleState.hidden:
         break;
     }
   }

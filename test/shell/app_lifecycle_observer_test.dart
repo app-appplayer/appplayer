@@ -13,9 +13,16 @@ void main() {
   late MockLogger logger;
   late AppLifecycleObserver observer;
 
+  setUpAll(() {
+    registerFallbackValue(AppLifecyclePhase.foreground);
+  });
+
   setUp(() {
     core = MockCore();
     logger = MockLogger();
+    // The observer forwards lifecycle transitions to the core; stub the
+    // async hook so non-dispose phases resolve without a type error.
+    when(() => core.onLifecyclePhase(any())).thenAnswer((_) async {});
     observer = AppLifecycleObserver(core, logger: logger);
   });
 
@@ -62,5 +69,37 @@ void main() {
     await observer.didChangeAppLifecycleState(AppLifecycleState.detached);
 
     verify(() => core.dispose()).called(1);
+  });
+
+  // TC-LIFE-005: resumed/paused/hidden/inactive forward the mapped phase
+  // to the core so it can apply its BackgroundPolicy (FR-PLATFORM).
+  testWidgets('TC-LIFE-005 lifecycle states forward mapped phases',
+      (tester) async {
+    observer.attach();
+
+    await observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    verify(() => core.onLifecyclePhase(AppLifecyclePhase.foreground))
+        .called(1);
+
+    await observer.didChangeAppLifecycleState(AppLifecycleState.paused);
+    verify(() => core.onLifecyclePhase(AppLifecyclePhase.background)).called(1);
+
+    // hidden also maps to background.
+    await observer.didChangeAppLifecycleState(AppLifecycleState.hidden);
+    verify(() => core.onLifecyclePhase(AppLifecyclePhase.background)).called(1);
+
+    await observer.didChangeAppLifecycleState(AppLifecycleState.inactive);
+    verify(() => core.onLifecyclePhase(AppLifecyclePhase.inactive)).called(1);
+  });
+
+  // TC-LIFE-006: OS memory-pressure signal is routed to the core (FR-MEM).
+  testWidgets('TC-LIFE-006 memory pressure forwards memoryReclaim phase',
+      (tester) async {
+    observer.attach();
+
+    observer.didHaveMemoryPressure();
+
+    verify(() => core.onLifecyclePhase(AppLifecyclePhase.memoryPressure))
+        .called(1);
   });
 }

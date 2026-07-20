@@ -1,3 +1,23 @@
+## 0.1.3 — 2026-07-20
+
+### Added
+
+- **BLE board connection** — connect to a nearby ESP32 (or other) MCP-over-BLE
+  board directly from the app. Vendors the `ble_transport` recipe (layer ② of
+  the extension-transport standard, `specs/platform/08-extension.md` §4 ·
+  `16-ble-transport.md`) onto `appplayer_core`'s layer-① `connectExtensionTransport`
+  seam via `ble_extension.dart`.
+- **Debug MCP host** — desktop-only, settings-gated debug MCP endpoint
+  (`ui.screenshot` / `tree` / `tap` / `type`) on port 7931 (Standard) so it
+  stays clear of Pro's 7930 when both run on one machine.
+
+### Changed
+
+- **Dependency floors raised to published artifacts** — `appplayer_core`
+  `^0.1.9 → ^0.1.13`, plus direct `brain_kernel ^0.1.8` and `mcp_client ^2.1.0`
+  (the BLE entry API needs `brain_kernel` directly). Resolves entirely from
+  pub.dev — no path overrides.
+
 ## 0.1.2 — 2026-06-26
 
 ### Added

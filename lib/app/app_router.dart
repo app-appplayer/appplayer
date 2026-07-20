@@ -9,15 +9,23 @@ import '../ui/home/home_screen.dart';
 import '../ui/logs/log_screen.dart';
 import '../ui/onboarding/onboarding_screen.dart';
 import '../ui/settings/settings_screen.dart';
+import 'app_settings.dart';
 
 /// MOD-SHELL-002 — declarative GoRouter config.
 class AppRouter {
   const AppRouter._();
 
-  static GoRouter build({required bool onboardingCompleted}) {
+  static GoRouter build({required AppSettings settings}) {
     return GoRouter(
-      initialLocation: onboardingCompleted ? '/' : '/onboarding',
+      initialLocation: settings.onboardingCompleted ? '/' : '/onboarding',
+      // Re-evaluate the redirect when settings change (e.g. onboarding is
+      // marked complete) so `markOnboardingCompleted()` takes effect
+      // immediately instead of only on the next app launch.
+      refreshListenable: settings,
       redirect: (BuildContext ctx, GoRouterState state) {
+        // Read the live value — a captured bool would leave the router on
+        // `/onboarding` until restart.
+        final onboardingCompleted = settings.onboardingCompleted;
         final location = state.uri.path;
         if (!onboardingCompleted && location != '/onboarding') {
           return '/onboarding';
