@@ -1,4 +1,4 @@
-## Unreleased — entry links (platform spec 19)
+## 0.1.4 — 2026-07-29 — entry links (platform spec 19)
 
 Standard becomes the **concept entry host**: a scanned or tapped link on the demo domain opens a served app on the page the medium asked for.
 
