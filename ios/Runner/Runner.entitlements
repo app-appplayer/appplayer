@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Entry links (platform spec 19 §3.4). The claim is two-sided: this
+	     names the domain, and the domain must serve
+	     /.well-known/apple-app-site-association naming this app. Without the
+	     server half the link opens in a browser rather than here — a silent
+	     downgrade, not an error. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:demo.appplayer.app</string>
+	</array>
+</dict>
+</plist>

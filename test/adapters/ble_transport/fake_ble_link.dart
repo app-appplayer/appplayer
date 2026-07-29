@@ -1,7 +1,5 @@
-/// Copied from the canonical recipe's test support
-/// (`os/core/brain_kernel/recipes/ble_transport/test/`) — the radio-free
-/// [BleLink] fake used to exercise the BLE transport without hardware.
-/// Keep faithful to the recipe.
+/// Radio-free [BleLink] fake used to exercise the BLE transport without
+/// hardware.
 library;
 
 import 'dart:async';

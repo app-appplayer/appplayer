@@ -61,7 +61,7 @@ class AppSettings extends ChangeNotifier {
   /// true = always fresh connection, false = use cached runtime
   bool get freshConnect => _freshConnect;
 
-  /// Global view-mode pin (responsive-rendering plan §4, rung 2). Per
+  /// Global view-mode pin. Per
   /// the priority chain, the per-app pin wins over this value, and this
   /// value wins over any DSL `responsive` hint and the MediaQuery
   /// auto-classification. [ViewMode.auto] means "defer to the next rung".

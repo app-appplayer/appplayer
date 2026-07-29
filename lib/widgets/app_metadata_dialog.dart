@@ -4,7 +4,7 @@ import '../app/design_tokens.dart';
 import '../l10n/app_strings.dart';
 import '../models/app_config.dart';
 
-/// Shows §11 metadata for a launcher entry — description, version,
+/// Shows metadata for a launcher entry — description, version,
 /// publisher, category, screenshots — rendered from the cached
 /// [AppConfig.metadataJson] snapshot. Returns a silent empty-state card
 /// when no metadata has been fetched yet (e.g. first registration

@@ -1,7 +1,10 @@
 import 'package:appplayer_core/appplayer_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
+import '../../entry/entry_outcome_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../l10n/app_strings.dart';
@@ -15,7 +18,13 @@ import '../../widgets/app_metadata_dialog.dart';
 /// [AppConfig.decodeList]. Each icon opens the app on tap and shows the
 /// edit screen on long-press.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.entryRecoveryOffer});
+
+  /// Set by the shell when an install may have come from an entry this
+  /// platform could not carry across it (§3.5). Optional so the screen mounts
+  /// anywhere — a required provider would make the chrome unmountable in
+  /// tests and in any host that does not run entry links.
+  final ValueListenable<bool>? entryRecoveryOffer;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -24,6 +33,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<AppConfig> _apps = <AppConfig>[];
   bool _loaded = false;
+
+  /// One dismissal is enough — a recovery offer that keeps coming back is a
+  /// nag, and the launch it belonged to is already over.
+  bool _recoveryDismissed = false;
+
+  /// Stand-in when the shell wired none.
+  static final ValueNotifier<bool> _noOffer = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -206,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// * **Server** — stdio / HTTP connection. `closeApp` releases the
   ///   client, stdio subprocess sees EOF and exits.
   /// * **Dashboard** — dashboard session plus every server connection it
-  ///   aggregated (spec §11.9). All must be released together.
+  ///   aggregated. All must be released together.
   /// * **Bundle** — no network connection; the loaded runtime is the
   ///   active resource. `closeApp` on the bundle handle destroys the
   ///   cached runtime, matching the user's mental model that bundle
@@ -347,6 +363,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('AppPlayer'),
         actions: <Widget>[
+          // Scanning is an acquisition source for an entry (§9.2). It sits
+          // in the chrome rather than behind a setting because a code in
+          // front of someone is a now-or-never affordance.
+          IconButton(
+            key: const Key('home.scan'),
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: 'Scan a code',
+            onPressed: () => context.push(EntryRoutes.scan),
+          ),
           IconButton(
             key: const Key('home.add'),
             icon: const Icon(Icons.add),
@@ -364,7 +389,38 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _buildBody(),
+      body: ValueListenableBuilder<bool>(
+        valueListenable: widget.entryRecoveryOffer ?? _noOffer,
+        builder: (context, offer, __) {
+          return Column(
+            children: <Widget>[
+              if (offer && !_recoveryDismissed) _entryRecoveryBanner(),
+              Expanded(child: _buildBody()),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Offered when an install could have come from an entry but the platform
+  /// could not carry the code across it (§3.5). Landing silently on home is
+  /// the failure the person cannot recover from — by then the medium is
+  /// usually no longer in front of them.
+  Widget _entryRecoveryBanner() {
+    return MaterialBanner(
+      key: const Key('home.entry_recovery'),
+      content: const Text('Opened this app from a code? Scan it again.'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => context.push(EntryRoutes.scan),
+          child: const Text('Scan'),
+        ),
+        TextButton(
+          onPressed: () => setState(() => _recoveryDismissed = true),
+          child: const Text('Dismiss'),
+        ),
+      ],
     );
   }
 
@@ -385,55 +441,32 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListenableBuilder(
       listenable: core.lifecycleListenable,
       builder: (context, _) {
-        final formFactor = FormFactor.of(context);
         final spacing = AppSpacing.of(context);
-        // compact — Wrap stays aligned-left, matches mobile portrait.
-        // medium / expanded / large — fluid GridView with automatic
-        // column count driven by tile max extent (128 px per tile).
-        if (formFactor == FormFactor.compact) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(spacing.base),
-            child: Wrap(
-              spacing: spacing.lg,
-              runSpacing: spacing.lg,
-              children: _apps
-                  .map((app) => _AppIcon(
-                        key: Key('home.app.${app.id}'),
-                        app: app,
-                        active: _isAppActive(core, app),
-                        onTap: () => _openApp(app),
-                        onLongPress: (iconCtx) => _showAppMenu(iconCtx, app),
-                      ))
-                  .toList(),
-            ),
-          );
-        }
-        return GridView.builder(
+        // Fixed-size tiles, fixed spacing, aligned-left across every form
+        // factor. Columns reflow naturally (add/remove one) as the width
+        // changes instead of the tiles stretching to fill the row.
+        return SingleChildScrollView(
           padding: EdgeInsets.all(spacing.base),
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 128,
-            mainAxisSpacing: spacing.lg,
-            crossAxisSpacing: spacing.lg,
-            childAspectRatio: 0.85,
+          child: Wrap(
+            spacing: spacing.lg,
+            runSpacing: spacing.lg,
+            children: _apps
+                .map((app) => _AppIcon(
+                      key: Key('home.app.${app.id}'),
+                      app: app,
+                      active: _isAppActive(core, app),
+                      onTap: () => _openApp(app),
+                      onLongPress: (iconCtx) => _showAppMenu(iconCtx, app),
+                    ))
+                .toList(),
           ),
-          itemCount: _apps.length,
-          itemBuilder: (ctx, i) {
-            final app = _apps[i];
-            return _AppIcon(
-              key: Key('home.app.${app.id}'),
-              app: app,
-              active: _isAppActive(core, app),
-              onTap: () => _openApp(app),
-              onLongPress: (iconCtx) => _showAppMenu(iconCtx, app),
-            );
-          },
         );
       },
     );
   }
 
-  /// True when the tile should show the "connected" dot. Per spec §11.9
-  /// dashboards are active when *any* of their inner server connections
+  /// True when the tile should show the "connected" dot.
+  /// Dashboards are active when *any* of their inner server connections
   /// is live — not when all of them are. Partial connectivity is still
   /// "the dashboard has something to show", so one live slot lights the
   /// badge.

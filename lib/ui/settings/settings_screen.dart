@@ -93,7 +93,7 @@ class SettingsScreenState extends State<SettingsScreen> {
             onSelectionChanged: (s) => settings.setThemeMode(s.first),
           ),
           const SizedBox(height: AppSpacing.md),
-          // ── View mode (responsive-rendering plan §7.1) ───────────────────
+          // ── View mode ────────────────────────────────────────────────────
           // Pins the global form factor. `auto` defers to MediaQuery;
           // other values override regardless of window width, with per-app
           // pins taking higher priority. The secondary label shows the
@@ -215,7 +215,8 @@ class SettingsScreenState extends State<SettingsScreen> {
 
           // ── App info ─────────────────────────────────────────────────────
           _SectionTitle(S.get('settings.info')),
-          const Text('App version: 0.1.0'),
+          // Kept in sync with pubspec.yaml `version` by hand.
+          const Text('App version: 0.1.3'),
           const Text(
             'Core DSL: ${MCPUIDSLVersion.current}',
             key: Key('settings.core_version'),

@@ -12,10 +12,14 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.1.13
+  appplayer_core: ^0.1.15
 
   provider: ^6.1.2
   go_router: ^14.6.2
+  app_links: ^6.3.2
+  mobile_scanner: ^5.2.3
+  android_play_install_referrer: ^0.4.0
+  http: ^1.2.2
   shared_preferences: ^2.3.5
   flutter_secure_storage: ^9.2.4
   dio: ^5.7.0
@@ -26,9 +30,9 @@ dependencies:
   # of web builds via the conditional import in lib/adapters/io_capability.dart.
   mcp_bundle: ^0.4.5
   mcp_io: ^0.2.2
-  # io drivers — the wiring in lib/adapters/io_drivers/ is COPIED from the
-  # recipe (recipes are not published/depended); these are the real published
-  # driver packages it imports. process is desktop boot; modbus/mqtt/http/scpi
+  # io drivers — the wiring in lib/adapters/io_drivers/ is vendored; these
+  # are the real published driver packages it imports. process is desktop
+  # boot; modbus/mqtt/http/scpi
   # are network (mobile + desktop). dart:io-based — excluded from web by the
   # conditional import in io_capability.dart.
   mcp_io_process: ^0.1.1
@@ -37,18 +41,22 @@ dependencies:
   mcp_io_http: ^0.2.1
   mcp_io_scpi: ^0.2.1
   # BLE extension transport — the wiring in lib/adapters/ble_transport/ is
-  # COPIED from the recipe os/core/brain_kernel/recipes/ble_transport/
-  # (recipes are not published/depended); these are the real published
-  # packages it imports. universal_ble covers all six Flutter targets
+  # vendored; these are the real published packages it imports.
+  # universal_ble covers all six Flutter targets
   # (web needs HTTPS + a user gesture to scan), so no conditional import
   # is required. brain_kernel is already in the app's graph via
   # appplayer_core; it is direct here because the BLE entry API
   # (lib/adapters/ble_extension.dart) names KernelClientConnection.
   mcp_client: ^2.1.0
-  brain_kernel: ^0.1.8
+  brain_kernel: ^0.2.0
   universal_ble: ^2.1.0
 
 dev_dependencies:
+  # Test-only direct imports: the host-brightness and extension-transport tests
+  # assert against runtime/core types that reach this app transitively through
+  # appplayer_core. Declared so the dependency is stated rather than inherited.
+  flutter_mcp_ui_core: ^0.4.3
+  flutter_mcp_ui_runtime: ^0.5.3
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
@@ -57,7 +65,7 @@ dev_dependencies:
   # mcp_bridge transport into appplayer_core's connectExtensionTransport.
   # Resolved to the local checkout via pubspec_overrides.
   mcp_bridge: any
-  mcp_server: ^2.0.0
+  mcp_server: ^2.1.1
 
 flutter:
   uses-material-design: true

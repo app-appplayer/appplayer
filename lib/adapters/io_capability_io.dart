@@ -2,8 +2,7 @@
 ///
 /// One `IoRuntime` exposes the fixed `io.*` surface plus
 /// `io.connect_device` / `io.disconnect_device` (from the recipe). Device
-/// drivers register per the platform matrix in
-/// `specs/platform/11-io-devices.md`:
+/// drivers register per the platform matrix:
 ///   - network drivers (modbus / mqtt / http / scpi) — available on mobile +
 ///     desktop, connected at runtime via `io.connect_device`;
 ///   - `process` — host-owned, desktop-only, registered at boot.

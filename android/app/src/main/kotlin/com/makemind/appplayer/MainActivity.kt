@@ -1,4 +1,4 @@
-package com.example.appplayer
+package com.makemind.appplayer
 
 import io.flutter.embedding.android.FlutterActivity
 

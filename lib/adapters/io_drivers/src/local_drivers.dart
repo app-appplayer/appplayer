@@ -4,9 +4,7 @@
 /// boot-registered (not provisioned via `io.connect_device`). It lives here,
 /// in the shared recipe, so AppPlayer and Studio register it identically
 /// (parity) rather than each host hand-building a [ProcessAdapter].
-///
-/// See `specs/platform/11-io-devices.md` §3 (boot vs on-connect) and §5
-/// (platform gating — process is desktop-only).
+/// Process is desktop-only (platform gating).
 library;
 
 import 'package:mcp_io/mcp_io.dart';

@@ -22,8 +22,6 @@ export 'package:appplayer_core/appplayer_core.dart'
         AppDensity;
 
 /// Design tokens — single source of layout/colour/motion primitives.
-///
-/// Mirrored by `docs/00_PRD/DESIGN-SYSTEM.md`; changes must update both.
 
 // -----------------------------------------------------------------------------
 // Color

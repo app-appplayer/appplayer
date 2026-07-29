@@ -2,7 +2,7 @@
 /// kernel extension-transport seam (`connectExtensionTransport`) with an
 /// mcp_bridge transport. Verifies the wiring the unit/recipe tests do not:
 /// that the booted service holds a client host and the method reaches a real
-/// remote server. See specs/platform/08-extension.md §4.
+/// remote server.
 library;
 
 import 'dart:io';
@@ -47,7 +47,7 @@ void main() {
       description: 'set the on-board LED',
       inputSchema: const {'type': 'object'},
       handler: (args) async =>
-          srv.CallToolResult(content: [srv.TextContent(text: 'ok')]),
+          const srv.CallToolResult(content: [srv.TextContent(text: 'ok')]),
     );
     final serverTransport =
         br.TcpServerTransport({'host': 'localhost', 'port': port});

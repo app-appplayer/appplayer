@@ -1,13 +1,8 @@
-/// Copied from the canonical recipe
-/// `os/core/brain_kernel/recipes/ble_transport/` — recipes are copied into
-/// the host, not published / depended. Keep faithful to the recipe; it is
-/// the single source for Studio↔AppPlayer parity.
+/// Vendored recipe — Flutter BLE extension `ClientTransport` for
+/// MCP-serving boards.
 ///
-/// Recipe — Flutter BLE extension `ClientTransport` for MCP-serving boards.
-///
-/// Layer 2 (transport impl) of the extension-transport standard
-/// (`specs/platform/08-extension.md` §4), realizing the BLE GATT binding of
-/// `specs/platform/16-ble-transport.md`: fixed MCP Serving service, write
+/// Layer 2 (transport impl) of the extension-transport standard,
+/// realizing the BLE GATT binding: fixed MCP Serving service, write
 /// RX characteristic + notify TX characteristic as a pure byte pipe, and
 /// newline-delimited JSON-RPC on the reassembled stream — the MCP layer
 /// never knows it is on BLE.
@@ -18,10 +13,9 @@
 /// `test/`. [BleBoardScanner] discovers nearby boards by the fixed service
 /// UUID.
 ///
-/// Vendored reference (`publish_to: none`): Flutter hosts (AppPlayer,
-/// Studio) copy this package and inject the transport through the layer-1
-/// kernel seam (`connectExtension` / the host's `connectExtensionTransport`
-/// wrapper). Layer 1 and layer 3 stay unchanged.
+/// The host injects the transport through the layer-1 kernel seam
+/// (`connectExtension` / the host's `connectExtensionTransport` wrapper).
+/// Layer 1 and layer 3 stay unchanged.
 library;
 
 export 'src/ble_board_scanner.dart' show BleBoardCandidate, BleBoardScanner;

@@ -81,13 +81,13 @@ void _registerPages(Server server, ShowcaseState state, RealtimeManager realtime
     handler: (uri, params) async => _json(uri, _appDefinition(realtime)),
   );
 
-  // Well-known app metadata (spec §11.6). Launchers read this before
+  // Well-known app metadata. Launchers read this before
   // (or alongside) ui://app to render icon / description / publisher
   // without having to materialise the full application definition.
   server.addResource(
     uri: 'ui://app/info',
     name: 'App Info',
-    description: 'Lightweight application metadata (§11.6)',
+    description: 'Lightweight application metadata',
     mimeType: 'application/json',
     handler: (uri, params) async => _json(uri, _appInfo()),
   );
@@ -261,7 +261,7 @@ Map<String, dynamic> _appDefinition(RealtimeManager realtime) => {
         'system.info': true,
         'notification': true,
       },
-      // 'dashboard' intentionally omitted to exercise the spec §11.9.1
+      // 'dashboard' intentionally omitted to exercise the
       // fallback path in launchers (icon-only tile in dashboard slots).
       'navigation': {
         'type': 'drawer',

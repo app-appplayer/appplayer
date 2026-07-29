@@ -1,8 +1,7 @@
 /// BLE board connection — public entry of the app layer.
 ///
 /// Wires the vendored `ble_transport` recipe (layer ② of the
-/// extension-transport standard, `specs/platform/08-extension.md` §4,
-/// realizing the BLE GATT binding of `specs/platform/16-ble-transport.md`)
+/// extension-transport standard, realizing the BLE GATT binding)
 /// onto appplayer_core's layer-① seam (`connectExtensionTransport`).
 /// Layers ① and ③ stay unchanged: once connected, the board lands in the
 /// kernel registry and is consumed through the standard `mcp.*` path like
@@ -24,7 +23,7 @@ import 'package:brain_kernel/brain_kernel.dart' show KernelClientConnection;
 
 import 'ble_transport/ble_transport.dart';
 
-/// Discover nearby MCP-serving boards (spec 16 §6 — a single scan filter
+/// Discover nearby MCP-serving boards (a single scan filter
 /// on the fixed MCP Serving service UUID, no configuration).
 ///
 /// The scan starts on listen and stops when the subscription is cancelled

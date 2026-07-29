@@ -897,9 +897,10 @@ class _AppFormScreenState extends State<AppFormScreen> {
           physics: const NeverScrollableScrollPhysics(),
           buildDefaultDragHandles: false,
           itemCount: _connectionIds.length,
-          onReorder: (oldIndex, newIndex) {
+          // `onReorderItem` already accounts for the removed item, so unlike
+          // the deprecated `onReorder` the index needs no adjustment here.
+          onReorderItem: (oldIndex, newIndex) {
             setState(() {
-              if (newIndex > oldIndex) newIndex -= 1;
               final moved = _connectionIds.removeAt(oldIndex);
               _connectionIds.insert(newIndex, moved);
             });
@@ -1064,7 +1065,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
           },
         ),
         const SizedBox(height: AppSpacing.md),
-        // ── Per-app view-mode pin (responsive-rendering plan §7.2) ────
+        // ── Per-app view-mode pin ─────────────────────────────────────
         Text(S.get('form.viewmode.title'), style: theme.textTheme.titleSmall),
         const SizedBox(height: AppSpacing.xs),
         Text(

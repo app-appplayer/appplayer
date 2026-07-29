@@ -35,7 +35,7 @@ Future<void> pumpDashboard(
   required AppSettings settings,
 }) async {
   // DashboardScreen resolves `GoRouter.of(context)` in _buildGrid /
-  // _buildCardList (spec §4.3.1 openApp routes to '/app/:id'). A plain
+  // _buildCardList (openApp routes to '/app/:id'). A plain
   // MaterialApp would fail with "No GoRouter found in context", so the
   // tests mount the screen under a minimal GoRouter with stub routes.
   final router = GoRouter(
@@ -148,7 +148,7 @@ void main() {
 
         for (final id in <String>['srv-a', 'srv-b']) {
           final session = MockAppSession();
-          // Spec §11.9 — dashboard slots call buildDashboardWidget, not
+          // Dashboard slots call buildDashboardWidget, not
           // buildWidget. Returning non-null means "this app provides a
           // dashboard view"; `null` would trigger the icon fallback.
           when(() => session.buildDashboardWidget(

@@ -290,7 +290,13 @@ class DashboardScreenState extends State<DashboardScreen> {
                   errorMessage: _slotErrors[id],
                   onTap: () => router.push('/app/$id'),
                   onLongPress: (ctx) => _showSlotMenu(ctx, id),
-                  onOpenApp: (_, __) => router.push('/app/$id'),
+                  onOpenApp: (_, route) => router.push(
+                    '/app/$id',
+                    // §4.3.1 carries the page the dashboard asked for. It goes
+                    // as a launch route, not an entry: an in-app open is not
+                    // an arrival from outside (§8.9.1).
+                    extra: route,
+                  ),
                 ),
               ))
           .toList(),
@@ -318,7 +324,13 @@ class DashboardScreenState extends State<DashboardScreen> {
               errorMessage: _slotErrors[id],
               onTap: () => router.push('/app/$id'),
               onLongPress: (ctx) => _showSlotMenu(ctx, id),
-              onOpenApp: (_, __) => router.push('/app/$id'),
+              onOpenApp: (_, route) => router.push(
+                    '/app/$id',
+                    // §4.3.1 carries the page the dashboard asked for. It goes
+                    // as a launch route, not an entry: an in-app open is not
+                    // an arrival from outside (§8.9.1).
+                    extra: route,
+                  ),
             ),
           ),
         );
@@ -478,7 +490,7 @@ class _DashboardSlot extends StatelessWidget {
   final void Function(BuildContext inner) onLongPress;
 
   /// Host handler for DSL `navigation:openApp` actions fired from
-  /// within the dashboard content (spec §4.3.1). Routes to the
+  /// within the dashboard content. Routes to the
   /// launcher's `/app/:id` flow.
   final void Function(String? appId, String? route) onOpenApp;
 
@@ -504,7 +516,7 @@ class _DashboardSlot extends StatelessWidget {
         onOpenApp: onOpenApp,
       );
       if (dashboard != null) {
-        // Spec §11.9 — inner buttons/toggles still consume their own
+        // Inner buttons/toggles still consume their own
         // taps. `deferToChild` lets long-press bubble up to this
         // wrapper only when no descendant handled it.
         return GestureDetector(
@@ -518,7 +530,7 @@ class _DashboardSlot extends StatelessWidget {
         );
       }
 
-      // Spec §11.9.1 fallback: no dashboard view declared → default card
+      // Fallback: no dashboard view declared → default card
       // from the session's metadata (icon + name). Tapping opens the app.
       return GestureDetector(
         onTap: onTap,

@@ -1,11 +1,11 @@
 // QA-FLOW automated acceptance tests — top of the test pyramid
-// (docs/06_OPS/TESTING-STRATEGY.md §1 "Integration (flows)").
+// (integration flows).
 //
 // Each test boots the REAL `AppPlayerApp` widget (real GoRouter, real
 // AppSettings / PrefsAppsRegistry / SharedPrefsServerStorage) with only
 // `AppPlayerCoreService` mocked (`MockCore`, reused from
-// `test/ui/_helpers.dart`) and drives one full end-to-end user journey,
-// matching the spec at `docs/04_TEST/flows/qa-e2e.md` (QA-FLOW-001..006).
+// `test/ui/_helpers.dart`) and drives one full end-to-end user journey
+// (QA-FLOW-001..006).
 //
 // Deterministic only — no real network / BLE / keychain. Standard has no
 // marketplace / auto-discovery UI, so flows are limited to what the shell

@@ -1,4 +1,4 @@
-/// Layout widgets showcase. Covers every layout widget in spec §2.4:
+/// Layout widgets showcase. Covers every layout widget:
 /// box, linear, stack, center, align, padding, margin, expanded, flexible,
 /// spacer, wrap, positioned, safeArea, sizedBox, aspectRatio, constrained,
 /// fractionallySized, intrinsicHeight, intrinsicWidth, visibility,

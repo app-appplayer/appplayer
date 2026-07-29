@@ -149,6 +149,20 @@ class CompositionRoot {
       debugMcpPort: 7931,
     );
 
+    // Multi-origin composition (MCP UI DSL v1.4 Composition Profile): lets one
+    // bundle render definitions served by several MCP servers. Claimed here for
+    // the same reason Pro claims it — the profile is a property of the runtime,
+    // not of a tier. Without it a `view` naming a foreign origin fails closed
+    // and renders its fallback, so the same bundle would compose on Pro and
+    // quietly show placeholders here, which is the kind of drift that reads as
+    // a broken bundle rather than a missing capability.
+    //
+    // Origins a `view` can name are the connections THIS HOST already holds —
+    // here, the servers the user has saved and connected. The resolver reads
+    // through the kernel's outbound `mcp.*` surface, so this needs no new
+    // transport and no new connection registry.
+    core.useKernelDefinitionResolver();
+
     // Desktop io capability — exposes the io.* tool surface backed by the
     // process adapter (and future device adapters). Desktop-only: a no-op on
     // web (compile-time) and mobile (runtime guard). The bundle install root

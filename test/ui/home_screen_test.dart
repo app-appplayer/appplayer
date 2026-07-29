@@ -117,6 +117,79 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
+  // TC-HOME-008 — deferred entry recovery (platform spec 19 §3.5)
+  // ---------------------------------------------------------------------------
+
+  group('TC-HOME-008 entry recovery offer', () {
+    testWidgets('no banner when the shell wired no offer', (tester) async {
+      // The screen must mount anywhere: a required provider would make the
+      // chrome unmountable in tests and in hosts that run no entry links.
+      final settings = await _setupPrefs();
+      await tester.pumpWidget(
+        wrapScreen(child: const HomeScreen(), core: core, settings: settings),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('home.entry_recovery')), findsNothing);
+    });
+
+    testWidgets('the banner appears when recovery is offered', (tester) async {
+      final settings = await _setupPrefs();
+      final offer = ValueNotifier<bool>(true);
+      addTearDown(offer.dispose);
+      await tester.pumpWidget(
+        wrapScreen(
+          child: HomeScreen(entryRecoveryOffer: offer),
+          core: core,
+          settings: settings,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('home.entry_recovery')), findsOneWidget);
+    });
+
+    testWidgets('dismissing it keeps it away', (tester) async {
+      // A recovery offer that keeps coming back is a nag, and the launch it
+      // belonged to is already over.
+      final settings = await _setupPrefs();
+      final offer = ValueNotifier<bool>(true);
+      addTearDown(offer.dispose);
+      await tester.pumpWidget(
+        wrapScreen(
+          child: HomeScreen(entryRecoveryOffer: offer),
+          core: core,
+          settings: settings,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Dismiss'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('home.entry_recovery')), findsNothing);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // TC-HOME-007 — scan button (platform spec 19 §9.2)
+  // ---------------------------------------------------------------------------
+
+  group('TC-HOME-007 scan button', () {
+    testWidgets('home.scan icon button is present', (tester) async {
+      // A code in front of someone is a now-or-never affordance, so the way
+      // to scan one lives in the chrome rather than behind a setting.
+      final settings = await _setupPrefs();
+      await tester.pumpWidget(
+        wrapScreen(child: const HomeScreen(), core: core, settings: settings),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('home.scan')), findsOneWidget);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // TC-HOME-006 — [⚙] button
   // ---------------------------------------------------------------------------
 

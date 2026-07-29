@@ -3,10 +3,9 @@
 /// `ble_transport` recipe (layer ② impl) → kernel extension-transport seam
 /// (`connectExtensionTransport`, layer ①). The board is simulated by a real
 /// `mcp_server` Server speaking newline-delimited JSON-RPC over the recipe's
-/// radio seam (FakeBleLink) at the ATT MTU floor of 23, so the whole spec 16
+/// radio seam (FakeBleLink) at the ATT MTU floor of 23, so the whole BLE
 /// path (framing + chunking + reassembly) is exercised end to end without
-/// hardware. See specs/platform/08-extension.md §4 and
-/// specs/platform/16-ble-transport.md.
+/// hardware.
 library;
 
 import 'dart:async';
@@ -50,7 +49,7 @@ class _BoardFakeBleLink extends FakeBleLink {
 /// The board side of the fake radio: an mcp_server [srv.ServerTransport]
 /// whose byte pipe is the FakeBleLink. RX writes are reassembled with the
 /// recipe's newline framer; responses go back as TX notifications chunked
-/// to the MTU-23 floor (spec 16 §4 — boundaries carry no semantics).
+/// to the MTU-23 floor (boundaries carry no semantics).
 class _FakeBleBoardTransport implements srv.ServerTransport {
   _FakeBleBoardTransport(this._link) {
     final framer = NewlineJsonFramer(
@@ -95,7 +94,7 @@ void main() {
       'listTools / callTool / readResource round-trip over the BLE pipe',
       () async {
     // Simulated board: a real mcp_server behind the recipe's radio seam,
-    // pinned at the default ATT MTU 23 (spec 16 §4 MUST — chunking absorbs).
+    // pinned at the default ATT MTU 23 (chunking absorbs).
     final link = _BoardFakeBleLink()..negotiatedMtu = bleDefaultAttMtu;
     final board = srv.Server(
       name: 'ble-board-sim',

@@ -18,9 +18,20 @@ class AppRendererScreen extends StatefulWidget {
     super.key,
     required this.serverId,
     this.preloadedSession,
+    this.entry,
+    this.launchRoute,
   });
 
   final String serverId;
+
+  /// How this app was reached, when it was reached from outside — an
+  /// app-to-app `navigation.openApp` naming a route, or a scan entry
+  /// (MCP UI DSL §8.9, platform spec 19). Null for an ordinary launcher open.
+  final EntryContext? entry;
+
+  /// Page an in-app open asked for (DSL §4.3.1). Carries no arrival, so the
+  /// opened definition sees no `entry.*` tree (§8.9.1).
+  final String? launchRoute;
 
   /// Pre-opened session (e.g. from bundle open in HomeScreen).
   final AppSession? preloadedSession;
@@ -50,7 +61,6 @@ class AppRendererScreenState extends State<AppRendererScreen> {
   void dispose() {
     // Renderer unmount = active context ends → tell the core with a
     // null handle (back at launcher / home means master context).
-    // knowledge-operations.md §12.4.1.
     _coreRef?.setActiveSession(null);
     super.dispose();
   }
@@ -71,6 +81,8 @@ class AppRendererScreenState extends State<AppRendererScreen> {
         session = await core.openAppFromServer(
           app?.serverConfigId ?? widget.serverId,
           trustLevel: trust,
+          entry: widget.entry,
+          launchRoute: widget.launchRoute,
         );
       }
       if (!mounted) return;
@@ -102,6 +114,8 @@ class AppRendererScreenState extends State<AppRendererScreen> {
     return core.openAppFromBundle(
       BundleInstalledRef(bundleId),
       trustLevel: trust,
+      entry: widget.entry,
+      launchRoute: widget.launchRoute,
     );
   }
 

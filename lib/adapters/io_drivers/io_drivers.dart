@@ -1,11 +1,6 @@
-/// Copied from the canonical recipe
-/// `os/core/brain_kernel/recipes/io_drivers/` — recipes are copied into the
-/// host, not published / depended. Keep faithful to the recipe; it is the
-/// single source for Studio↔AppPlayer parity.
+/// Shared io device-driver wiring — vendored recipe.
 ///
-/// Shared io device-driver wiring — reference recipe.
-///
-/// Implements the model defined in `specs/platform/11-io-devices.md`:
+/// Implements the io device-driver model:
 ///   - [IoDriverRegistry] / [IoDeviceConfig] — type-keyed builders with
 ///     per-driver platform gating (the provisioner).
 ///   - [registerNetworkDrivers] — builders for the dart:io socket drivers
@@ -13,10 +8,8 @@
 ///   - [ioDeviceTools] — the host-agnostic tool map (`io.*` + connect /
 ///     disconnect) a host registers into its dispatcher / server registry.
 ///
-/// Consumed identically by AppPlayer and Studio so the same bundle sees the
-/// same `io.*` surface. `mcp_io` core is not modified; FFI/native drivers
-/// (serial, can) and the session-based opcua / websocket plug in under the
-/// same builder pattern (see README).
+/// `mcp_io` core is not modified; FFI/native drivers (serial, can) and the
+/// session-based opcua / websocket plug in under the same builder pattern.
 library;
 
 export 'src/io_device_provisioner.dart';

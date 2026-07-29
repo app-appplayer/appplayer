@@ -1,10 +1,9 @@
 /// MCP UI DSL 1.3 compliant theme for the showcase app.
 ///
 /// Default `mode: 'system'` so the launcher's light/dark setting drives the
-/// active scheme. Matches the canonical 14-domain shape from
-/// `specs/mcp_ui_dsl/05_Theme.md` — Material 3 28-role color, 15-role
-/// typography, 9-step spacing on the 8pt grid, 7-family shape, 6-level
-/// elevation. Mode-specific overrides live under `light` / `dark`.
+/// active scheme. Matches the canonical 14-domain shape — Material 3 28-role
+/// color, 15-role typography, 9-step spacing on the 8pt grid, 7-family shape,
+/// 6-level elevation. Mode-specific overrides live under `light` / `dark`.
 Map<String, dynamic> showcaseTheme() => {
       'mode': 'system',
       'color': {

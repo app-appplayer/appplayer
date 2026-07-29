@@ -1,4 +1,4 @@
-/// Chart-family widgets showcase (§10): chart (bar/line/pie), gauge,
+/// Chart-family widgets showcase: chart (bar/line/pie), gauge,
 /// timeline, calendar, heatmap.
 Map<String, dynamic> chartsPage() => {
       'type': 'page',

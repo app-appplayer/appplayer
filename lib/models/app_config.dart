@@ -92,7 +92,7 @@ class AppConfig implements HasAppHandle {
   /// read-only system surfaces (info / notification / clipboard read).
   final AppTrustLevel trustLevel;
 
-  /// Per-app view-mode pin (responsive-rendering plan §4, rung 1).
+  /// Per-app view-mode pin.
   /// Default [ViewMode.auto] defers to the global pin / DSL hint /
   /// MediaQuery chain. Any concrete value forces the form factor for
   /// this app regardless of window width.

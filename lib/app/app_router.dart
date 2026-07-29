@@ -1,8 +1,13 @@
 import 'package:appplayer_core/appplayer_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../entry/entry_controller.dart';
 import '../ui/app/app_renderer_screen.dart';
+import '../ui/entry/entry_gate_screen.dart';
+import '../ui/entry/entry_scan_screen.dart';
+import '../ui/entry/entry_open_screen.dart';
 import '../ui/app_form/app_form_screen.dart';
 import '../ui/dashboard/dashboard_screen.dart';
 import '../ui/home/home_screen.dart';
@@ -15,7 +20,10 @@ import 'app_settings.dart';
 class AppRouter {
   const AppRouter._();
 
-  static GoRouter build({required AppSettings settings}) {
+  static GoRouter build({
+    required AppSettings settings,
+    ValueListenable<bool>? entryRecoveryOffer,
+  }) {
     return GoRouter(
       initialLocation: settings.onboardingCompleted ? '/' : '/onboarding',
       // Re-evaluate the redirect when settings change (e.g. onboarding is
@@ -38,7 +46,8 @@ class AppRouter {
       routes: <RouteBase>[
         GoRoute(
           path: '/',
-          builder: (_, __) => const HomeScreen(),
+          builder: (_, __) =>
+              HomeScreen(entryRecoveryOffer: entryRecoveryOffer),
         ),
         GoRoute(
           path: '/onboarding',
@@ -62,7 +71,32 @@ class AppRouter {
             preloadedSession: state.extra is AppSession
                 ? state.extra! as AppSession
                 : null,
+            // An app-to-app open (DSL §4.3.1 `navigation.openApp`) names the
+            // page it wants. Dropping it here is what made every such open
+            // land on the target's home screen. It arrives as a plain route:
+            // an entry tree belongs to definitions reached from outside.
+            launchRoute: state.extra is String ? state.extra! as String : null,
+            entry: state.extra is EntryContext
+                ? state.extra! as EntryContext
+                : null,
           ),
+        ),
+        // Entry links (platform spec 19 §9). Both outcomes are pushed rather
+        // than replacing the stack: a scan that lands on top of wherever the
+        // viewer was leaves them able to get back.
+        GoRoute(
+          path: '/entry/scan',
+          builder: (_, __) => const EntryScanScreen(),
+        ),
+        GoRoute(
+          path: '/entry/blocked',
+          builder: (_, state) =>
+              EntryGateScreen(blocked: state.extra! as EntryBlocked),
+        ),
+        GoRoute(
+          path: '/entry/open',
+          builder: (_, state) =>
+              EntryOpenScreen(open: state.extra! as EntryOpen),
         ),
         GoRoute(
           path: '/dashboard/:id',

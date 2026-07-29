@@ -2,7 +2,6 @@ import 'package:appplayer/app/app_router.dart';
 import 'package:appplayer/app/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<AppSettings> _settings({required bool onboardingCompleted}) async {
@@ -42,9 +41,10 @@ void main() {
     test('route table includes /app/:id path', () async {
       final router =
           AppRouter.build(settings: await _settings(onboardingCompleted: true));
-      // GoRouter configuration should have 9 routes
-      // (+ /logs and /apps/:id/logs since logs UI was added).
-      expect(router.configuration.routes.length, 9);
+      // Route count is asserted so a route added without a test is visible
+      // here rather than shipping unnoticed. 9 + /entry/scan + /entry/blocked
+      // + /entry/open (platform spec 19 §9).
+      expect(router.configuration.routes.length, 12);
     });
 
     // TC-ROUTER-004 — completing onboarding live-refreshes the redirect.

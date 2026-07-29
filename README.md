@@ -29,7 +29,7 @@ This app is the entry-point reference implementation: a base launcher and runtim
 - `lib/app/` — `MaterialApp` root and composition root
 - `lib/adapters/` — host adapters for `appplayer_core` (secure storage, HTTP bundle fetcher, shared-prefs server store, logger, metadata sink)
   - `lib/adapters/ble_extension.dart` — `connectBleBoard(...)`, the app-layer BLE entry
-  - `lib/adapters/ble_transport/` — vendored `ble_transport` recipe (BLE GATT board scan + client transport, `specs/platform/16-ble-transport.md`)
+  - `lib/adapters/ble_transport/` — vendored `ble_transport` recipe (BLE GATT board scan + client transport)
 - `lib/ui/` — Standard tier screens (home, app renderer, dashboard, settings, onboarding, app form)
 - `lib/widgets/` — shared widgets
 - `lib/models/` — local data models (e.g. `AppConfig`)

@@ -6,11 +6,11 @@ import 'package:mcp_server/mcp_server.dart';
 /// Real-time data page — contrasts the two primitives MCP UI DSL exposes
 /// for moving live values into state:
 ///
-///   1. **Tool call (§4.4)** — client invokes an MCP tool; the tool's
-///      response is auto-merged into state by top-level key (§3.10). The
+///   1. **Tool call** — client invokes an MCP tool; the tool's
+///      response is auto-merged into state by top-level key. The
 ///      call is synchronous and client-driven (one-shot button, or
 ///      periodic via `client.poll`).
-///   2. **Resource notification stream (§4.5 + §6.4)** — client subscribes
+///   2. **Resource notification stream** — client subscribes
 ///      to a resource URI; the server emits
 ///      `notifications/resources/updated` on every change. The runtime
 ///      extracts the binding-named key from the notification payload and
@@ -36,7 +36,7 @@ Map<String, dynamic> realtimePage(double toolInit, double streamInit) => {
       },
       // client.poll channel — standard MCP "pseudo-stream" primitive.
       // Every tick, the runtime fires `onData`, which calls the tool;
-      // the tool response auto-merges into state (§3.10), simulating a
+      // the tool response auto-merges into state, simulating a
       // stream of reads on a fixed cadence.
       'channels': {
         'tempPoll': {
@@ -71,7 +71,7 @@ Map<String, dynamic> realtimePage(double toolInit, double streamInit) => {
 Map<String, dynamic> _toolCard() => _card(
       title: 'Tool call polling (pseudo-stream)',
       description:
-          'Standard MCP has no native streaming — the canonical workaround is client-side periodic tool calls (spec §8.6 client.poll channel). Start polling makes the runtime fire getToolTemperature every 1s; the response `{"toolTemperature": X}` auto-merges into state (§3.10), so the value updates as if it were a stream.',
+          'Standard MCP has no native streaming — the canonical workaround is client-side periodic tool calls (client.poll channel). Start polling makes the runtime fire getToolTemperature every 1s; the response `{"toolTemperature": X}` auto-merges into state, so the value updates as if it were a stream.',
       valueBinding: 'toolTemperature',
       statusBinding: 'toolStatus',
       primaryLabel: 'Start polling',
@@ -215,7 +215,7 @@ Map<String, dynamic> _card({
 /// Wires the two realtime primitives the page needs:
 ///
 /// - **Tool path**: `getToolTemperature` tool. Each call samples a fresh
-///   value and returns `{"toolTemperature": <value>}`. Auto-merge (§3.10)
+///   value and returns `{"toolTemperature": <value>}`. Auto-merge
 ///   writes `toolTemperature` into page state on success.
 /// - **Stream path**: `data://streamTemperature` resource. A server-side
 ///   timer pushes Extended-mode notifications every second; the subscribe
