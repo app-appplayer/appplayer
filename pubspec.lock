@@ -44,11 +44,10 @@ packages:
   appplayer_core:
     dependency: "direct main"
     description:
-      name: appplayer_core
-      sha256: b6eccbfdd43074ed5b23e04d6c9ae22ce44c3c642ec6152270d72ae77e640db9
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.17"
+      path: "../../../core/appplayer/dart"
+      relative: true
+    source: path
+    version: "0.1.19"
   archive:
     dependency: transitive
     description:
@@ -278,19 +277,17 @@ packages:
   flutter_mcp_ui_core:
     dependency: "direct dev"
     description:
-      name: flutter_mcp_ui_core
-      sha256: "68b692a8820a070bf77ef9b49c6438d040aca183abfb0ea723a61763de90b22f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.3"
+      path: "../../../../packages/mcp_ui/1.3/flutter_mcp_ui_core"
+      relative: true
+    source: path
+    version: "0.5.0"
   flutter_mcp_ui_runtime:
     dependency: "direct dev"
     description:
-      name: flutter_mcp_ui_runtime
-      sha256: f784b9a19552acd129a9b4ffc4f6473d39938e3de3a0f45a897b42c106e7fe2b
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.3"
+      path: "../../../../packages/mcp_ui/1.3/flutter_mcp_ui_runtime"
+      relative: true
+    source: path
+    version: "0.6.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -529,10 +526,10 @@ packages:
     dependency: "direct main"
     description:
       name: mcp_bundle
-      sha256: "2ac3765a5f6001a9c686cf33797c1333ef537eb9a79a36c79187140048444afb"
+      sha256: d6377c786ae336543a0f07e504ef9455e7dbe46cdf5a3dc97a29d8090016673c
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.8"
+    version: "0.4.9"
   mcp_client:
     dependency: "direct main"
     description:
