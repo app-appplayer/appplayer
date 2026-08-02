@@ -6,7 +6,6 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:appplayer/entry/entry_controller.dart';
 import 'package:appplayer/entry/entry_link_service.dart';
-import 'package:appplayer_core/appplayer_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeLinks implements AppLinks {

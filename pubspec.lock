@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: appplayer_core
-      sha256: a964da524306f8525878d3dd7eaea458d442abd18b4da96c0af839a81448f072
+      sha256: b6eccbfdd43074ed5b23e04d6c9ae22ce44c3c642ec6152270d72ae77e640db9
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.15"
+    version: "0.1.17"
   archive:
     dependency: transitive
     description:
@@ -537,10 +537,10 @@ packages:
     dependency: "direct main"
     description:
       name: mcp_client
-      sha256: b5bcb0e7992f4733d9028d5221ec83f9f8cfaa36a638ba6af9aea679e78589a5
+      sha256: "76007a6a3d79f74ff9e83c16eaf524111abb75f733a0ca3870584e3dfa5b600a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   mcp_fact_graph:
     dependency: transitive
     description:
@@ -641,10 +641,10 @@ packages:
     dependency: "direct dev"
     description:
       name: mcp_server
-      sha256: "4c0e2a09882cd50f70e6cd500ea6669c4f7479b74fc85e248f24e70b70269f67"
+      sha256: c516d73e416c59f9771c73938d3d01db9880c091988bbb79f1abcb8c23c7d3e5
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   mcp_skill:
     dependency: transitive
     description:
