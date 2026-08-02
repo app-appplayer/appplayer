@@ -7,5 +7,5 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  mcp_server: ^2.0.0
-  mcp_bundle: ^0.3.0
+  mcp_server: ^2.2.3
+  mcp_bundle: ^0.4.9
