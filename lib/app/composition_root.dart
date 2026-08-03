@@ -142,6 +142,21 @@ class CompositionRoot {
       onMcpLogMessage: (serverId, params) {
         logBuffer.add(LogEntry.fromMcp(serverId: serverId, params: params));
       },
+      // The UI DSL runtime's own diagnostics → the same buffer as a third
+      // source. They used to reach `dart:developer` and stop there, so the
+      // only reader was whoever had DevTools open — and some of them are
+      // addressed to the person who wrote the document, who is looking at
+      // this app. The log screen already filters by source, so they arrive
+      // separable from AppPlayer's own and from the server's.
+      onRuntimeLog: (record) {
+        logBuffer.add(LogEntry.fromRuntime(
+          level: record.level,
+          logger: record.logger,
+          message: record.message,
+          error: record.error,
+          stackTrace: record.stackTrace,
+        ));
+      },
       // Debug MCP (desktop-only, settings-gated). The desktop gate is
       // enforced inside core, so pass the raw pref. Port 7931 keeps
       // Standard clear of Pro's 7930 when both run on one machine.
