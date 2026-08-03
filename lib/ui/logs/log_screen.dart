@@ -34,9 +34,16 @@ class _LogScreenState extends State<LogScreen> {
   bool _accepts(LogEntry entry) {
     if (entry.level.index < _minLevel.index) return false;
     if (_sourceFilter != null && entry.source != _sourceFilter) return false;
-    if (widget.scopeKey != null &&
-        entry.context[widget.scopeKey!] != widget.scopeValue) {
-      return false;
+    if (widget.scopeKey != null) {
+      final scoped = entry.context[widget.scopeKey!];
+      // An entry carrying no value for the scope key is not evidence that it
+      // belongs to some other scope — it is a diagnostic with no scope at all,
+      // and the runtime's are all of that kind. Dropping them here hid them
+      // from every scoped view, and the global one has no entry point in the
+      // app, so they were visible nowhere: konpi opened this screen looking
+      // for a runtime warning, found the source filter listing `runtime`, and
+      // zero entries under it.
+      if (scoped != null && scoped != widget.scopeValue) return false;
     }
     final query = _searchCtrl.text.trim().toLowerCase();
     if (query.isEmpty) return true;
