@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.1.19
+  appplayer_core: ^0.1.20
 
   provider: ^6.1.2
   go_router: ^14.6.2
@@ -55,8 +55,8 @@ dev_dependencies:
   # Test-only direct imports: the host-brightness and extension-transport tests
   # assert against runtime/core types that reach this app transitively through
   # appplayer_core. Declared so the dependency is stated rather than inherited.
-  flutter_mcp_ui_core: ^0.5.0
-  flutter_mcp_ui_runtime: ^0.6.0
+  flutter_mcp_ui_core: ^0.6.0
+  flutter_mcp_ui_runtime: ^0.7.0
   # Test-only: the widget screen matrix reads the spec's widget registry to
   # enumerate every declared widget and its examples, so the suite cannot
   # quietly cover less than the spec declares.
