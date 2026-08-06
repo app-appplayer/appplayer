@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  connectivity_plus
   flutter_js
   flutter_secure_storage_windows
   universal_ble

@@ -12,7 +12,11 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.1.20
+  appplayer_core: ^0.1.21
+
+  # Platform source for the network-regain signal the core binds
+  # (`bindOnlineChanges`) — no recipe needed: the edge logic is in the core.
+  connectivity_plus: ^7.3.1
 
   provider: ^6.1.2
   go_router: ^14.6.2

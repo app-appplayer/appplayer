@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:appplayer_core/appplayer_core.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../adapters/io_capability.dart';
 import 'package:dio/dio.dart';
@@ -163,6 +164,18 @@ class CompositionRoot {
       enableDebugMcp: settings.debugMcpEnabled,
       debugMcpPort: 7931,
     );
+
+    // Reachability signal (FR-HEALTH-010) — the network coming back is the
+    // moment a failed connection is worth dialling again, and it is the ONLY
+    // external signal a remote / cloud server has: nothing local ever "sights"
+    // an HTTPS endpoint the way a board is sighted. The core does the edge
+    // detection; the host only supplies its platform source.
+    core.bindOnlineChanges(
+      Connectivity().onConnectivityChanged.map(
+        (r) => r.any((c) => c != ConnectivityResult.none),
+      ),
+    );
+
 
     // Multi-origin composition (MCP UI DSL v1.4 Composition Profile): lets one
     // bundle render definitions served by several MCP servers. Claimed here for
