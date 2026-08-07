@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:appplayer_core/appplayer_core.dart';
+import 'package:flutter_mcp_ui_runtime/flutter_mcp_ui_runtime.dart'
+    show RuntimeCapabilities;
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../adapters/io_capability.dart';
@@ -10,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../adapters/console_logger.dart';
+import '../adapters/host_media/media_capabilities.dart';
 import '../adapters/http_bundle_fetcher.dart';
 import '../adapters/prefs_apps_registry.dart';
 import '../adapters/secure_credential_vault.dart';
@@ -136,6 +139,18 @@ class CompositionRoot {
       appMetadataSink: metadataSink,
       logger: logger,
       hostBrightness: hostBrightness,
+      // UI DSL §6.13 — what this tier can actually perform, from the vendored
+      // host_media copy. Declared from what is wired: a document asking for
+      // something absent gets `onError`, never a drawing of it working.
+      runtimeCapabilities: RuntimeCapabilities(
+        sound: JustAudioSoundPort(),
+        media: PlatformMediaPort(),
+        mediaSupportsVideo: true,
+        webViewBuilder: webViewSurface(),
+        lottieBuilder: lottieSurface(),
+        pdfBuilder: pdfSurface(),
+      ),
+
       settingsStore: settingsStore,
       // MCP `notifications/message` (logging spec) → in-app LogBuffer
       // as a LogSource.mcp entry. Core diagnostics are pushed

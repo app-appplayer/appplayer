@@ -47,6 +47,14 @@ class _AppPlayerAppState extends State<AppPlayerApp> {
     _observer =
         AppLifecycleObserver(widget.ctx.core, logger: widget.ctx.logger)
           ..attach();
+    // The debug host's `app.open` routes through this shell's router — a
+    // harness reaches an installed bundle without registering it in the user's
+    // app list, which would change the thing it is measuring.
+    widget.ctx.core.debugOpenBundle = (bundleId) async {
+      final router = _router;
+      router.push('/app/$bundleId');
+      return true;
+    };
     _router = AppRouter.build(
       settings: widget.ctx.settings,
       entryRecoveryOffer: _offerEntryRecovery,

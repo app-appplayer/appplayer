@@ -72,7 +72,8 @@ class AppRendererScreenState extends State<AppRendererScreen> {
     }
     final core = context.read<AppPlayerCoreService>();
     try {
-      final app = await _loadAppConfig(widget.serverId);
+      final app = await _loadAppConfig(widget.serverId) ??
+          await _installedBundleAsApp(core, widget.serverId);
       final trust = toRuntimeTrustLevel(app?.trustLevel ?? AppTrustLevel.basic);
       final AppSession session;
       if (app?.type == AppType.bundle) {
@@ -117,6 +118,33 @@ class AppRendererScreenState extends State<AppRendererScreen> {
       entry: widget.entry,
       launchRoute: widget.launchRoute,
     );
+  }
+
+  /// An installed bundle nobody registered, as a config this screen can open.
+  ///
+  /// Registration decides what the launcher SHOWS, not what can be run — a
+  /// harness opens a bundle without adding it to the user's app list, and the
+  /// App Manager hands one over before its tile exists.
+  Future<AppConfig?> _installedBundleAsApp(
+    AppPlayerCoreService core,
+    String bundleId,
+  ) async {
+    try {
+      final installed = await core.listInstalledBundles();
+      final match = installed.where((b) => b.id == bundleId);
+      if (match.isEmpty) return null;
+      return AppConfig(
+        id: bundleId,
+        name: bundleId,
+        type: AppType.bundle,
+        bundleId: bundleId,
+        bundleVersion: match.first.version,
+      );
+    } catch (_) {
+      // A host that cannot list installs is not a reason to report a different
+      // failure than the one this screen already reports for an unknown app.
+      return null;
+    }
   }
 
   Future<AppConfig?> _loadAppConfig(String appId) async {

@@ -1,7 +1,7 @@
 name: appplayer
 description: "AppPlayer (Standard) — reference product assembling AppPlayer Core with App Mode, Dashboard Mode, and bundle execution."
 publish_to: 'none'
-version: 0.1.4
+version: 0.1.5
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -12,7 +12,18 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.1.21
+  appplayer_core: ^0.1.23
+
+  # UI DSL runtime capability types (§6.13) + the platform powers behind
+  # them. Vendored rather than path-consumed (lib/adapters/host_media/):
+  # this tier ships from a public repository and a path dep reaching
+  # outside it would not resolve for whoever checks that repo out.
+  flutter_mcp_ui_runtime: ^0.7.2
+  just_audio: ^0.10.6
+  video_player: ^2.13.0
+  webview_flutter: ^4.14.1
+  lottie: ^3.3.0
+  pdfrx: ^1.0.0
 
   # Platform source for the network-regain signal the core binds
   # (`bindOnlineChanges`) — no recipe needed: the edge logic is in the core.
@@ -59,8 +70,8 @@ dev_dependencies:
   # Test-only direct imports: the host-brightness and extension-transport tests
   # assert against runtime/core types that reach this app transitively through
   # appplayer_core. Declared so the dependency is stated rather than inherited.
-  flutter_mcp_ui_core: ^0.6.0
-  flutter_mcp_ui_runtime: ^0.7.0
+  flutter_mcp_ui_core: ^0.6.1
+  flutter_mcp_ui_runtime: ^0.7.2
   # Test-only: the widget screen matrix reads the spec's widget registry to
   # enumerate every declared widget and its examples, so the suite cannot
   # quietly cover less than the spec declares.
