@@ -12,13 +12,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.1.24
+  appplayer_core: ^0.1.25
 
   # UI DSL runtime capability types (§6.13) + the platform powers behind
   # them. Vendored rather than path-consumed (lib/adapters/host_media/):
   # this tier ships from a public repository and a path dep reaching
   # outside it would not resolve for whoever checks that repo out.
-  flutter_mcp_ui_runtime: ^0.7.3
+  flutter_mcp_ui_runtime: ^0.7.4
   just_audio: ^0.10.6
   video_player: ^2.13.0
   webview_flutter: ^4.14.1
@@ -74,7 +74,7 @@ dev_dependencies:
   # dependency above, and declaring it twice is the same package with two
   # constraints to keep in step — the analyzer flags it, and the day they
   # drift the tests resolve a different runtime than the app does.
-  flutter_mcp_ui_core: ^0.6.2
+  flutter_mcp_ui_core: ^0.6.3
   # Test-only: the widget screen matrix reads the spec's widget registry to
   # enumerate every declared widget and its examples, so the suite cannot
   # quietly cover less than the spec declares.
