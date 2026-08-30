@@ -9,7 +9,8 @@ class _Resolver implements EntryResolverPort {
   _Resolver(this.answer);
   EntryTarget answer;
   @override
-  Future<EntryTarget> resolve(String code, {required String locale}) async =>
+  Future<EntryTarget> resolve(String code,
+          {required String host, required String locale}) async =>
       answer;
 }
 

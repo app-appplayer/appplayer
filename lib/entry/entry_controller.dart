@@ -81,7 +81,13 @@ class EntryController {
       return EntryNotForUs(link.rejection!);
     }
 
-    final decision = await _pipeline.decide(link.code!, locale: locale);
+    // The host the code arrived on travels with it: which registry answers is
+    // not a build-wide setting when a build claims more than one issuer.
+    final decision = await _pipeline.decide(
+      link.code!,
+      host: link.host!,
+      locale: locale,
+    );
     if (!decision.canOpen) {
       return EntryBlocked(
         target: decision.target,

@@ -23,7 +23,6 @@ class _FakeLinks implements AppLinks {
 }
 
 EntryController _controller({required String body}) => buildEntryController(
-      resolverEndpoint: Uri.parse('https://demo.appplayer.app/api/e'),
       fetch: (url, {headers = const <String, String>{}}) async => body,
     );
 
@@ -76,8 +75,7 @@ void main() {
     final outcomes = <EntryOutcome>[];
     final service = EntryLinkService(
       controller: buildEntryController(
-        resolverEndpoint: Uri.parse('https://demo.appplayer.app/api/e'),
-        fetch: (url, {headers = const <String, String>{}}) async =>
+          fetch: (url, {headers = const <String, String>{}}) async =>
             throw StateError('offline'),
       ),
       locale: () => 'en',

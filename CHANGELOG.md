@@ -1,3 +1,58 @@
+## 0.1.6 — 2026-08-27 — a code is resolved by the registry it came from
+
+**The resolver address follows the link's host.** `buildEntryController` took a
+single resolver endpoint beside a **set** of claimed hosts, and that asymmetry
+is the shape that sends one issuer's code to another issuer's registry — the
+day a second host is claimed it goes quietly to the first, and a wrong answer
+there decides what the viewer is shown.
+
+Platform spec 19 §2 puts the resolver on the entry host domain, so the host a
+code arrived on *is* which registry answers. The address is now derived per
+call — `https://<host>/api/e/<code>` — and `buildEntryController(resolverPath:)`
+replaces `resolverEndpoint:`. One path for every issuer, because a host reads
+all its claimed domains with one controller.
+
+Nothing changes for this build's own demo host: a `demo.appplayer.app` link
+still resolves against `https://demo.appplayer.app/api/e`.
+
+Floors: `appplayer_core ^0.1.25 → ^0.1.27` — the port signature carrying the
+host lives there — and `flutter_mcp_ui_runtime ^0.7.4 → ^0.7.7`,
+`flutter_mcp_ui_core ^0.6.3 → ^0.6.5`, raised to the versions released
+alongside this build rather than the ones the floors happened to name.
+
+**The demo bundle builder wrote a name the rest of the tree disagreed with.**
+`example/tool/build_demo_showcase_bundle.dart` emitted `위젯 갤러리` into
+`ui/app/info.json` — the name the launcher reads — while the shipped bundle,
+its manifest and the demo server all say `UI Showcase`. Running the tool
+reverted the name and failed the integration tests that pin it. The tool now
+writes `UI Showcase`.
+
+## 0.1.5 — 2026-08-08 — the platform powers behind the declared behaviours
+
+Recorded after the fact: 0.1.5 was cut and pushed on 2026-08-08 and this entry
+was not written at the time. The content below is read from the commits, not
+reconstructed from intent.
+
+**Host media capabilities** (UI DSL §6.13). Sound, media playback, a web
+engine, PDF and vector animation arrive as host-supplied implementations
+(`lib/adapters/host_media/`). The runtime owns the widget, the transport UI,
+the asset reference and the error routing; what it cannot do is decode audio or
+run a browser, so those are handed in — the shape asset resolution already
+used. A tier that wires fewer of them still renders documents, and every widget
+it cannot serve reports the absence rather than drawing a facsimile.
+
+New dependencies for those powers: `just_audio`, `video_player`,
+`webview_flutter`, `lottie`, `pdfrx`. Registered on Windows as well as the
+other boards.
+
+The recipe is vendored, and `test/adapters/vendored_host_media_in_sync_test.dart`
+holds the copy to its source — a vendored file that drifts is a fix applied in
+one place and absent in the other.
+
+**Dependency floors moved to what was published**: `appplayer_core ^0.1.20 →
+^0.1.25`, `flutter_mcp_ui_core ^0.6.0 → ^0.6.3`, `flutter_mcp_ui_runtime
+^0.7.0 → ^0.7.4`, plus `connectivity_plus`.
+
 ## 0.1.4 — 2026-07-29 — entry links (platform spec 19)
 
 Standard becomes the **concept entry host**: a scanned or tapped link on the demo domain opens a served app on the page the medium asked for.

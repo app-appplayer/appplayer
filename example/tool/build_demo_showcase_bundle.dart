@@ -79,7 +79,7 @@ Future<void> main() async {
   await appInfoDir.create(recursive: true);
   final appInfo = <String, dynamic>{
     'id': 'com.makemind.examples.demo_showcase',
-    'name': '위젯 갤러리',
+    'name': 'UI Showcase',
     'version': (appJson['version'] as String?) ?? '1.0.0',
     'description':
         'MCP UI DSL widget showcase — the same content served by '

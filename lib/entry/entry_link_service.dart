@@ -21,13 +21,17 @@ import 'entry_controller.dart';
 /// is claimable by exactly one application.
 const String kDemoEntryHost = 'demo.appplayer.app';
 
-/// Where codes are dereferenced. Same host by default — an issuer that runs
-/// its own resolver points this elsewhere.
-final Uri kDemoEntryResolver = Uri.parse('https://$kDemoEntryHost/api/e');
+/// Where codes are dereferenced.
+///
+/// Not a fixed address any more: the resolver operates the entry host domain
+/// (spec 19 §2), so the address follows the link. This is the path space it
+/// is served on, and it is the same for every issuer — a host reads every
+/// claimed domain with one controller.
+const String kEntryResolverPath = HttpEntryResolver.defaultResolverPath;
 
 /// Builds the controller Standard runs with.
 EntryController buildEntryController({
-  Uri? resolverEndpoint,
+  String resolverPath = kEntryResolverPath,
   Set<String>? claimedHosts,
   Logger? logger,
   EntryFetch? fetch,
@@ -35,7 +39,7 @@ EntryController buildEntryController({
   return EntryController(
     pipeline: EntryPipeline(
       resolver: HttpEntryResolver(
-        endpoint: resolverEndpoint ?? kDemoEntryResolver,
+        path: resolverPath,
         fetch: fetch ?? _httpFetch,
         logger: logger,
       ),
