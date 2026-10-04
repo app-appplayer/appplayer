@@ -127,7 +127,9 @@ class _AppFormScreenState extends State<AppFormScreen> {
       if (!mounted) return;
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.get('form.load.fail').replaceAll(r'${error}', '$e'))),
+        SnackBar(
+            content:
+                Text(S.get('form.load.fail').replaceAll(r'${error}', '$e'))),
       );
     }
   }
@@ -215,9 +217,8 @@ class _AppFormScreenState extends State<AppFormScreen> {
     final logger = context.read<ConsoleLogger>();
     final pickedPath = _bundleFromFile ? _bundleFilePath : null;
     final pickedUrl = _bundleFromFile ? null : _bundleUrlCtrl.text.trim();
-    final hasNewSource =
-        (pickedPath != null && pickedPath.isNotEmpty) ||
-            (pickedUrl != null && pickedUrl.isNotEmpty);
+    final hasNewSource = (pickedPath != null && pickedPath.isNotEmpty) ||
+        (pickedUrl != null && pickedUrl.isNotEmpty);
 
     if (!hasNewSource) {
       if (_installedBundleId != null) {
@@ -257,7 +258,8 @@ class _AppFormScreenState extends State<AppFormScreen> {
 
   void _showError(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   // ── Manifest confirm dialog ────────────────────────────────────────────────
@@ -271,8 +273,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
           _bundleFromFile
               ? S.get('form.bundle.confirm.file').replaceAll(
                     r'${path}',
-                    _bundleFilePath ??
-                        S.get('form.bundle.confirm.file.empty'),
+                    _bundleFilePath ?? S.get('form.bundle.confirm.file.empty'),
                   )
               : S.get('form.bundle.confirm.url').replaceAll(
                     r'${url}',
@@ -350,9 +351,8 @@ class _AppFormScreenState extends State<AppFormScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(S
-                .get('form.save.fail')
-                .replaceAll(r'${error}', '$e'))),
+            content:
+                Text(S.get('form.save.fail').replaceAll(r'${error}', '$e'))),
       );
     }
   }
@@ -396,9 +396,8 @@ class _AppFormScreenState extends State<AppFormScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(S
-                .get('form.delete.fail')
-                .replaceAll(r'${error}', '$e'))),
+            content:
+                Text(S.get('form.delete.fail').replaceAll(r'${error}', '$e'))),
       );
     }
   }
@@ -480,6 +479,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
         return AppConfig(
           id: id,
           name: typed.isEmpty ? _serverNameHint() : typed,
+          nameFromSource: typed.isEmpty,
           type: AppType.server,
           serverConfigId: id, // 1-to-1 mapping: appId == serverConfigId
           trustLevel: _trustLevel,
@@ -499,6 +499,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
         return AppConfig(
           id: bundleId,
           name: typed.isEmpty ? bundleId : typed,
+          nameFromSource: typed.isEmpty,
           type: AppType.bundle,
           bundleId: bundleId,
           bundleVersion: _installedBundleVersion,
@@ -595,84 +596,84 @@ class _AppFormScreenState extends State<AppFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-            // App type selector — only meaningful when creating a new
-            // entry. On edit the type is immutable, so the segment row
-            // is hidden to keep the form focused on editable fields.
-            if (widget.mode == AppFormMode.create) ...<Widget>[
-              SegmentedButton<AppType>(
-                key: const Key('app_form.type'),
-                segments: <ButtonSegment<AppType>>[
-                  ButtonSegment(
-                    value: AppType.server,
-                    label: Text(S.get('form.server')),
-                    icon: const Icon(Icons.dns),
+                // App type selector — only meaningful when creating a new
+                // entry. On edit the type is immutable, so the segment row
+                // is hidden to keep the form focused on editable fields.
+                if (widget.mode == AppFormMode.create) ...<Widget>[
+                  SegmentedButton<AppType>(
+                    key: const Key('app_form.type'),
+                    segments: <ButtonSegment<AppType>>[
+                      ButtonSegment(
+                        value: AppType.server,
+                        label: Text(S.get('form.server')),
+                        icon: const Icon(Icons.dns),
+                      ),
+                      ButtonSegment(
+                        value: AppType.bundle,
+                        label: Text(S.get('form.bundle')),
+                        icon: const Icon(Icons.folder_zip),
+                      ),
+                      ButtonSegment(
+                        value: AppType.dashboard,
+                        label: Text(S.get('form.dashboard')),
+                        icon: const Icon(Icons.dashboard),
+                      ),
+                    ],
+                    selected: <AppType>{_selectedType},
+                    onSelectionChanged: (s) =>
+                        setState(() => _selectedType = s.first),
                   ),
-                  ButtonSegment(
-                    value: AppType.bundle,
-                    label: Text(S.get('form.bundle')),
-                    icon: const Icon(Icons.folder_zip),
-                  ),
-                  ButtonSegment(
-                    value: AppType.dashboard,
-                    label: Text(S.get('form.dashboard')),
-                    icon: const Icon(Icons.dashboard),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+
+                // ── Type-specific fields ─────────────────────────────────────────
+                if (_selectedType == AppType.server) _buildServerFields(),
+                if (_selectedType == AppType.bundle) _buildBundleFields(),
+                if (_selectedType == AppType.dashboard) _buildDashboardFields(),
+
+                // ── Trust level ──────────────────────────────────────────────────
+                const SizedBox(height: AppSpacing.lg),
+                _buildTrustLevelSelector(),
+
+                // ── Connection controls (edit mode, server type) ────────────────
+                if (widget.mode == AppFormMode.edit &&
+                    _selectedType == AppType.server) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  const Divider(),
+                  const SizedBox(height: AppSpacing.sm),
+                  OutlinedButton.icon(
+                    key: const Key('app_form.disconnect'),
+                    icon: const Icon(Icons.power_settings_new, size: 16),
+                    label: Text(S.get('form.disconnect')),
+                    onPressed: () async {
+                      final core = context.read<AppPlayerCoreService>();
+                      try {
+                        await core.closeApp(AppHandle.server(widget.appId!));
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(S.get('form.disconnected'))),
+                        );
+                      } catch (e) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(S
+                                  .get('form.disconnect.fail')
+                                  .replaceAll(r'${error}', '$e'))),
+                        );
+                      }
+                    },
                   ),
                 ],
-                selected: <AppType>{_selectedType},
-                onSelectionChanged: (s) =>
-                    setState(() => _selectedType = s.first),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-            ],
 
-            // ── Type-specific fields ─────────────────────────────────────────
-            if (_selectedType == AppType.server) _buildServerFields(),
-            if (_selectedType == AppType.bundle) _buildBundleFields(),
-            if (_selectedType == AppType.dashboard) _buildDashboardFields(),
+                const SizedBox(height: AppSpacing.xl),
 
-            // ── Trust level ──────────────────────────────────────────────────
-            const SizedBox(height: AppSpacing.lg),
-            _buildTrustLevelSelector(),
-
-            // ── Connection controls (edit mode, server type) ────────────────
-            if (widget.mode == AppFormMode.edit &&
-                _selectedType == AppType.server) ...[
-              const SizedBox(height: AppSpacing.lg),
-              const Divider(),
-              const SizedBox(height: AppSpacing.sm),
-              OutlinedButton.icon(
-                key: const Key('app_form.disconnect'),
-                icon: const Icon(Icons.power_settings_new, size: 16),
-                label: Text(S.get('form.disconnect')),
-                onPressed: () async {
-                  final core = context.read<AppPlayerCoreService>();
-                  try {
-                    await core.closeApp(AppHandle.server(widget.appId!));
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(S.get('form.disconnected'))),
-                    );
-                  } catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text(S
-                              .get('form.disconnect.fail')
-                              .replaceAll(r'${error}', '$e'))),
-                    );
-                  }
-                },
-              ),
-            ],
-
-            const SizedBox(height: AppSpacing.xl),
-
-            // ── Save button ──────────────────────────────────────────────────
-            FilledButton(
-              key: const Key('app_form.save'),
-              onPressed: _save,
-              child: Text(S.get('form.save')),
-            ),
+                // ── Save button ──────────────────────────────────────────────────
+                FilledButton(
+                  key: const Key('app_form.save'),
+                  onPressed: _save,
+                  child: Text(S.get('form.save')),
+                ),
               ],
             ),
           ),
@@ -817,8 +818,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
             ButtonSegment(value: false, label: Text(S.get('form.bundle.url'))),
           ],
           selected: <bool>{_bundleFromFile},
-          onSelectionChanged: (s) =>
-              setState(() => _bundleFromFile = s.first),
+          onSelectionChanged: (s) => setState(() => _bundleFromFile = s.first),
         ),
         const SizedBox(height: AppSpacing.md),
         if (_bundleFromFile) ...<Widget>[
@@ -933,8 +933,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
                   IconButton(
                     icon: const Icon(Icons.remove_circle_outline),
                     tooltip: S.get('form.dash.connection.remove'),
-                    onPressed: () =>
-                        setState(() => _connectionIds.remove(id)),
+                    onPressed: () => setState(() => _connectionIds.remove(id)),
                   ),
                 ],
               ),
@@ -1002,8 +1001,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
   /// launcher entries that reference the same serverId.
   Future<void> _editConnection(ServerConfig server) async {
     final core = context.read<AppPlayerCoreService>();
-    final updated =
-        await ServerConfigDialog.show(context, initial: server);
+    final updated = await ServerConfigDialog.show(context, initial: server);
     if (updated == null) return;
     await core.saveServer(updated);
     if (!mounted) return;
@@ -1045,19 +1043,23 @@ class _AppFormScreenState extends State<AppFormScreen> {
           items: <DropdownMenuItem<AppTrustLevel>>[
             DropdownMenuItem(
               value: AppTrustLevel.untrusted,
-              child: Text(S.get('form.trust.untrusted'), overflow: TextOverflow.ellipsis),
+              child: Text(S.get('form.trust.untrusted'),
+                  overflow: TextOverflow.ellipsis),
             ),
             DropdownMenuItem(
               value: AppTrustLevel.basic,
-              child: Text(S.get('form.trust.basic'), overflow: TextOverflow.ellipsis),
+              child: Text(S.get('form.trust.basic'),
+                  overflow: TextOverflow.ellipsis),
             ),
             DropdownMenuItem(
               value: AppTrustLevel.elevated,
-              child: Text(S.get('form.trust.elevated'), overflow: TextOverflow.ellipsis),
+              child: Text(S.get('form.trust.elevated'),
+                  overflow: TextOverflow.ellipsis),
             ),
             DropdownMenuItem(
               value: AppTrustLevel.full,
-              child: Text(S.get('form.trust.full'), overflow: TextOverflow.ellipsis),
+              child: Text(S.get('form.trust.full'),
+                  overflow: TextOverflow.ellipsis),
             ),
           ],
           onChanged: (v) {
@@ -1083,8 +1085,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
           ),
           items: <DropdownMenuItem<ViewMode>>[
             DropdownMenuItem(
-                value: ViewMode.auto,
-                child: Text(S.get('form.viewmode.auto'))),
+                value: ViewMode.auto, child: Text(S.get('form.viewmode.auto'))),
             DropdownMenuItem(
                 value: ViewMode.compact,
                 child: Text(S.get('form.viewmode.compact'))),

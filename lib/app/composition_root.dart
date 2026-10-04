@@ -20,6 +20,7 @@ import '../adapters/shared_prefs_server_storage.dart';
 import '../adapters/shared_prefs_settings_store.dart';
 import '../models/app_config.dart';
 import '../models/apps_list_notifier.dart';
+import 'app_metadata_merge.dart';
 import 'app_settings.dart';
 import 'host_brightness.dart';
 
@@ -98,29 +99,7 @@ class CompositionRoot {
     // without bespoke shell wiring.
     final metadataSink = RegistryMetadataSink<AppConfig>(
       registry: appsRegistry,
-      merge: (existing, m) => existing.copyWith(
-        // Metadata-supplied name wins over the id-as-name fallback
-        // assigned at registration time. Empty `m.name` (server omitted
-        // ui://app/info) falls back to the existing AppConfig.name so
-        // user edits still survive a metadata refresh.
-        name: m.name.trim().isNotEmpty ? m.name.trim() : null,
-        iconUrl: m.iconUri,
-        metadataJson: <String, dynamic>{
-          'appId': m.appId,
-          'sourceKind': m.sourceKind,
-          'name': m.name,
-          'version': m.version,
-          if (m.description != null) 'description': m.description,
-          if (m.iconUri != null) 'iconUri': m.iconUri,
-          if (m.splashUri != null) 'splashUri': m.splashUri,
-          if (m.screenshots.isNotEmpty) 'screenshots': m.screenshots,
-          if (m.category != null) 'category': m.category,
-          if (m.publisher != null) 'publisher': m.publisher,
-          if (m.homepage != null) 'homepage': m.homepage,
-          if (m.privacyPolicy != null) 'privacyPolicy': m.privacyPolicy,
-          if (m.extra.isNotEmpty) 'extra': m.extra,
-        },
-      ),
+      merge: mergeAppMetadata,
     );
 
     // Persist user-customized values of the bundle's
@@ -134,6 +113,13 @@ class CompositionRoot {
     await core.initialize(
       storage: storage,
       bundleInstallRoot: bundleInstallRoot,
+      // The kernel's durable key-value store — the js `kb` atom's records live
+      // here too — beside the installed bundles rather than inside them, so
+      // reinstalling a bundle keeps its state.
+      kvStorage: KvStoragePortAdapter(
+        rootDir: '${Directory(bundleInstallRoot).parent.path}'
+            '${Platform.pathSeparator}kv',
+      ),
       credentialVault: vault,
       bundleFetcher: fetcher,
       appMetadataSink: metadataSink,
@@ -187,10 +173,9 @@ class CompositionRoot {
     // detection; the host only supplies its platform source.
     core.bindOnlineChanges(
       Connectivity().onConnectivityChanged.map(
-        (r) => r.any((c) => c != ConnectivityResult.none),
-      ),
+            (r) => r.any((c) => c != ConnectivityResult.none),
+          ),
     );
-
 
     // Multi-origin composition (MCP UI DSL v1.4 Composition Profile): lets one
     // bundle render definitions served by several MCP servers. Claimed here for

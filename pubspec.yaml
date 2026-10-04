@@ -12,13 +12,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.1.27
+  appplayer_core: ^0.2.3
 
   # UI DSL runtime capability types (§6.13) + the platform powers behind
   # them. Vendored rather than path-consumed (lib/adapters/host_media/):
   # this tier ships from a public repository and a path dep reaching
   # outside it would not resolve for whoever checks that repo out.
-  flutter_mcp_ui_runtime: ^0.7.7
+  flutter_mcp_ui_runtime: ^0.8.4
   just_audio: ^0.10.6
   video_player: ^2.13.0
   webview_flutter: ^4.14.1
@@ -32,7 +32,8 @@ dependencies:
   provider: ^6.1.2
   go_router: ^14.6.2
   app_links: ^6.3.2
-  mobile_scanner: ^5.2.3
+  url_launcher: ^6.3.1
+  mobile_scanner: ^7.4.1
   android_play_install_referrer: ^0.4.0
   http: ^1.2.2
   shared_preferences: ^2.3.5
@@ -63,7 +64,7 @@ dependencies:
   # appplayer_core; it is direct here because the BLE entry API
   # (lib/adapters/ble_extension.dart) names KernelClientConnection.
   mcp_client: ^2.1.0
-  brain_kernel: ^0.2.0
+  brain_kernel: ^0.2.2
   universal_ble: ^2.1.0
 
 dev_dependencies:
@@ -74,7 +75,7 @@ dev_dependencies:
   # dependency above, and declaring it twice is the same package with two
   # constraints to keep in step — the analyzer flags it, and the day they
   # drift the tests resolve a different runtime than the app does.
-  flutter_mcp_ui_core: ^0.6.5
+  flutter_mcp_ui_core: ^0.6.9
   # Test-only: the widget screen matrix reads the spec's widget registry to
   # enumerate every declared widget and its examples, so the suite cannot
   # quietly cover less than the spec declares.
@@ -92,3 +93,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    # Notices for native code Flutter does not collect — generated, see
+    # appplayer_core tool/licenses (FR-LIC).
+    - path: assets/licenses/android.json
+      platforms: [android]
+    - path: assets/licenses/apple.json
+      platforms: [ios, macos]

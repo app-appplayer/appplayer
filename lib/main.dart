@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:appplayer_core/appplayer_core.dart' show OpenSourceLicenses;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'app/app_player_app.dart';
@@ -12,6 +14,15 @@ import 'l10n/app_strings.dart';
 Future<void> main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Notices for what is compiled into native libraries — Flutter collects
+    // the Dart packages by itself, not these (appplayer_core FR-LIC-003).
+    if (!kIsWeb && (Platform.isIOS || Platform.isMacOS)) {
+      OpenSourceLicenses.registerBundled('assets/licenses/apple.json');
+    }
+    if (!kIsWeb && Platform.isAndroid) {
+      OpenSourceLicenses.registerBundled('assets/licenses/android.json');
+    }
 
     // Route every framework and async error to stderr so `flutter run`
     // and monitoring harnesses capture the exact stack.

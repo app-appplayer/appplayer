@@ -45,9 +45,8 @@ void main() {
   const link = 'https://demo.appplayer.app/e/ABC123';
 
   test('a claimed link resolves and opens', () async {
-    final outcome =
-        await controllerFor(_ok(route: '/contact')).handle(Uri.parse(link),
-            locale: locale);
+    final outcome = await controllerFor(_ok(route: '/contact'))
+        .handle(Uri.parse(link), locale: locale);
     expect(outcome, isA<EntryOpen>());
     final open = outcome as EntryOpen;
     expect(open.target.kind, EntryTargetKind.server);
@@ -70,8 +69,8 @@ void main() {
     final outcome = await controllerFor(_ok())
         .handle(Uri.parse('https://elsewhere.test/e/ABC'), locale: locale);
     expect(outcome, isA<EntryNotForUs>());
-    expect((outcome as EntryNotForUs).rejection,
-        EntryLinkRejection.unclaimedHost);
+    expect(
+        (outcome as EntryNotForUs).rejection, EntryLinkRejection.unclaimedHost);
   });
 
   test('a guest entry at an account wall is blocked with the issuer intact',
@@ -99,9 +98,8 @@ void main() {
   });
 
   test('a local node entry opens — a sticker needs no account', () async {
-    final outcome =
-        await controllerFor(_ok(kind: EntryTargetKind.localServer))
-            .handle(Uri.parse(link), locale: locale);
+    final outcome = await controllerFor(_ok(kind: EntryTargetKind.localServer))
+        .handle(Uri.parse(link), locale: locale);
     expect(outcome, isA<EntryOpen>());
   });
 

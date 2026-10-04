@@ -1,3 +1,16 @@
+## [Unreleased]
+
+- **Quitting ends the servers it started.** A local (stdio) server is the
+  player's child process; quitting from the menu or being told to end
+  (`SIGTERM`) now closes it first. Left open it outlived the player and kept
+  running — on macOS, the "running in the background" notice.
+- **A name you give an app stays.** The name an app announces replaces only a
+  name filled in automatically (a transport hint, an id). The same server
+  registered twice with different settings stays two tiles you can tell apart.
+- **Application id is `app.appplayer`** on Android, iOS, macOS and Linux — the
+  reverse of the product's own domain `appplayer.app`. It was
+  `com.makemind.appplayer` / `com.makemind.appPlayer`.
+
 ## 0.1.6 — 2026-08-27 — a code is resolved by the registry it came from
 
 **The resolver address follows the link's host.** `buildEntryController` took a

@@ -44,11 +44,10 @@ packages:
   appplayer_core:
     dependency: "direct main"
     description:
-      name: appplayer_core
-      sha256: fff90054dea0fb141627d00e6d183e08fa5d528667fe34068972be4232ce12e9
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.27"
+      path: "/Users/jsha/Desktop/Works/workspace/makemind/os/core/appplayer/dart"
+      relative: false
+    source: path
+    version: "0.2.3"
   archive:
     dependency: transitive
     description:
@@ -100,11 +99,10 @@ packages:
   brain_kernel:
     dependency: "direct main"
     description:
-      name: brain_kernel
-      sha256: "79613c9b04ead514648cec3cb545009840c4b8880a781230622308d7663caf59"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1"
+      path: "/Users/jsha/Desktop/Works/workspace/makemind/os/core/brain_kernel/dart"
+      relative: false
+    source: path
+    version: "0.2.2"
   characters:
     dependency: transitive
     description:
@@ -319,18 +317,18 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_mcp_ui_core
-      sha256: ad3ebc64fe9c7d63154844fff7be2323a7bf0507abb2693f146d89e4f3731d8e
+      sha256: "4689c9bc398ccb2f31fb3018c2e587e1f74150d204250b2f16b0018f9b788f38"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.5"
+    version: "0.6.10"
   flutter_mcp_ui_runtime:
     dependency: "direct main"
     description:
       name: flutter_mcp_ui_runtime
-      sha256: f9fb6afa7bacbf5dd78b7d6c3979da5dfc0173cd00be697cb64df181095fa4b7
+      sha256: "42671044058c6e65471b7eeccdfdfb4a0c1e814b0a55b9751b64df252ee92341"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.7"
+    version: "0.8.4"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -625,17 +623,16 @@ packages:
     dependency: "direct main"
     description:
       name: mcp_bundle
-      sha256: d6377c786ae336543a0f07e504ef9455e7dbe46cdf5a3dc97a29d8090016673c
+      sha256: b0d8a4e089511ca23f262f35af2440ed2fed13d0e7b6c47c96a757eba6e78da3
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.9"
+    version: "0.4.10"
   mcp_client:
     dependency: "direct main"
     description:
-      name: mcp_client
-      sha256: "29fd5e5592016d141b481b2ada0459332058e263b3c44aba8a7819983e4f8eea"
-      url: "https://pub.dev"
-    source: hosted
+      path: "/Users/jsha/Desktop/Works/workspace/makemind/packages/mcp_client/dart"
+      relative: false
+    source: path
     version: "2.2.1"
   mcp_fact_graph:
     dependency: transitive
@@ -769,10 +766,10 @@ packages:
     dependency: "direct main"
     description:
       name: mobile_scanner
-      sha256: d234581c090526676fd8fab4ada92f35c6746e3fb4f05a399665d75a399fb760
+      sha256: "6b943ee30e7d9fa6bcab4238b6428e8df223be3731b9b75446fe8781dbd2286f"
       url: "https://pub.dev"
     source: hosted
-    version: "5.2.3"
+    version: "7.4.1"
   mocktail:
     dependency: "direct dev"
     description:
@@ -1123,7 +1120,7 @@ packages:
     source: hosted
     version: "1.0.0"
   url_launcher:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher
       sha256: f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8

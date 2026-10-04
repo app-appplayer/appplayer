@@ -34,6 +34,7 @@ class AppConfig implements HasAppHandle {
     required this.id,
     required this.name,
     required this.type,
+    this.nameFromSource = false,
     this.iconUrl,
     this.metadataJson,
     this.serverConfigId,
@@ -49,6 +50,16 @@ class AppConfig implements HasAppHandle {
   @override
   final String id;
   final String name;
+
+  /// The name was filled in automatically (a transport hint, an address, an
+  /// id) rather than given — so the name the app announces may replace it. A
+  /// given name stays: the same bundle registered twice with different
+  /// settings must stay two tiles that can be told apart.
+  final bool nameFromSource;
+
+  /// Whether the announced name may replace [name]. An entry from before the
+  /// mark counts as automatic only when its name is its id.
+  bool get nameIsAutomatic => nameFromSource || name == id;
   final AppType type;
 
   @override
@@ -102,6 +113,7 @@ class AppConfig implements HasAppHandle {
     return AppConfig(
       id: json['id'] as String,
       name: json['name'] as String,
+      nameFromSource: json['nameFromSource'] == true,
       type: AppType.values.firstWhere((e) => e.name == json['type']),
       iconUrl: json['iconUrl'] as String?,
       metadataJson: json['metadataJson'] is Map<String, dynamic>
@@ -111,8 +123,7 @@ class AppConfig implements HasAppHandle {
       bundleId: json['bundleId'] as String?,
       bundleVersion: json['bundleVersion'] as String?,
       dashboardConnectionIds:
-          (json['dashboardConnectionIds'] as List<dynamic>?)
-                  ?.cast<String>() ??
+          (json['dashboardConnectionIds'] as List<dynamic>?)?.cast<String>() ??
               const <String>[],
       dashboardLayout: DashboardLayout.values.firstWhere(
         (e) => e.name == json['dashboardLayout'],
@@ -133,6 +144,7 @@ class AppConfig implements HasAppHandle {
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
         'name': name,
+        if (nameFromSource) 'nameFromSource': true,
         'type': type.name,
         if (iconUrl != null) 'iconUrl': iconUrl,
         if (metadataJson != null) 'metadataJson': metadataJson,
@@ -150,6 +162,7 @@ class AppConfig implements HasAppHandle {
   AppConfig copyWith({
     String? id,
     String? name,
+    bool? nameFromSource,
     AppType? type,
     String? iconUrl,
     Map<String, dynamic>? metadataJson,
@@ -165,6 +178,7 @@ class AppConfig implements HasAppHandle {
     return AppConfig(
       id: id ?? this.id,
       name: name ?? this.name,
+      nameFromSource: nameFromSource ?? this.nameFromSource,
       type: type ?? this.type,
       iconUrl: iconUrl ?? this.iconUrl,
       metadataJson: metadataJson ?? this.metadataJson,
@@ -184,10 +198,7 @@ class AppConfig implements HasAppHandle {
   static List<AppConfig> decodeList(String? raw) {
     if (raw == null || raw.isEmpty) return <AppConfig>[];
     final list = jsonDecode(raw) as List<dynamic>;
-    return list
-        .cast<Map<String, dynamic>>()
-        .map(AppConfig.fromJson)
-        .toList();
+    return list.cast<Map<String, dynamic>>().map(AppConfig.fromJson).toList();
   }
 
   /// Encode app list for SharedPreferences.

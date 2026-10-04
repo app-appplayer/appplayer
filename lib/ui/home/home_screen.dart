@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../entry/entry_outcome_router.dart';
+import '../entry/entry_scan_screen.dart' show entryScanSupported;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../l10n/app_strings.dart';
@@ -366,12 +367,13 @@ class _HomeScreenState extends State<HomeScreen> {
           // Scanning is an acquisition source for an entry (§9.2). It sits
           // in the chrome rather than behind a setting because a code in
           // front of someone is a now-or-never affordance.
-          IconButton(
-            key: const Key('home.scan'),
-            icon: const Icon(Icons.qr_code_scanner),
-            tooltip: 'Scan a code',
-            onPressed: () => context.push(EntryRoutes.scan),
-          ),
+          if (entryScanSupported())
+            IconButton(
+              key: const Key('home.scan'),
+              icon: const Icon(Icons.qr_code_scanner),
+              tooltip: 'Scan a code',
+              onPressed: () => context.push(EntryRoutes.scan),
+            ),
           IconButton(
             key: const Key('home.add'),
             icon: const Icon(Icons.add),
@@ -394,7 +396,10 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, offer, __) {
           return Column(
             children: <Widget>[
-              if (offer && !_recoveryDismissed) _entryRecoveryBanner(),
+              // The banner's one action is scanning; where there is no camera
+              // scanner it would offer something the build cannot do.
+              if (offer && !_recoveryDismissed && entryScanSupported())
+                _entryRecoveryBanner(),
               Expanded(child: _buildBody()),
             ],
           );

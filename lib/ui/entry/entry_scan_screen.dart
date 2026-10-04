@@ -5,6 +5,7 @@
 /// what follows knows which door the code came through.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +13,23 @@ import 'package:provider/provider.dart';
 
 import '../../entry/entry_controller.dart';
 import '../../entry/entry_outcome_router.dart';
+
+/// Whether this build can open a camera scanner — the platforms the scanner
+/// plugin implements. Elsewhere scanning is not offered at all, rather than
+/// offered and opening a screen with no camera behind it.
+bool entryScanSupported({bool isWeb = kIsWeb, TargetPlatform? platform}) {
+  if (isWeb) return true;
+  switch (platform ?? defaultTargetPlatform) {
+    case TargetPlatform.android:
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return true;
+    case TargetPlatform.windows:
+    case TargetPlatform.linux:
+    case TargetPlatform.fuchsia:
+      return false;
+  }
+}
 
 class EntryScanScreen extends StatefulWidget {
   const EntryScanScreen({super.key});

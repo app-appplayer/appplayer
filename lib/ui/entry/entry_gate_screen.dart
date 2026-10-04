@@ -18,64 +18,13 @@ class EntryGateScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final issuer = blocked.target.issuer;
-    final notice = blocked.target.notice;
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Scanned link')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Icon(
-                      issuer.verified
-                          ? Icons.verified_outlined
-                          : Icons.help_outline,
-                      color: issuer.verified
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        issuer.name.isEmpty
-                            ? 'Unidentified issuer'
-                            : issuer.name,
-                        style: theme.textTheme.titleMedium,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _headline(blocked.rejection),
-                  style: theme.textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(_explain(blocked), style: theme.textTheme.bodyMedium),
-                if (notice != null) ...<Widget>[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(notice.message),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
+    return EntryFrame(
+      issuer: blocked.target.issuer,
+      notice: blocked.target.notice?.message,
+      showIdentity: false,
+      child: EntryMessage(
+        title: _headline(blocked.rejection),
+        body: <Widget>[Text(_explain(blocked))],
       ),
     );
   }
