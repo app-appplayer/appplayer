@@ -1,4 +1,5 @@
 import 'package:appplayer_core/appplayer_core.dart';
+import 'package:open_source_licenses/open_source_licenses.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

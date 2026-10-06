@@ -13,6 +13,10 @@ dependencies:
     sdk: flutter
 
   appplayer_core: ^0.2.3
+  # Registers and opens the app's open-source notices; its tool/licenses
+  # generators write assets/licenses/ (shared with Studio).
+  open_source_licenses:
+    path: ../../../core/brain_kernel/recipes/open_source_licenses
 
   # UI DSL runtime capability types (§6.13) + the platform powers behind
   # them. Vendored rather than path-consumed (lib/adapters/host_media/):
@@ -95,7 +99,7 @@ flutter:
   uses-material-design: true
   assets:
     # Notices for native code Flutter does not collect — generated, see
-    # appplayer_core tool/licenses (FR-LIC).
+    # open_source_licenses recipe tool/licenses.
     - path: assets/licenses/android.json
       platforms: [android]
     - path: assets/licenses/apple.json

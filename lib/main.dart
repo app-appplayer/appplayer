@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:appplayer_core/appplayer_core.dart' show OpenSourceLicenses;
+import 'package:open_source_licenses/open_source_licenses.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
@@ -16,7 +16,7 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     // Notices for what is compiled into native libraries — Flutter collects
-    // the Dart packages by itself, not these (appplayer_core FR-LIC-003).
+    // the Dart packages by itself, not these (open_source_licenses recipe).
     if (!kIsWeb && (Platform.isIOS || Platform.isMacOS)) {
       OpenSourceLicenses.registerBundled('assets/licenses/apple.json');
     }
