@@ -1,3 +1,4 @@
+import 'package:app_folders/app_folders.dart';
 import 'package:appplayer_core/appplayer_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -172,6 +173,22 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         PopupMenuItem(
           height: 28,
+          value: 'folder',
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.folder_outlined,
+                size: 14,
+                color: Theme.of(ctx).colorScheme.onSurface,
+              ),
+              const SizedBox(width: 6),
+              Text(S.get('menu.folder'), style: const TextStyle(fontSize: 12)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          height: 28,
           value: 'disconnect',
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
@@ -209,12 +226,74 @@ class _HomeScreenState extends State<HomeScreen> {
       } else if (value == 'logs') {
         final scopeId = app.serverConfigId ?? app.bundleId ?? app.id;
         await context.push('/apps/$scopeId/logs');
+      } else if (value == 'folder') {
+        await _moveToFolder(app);
       } else if (value == 'disconnect') {
         _disconnectApp(app);
       } else if (value == 'delete') {
         _deleteApp(app);
       }
     });
+  }
+
+  static AppFolderLabels get _folderLabels => AppFolderLabels(
+        moveTitle: S.get('menu.folder'),
+        newFolderHint: S.get('folder.new.hint'),
+        move: S.get('folder.move'),
+        takeOut: S.get('folder.takeout'),
+        cancel: S.get('folder.cancel'),
+        rename: S.get('folder.rename'),
+        renameTitle: S.get('folder.rename.title'),
+        save: S.get('folder.save'),
+      );
+
+  /// Puts [app] in a folder, or takes it out (FR-HOME-011).
+  Future<void> _moveToFolder(AppConfig app) async {
+    final registry = context.read<AppsRegistry<AppConfig>>();
+    final choice = await showMoveToFolderDialog(
+      context,
+      existing: FolderLayout<AppConfig>.of(registry.value, (a) => a.folder).names,
+      current: app.folder,
+      labels: _folderLabels,
+    );
+    if (choice == null) return;
+    final current = registry.byId(app.id) ?? app;
+    await registry.update(current.withFolder(switch (choice) {
+      MoveIntoFolder(:final name) => name,
+      TakeOutOfFolder() => null,
+    }));
+    if (mounted) _loadApps();
+  }
+
+  /// Opens a folder's apps with the same tiles and menu as the home.
+  Future<void> _openFolder(String name) async {
+    final registry = context.read<AppsRegistry<AppConfig>>();
+    final core = context.read<AppPlayerCoreService>();
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AppFolderScreen<AppConfig>(
+          name: name,
+          appsIn: (n) => registry.value.where((a) => a.folder == n).toList(),
+          changes: Listenable.merge([registry, core.lifecycleListenable]),
+          labels: _folderLabels,
+          padding: EdgeInsets.all(AppSpacing.of(context).base),
+          spacing: AppSpacing.of(context).lg,
+          tileBuilder: (_, app) => _AppIcon(
+            key: Key('home.app.${app.id}'),
+            app: app,
+            active: _isAppActive(core, app),
+            onTap: () => _openApp(app),
+            onLongPress: (iconCtx) => _showAppMenu(iconCtx, app),
+          ),
+          onRename: (from, to) async {
+            for (final a in registry.value.where((a) => a.folder == from).toList()) {
+              await registry.update(a.withFolder(to));
+            }
+          },
+        ),
+      ),
+    );
+    if (mounted) _loadApps();
   }
 
   /// Disconnect tile action — closes whatever "active" resource the app
@@ -447,6 +526,8 @@ class _HomeScreenState extends State<HomeScreen> {
       listenable: core.lifecycleListenable,
       builder: (context, _) {
         final spacing = AppSpacing.of(context);
+        // Folders first (by name), then the apps in no folder (FR-HOME-011).
+        final layout = FolderLayout<AppConfig>.of(_apps, (a) => a.folder);
         // Fixed-size tiles, fixed spacing, aligned-left across every form
         // factor. Columns reflow naturally (add/remove one) as the width
         // changes instead of the tiles stretching to fill the row.
@@ -455,15 +536,28 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Wrap(
             spacing: spacing.lg,
             runSpacing: spacing.lg,
-            children: _apps
-                .map((app) => _AppIcon(
-                      key: Key('home.app.${app.id}'),
-                      app: app,
-                      active: _isAppActive(core, app),
-                      onTap: () => _openApp(app),
-                      onLongPress: (iconCtx) => _showAppMenu(iconCtx, app),
-                    ))
-                .toList(),
+            children: <Widget>[
+              for (final MapEntry(key: name, value: apps)
+                  in layout.folders.entries)
+                AppFolderTile(
+                  key: Key('home.folder.$name'),
+                  name: name,
+                  width: _AppIcon.tileWidth,
+                  iconSize: _AppIcon.iconBoxSize,
+                  previews: [
+                    for (final app in apps.take(4)) _AppIcon.preview(context, app),
+                  ],
+                  onTap: () => _openFolder(name),
+                ),
+              for (final app in layout.loose)
+                _AppIcon(
+                  key: Key('home.app.${app.id}'),
+                  app: app,
+                  active: _isAppActive(core, app),
+                  onTap: () => _openApp(app),
+                  onLongPress: (iconCtx) => _showAppMenu(iconCtx, app),
+                ),
+            ],
           ),
         );
       },
@@ -505,8 +599,16 @@ class _AppIcon extends StatelessWidget {
   final VoidCallback onTap;
   final void Function(BuildContext iconContext) onLongPress;
 
-  static const double _iconBoxSize = 48;
+  static const double iconBoxSize = 48;
+  static const double tileWidth = iconBoxSize + 16;
+  static const double _iconBoxSize = iconBoxSize;
   static const double _iconRadius = 12;
+
+  /// The app's icon alone, for a folder tile's preview.
+  static Widget preview(BuildContext context, AppConfig app) {
+    final tile = _AppIcon(app: app, active: false, onTap: () {}, onLongPress: (_) {});
+    return tile._buildIcon(context, Theme.of(context).colorScheme);
+  }
   static const double _badgeSize = 12;
 
   /// Default fallback icon per app type.
@@ -538,7 +640,7 @@ class _AppIcon extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return SizedBox(
-      width: _iconBoxSize + 16,
+      width: tileWidth,
       child: GestureDetector(
         onSecondaryTap: () => onLongPress(context),
         child: InkWell(

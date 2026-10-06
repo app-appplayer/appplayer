@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:app_folders/app_folders.dart' show normalizeFolderName;
+
 import 'package:appplayer_core/appplayer_core.dart' show HasAppHandle, ViewMode;
 
 /// Type of an app entry on the launcher home screen.
@@ -45,6 +47,7 @@ class AppConfig implements HasAppHandle {
     this.dashboardSize = DashboardSize.twoByTwo,
     this.trustLevel = AppTrustLevel.basic,
     this.viewMode = ViewMode.auto,
+    this.folder,
   });
 
   @override
@@ -109,6 +112,10 @@ class AppConfig implements HasAppHandle {
   /// this app regardless of window width.
   final ViewMode viewMode;
 
+  /// The folder the person put this app in on the home (FR-HOME-011). Null
+  /// when it sits on the home itself.
+  final String? folder;
+
   factory AppConfig.fromJson(Map<String, dynamic> json) {
     return AppConfig(
       id: json['id'] as String,
@@ -138,6 +145,7 @@ class AppConfig implements HasAppHandle {
         orElse: () => AppTrustLevel.basic,
       ),
       viewMode: ViewMode.parse(json['viewMode']),
+      folder: normalizeFolderName(json['folder'] as String?),
     );
   }
 
@@ -157,7 +165,17 @@ class AppConfig implements HasAppHandle {
         'dashboardSize': dashboardSize.name,
         'trustLevel': trustLevel.name,
         if (viewMode != ViewMode.auto) 'viewMode': viewMode.value,
+        if (folder != null) 'folder': folder,
       };
+
+  /// This app moved into [name] — or out of any folder when it is null or
+  /// blank. Separate from [copyWith], which cannot clear a field.
+  AppConfig withFolder(String? name) {
+    final json = toJson()..remove('folder');
+    final normalized = normalizeFolderName(name);
+    if (normalized != null) json['folder'] = normalized;
+    return AppConfig.fromJson(json);
+  }
 
   AppConfig copyWith({
     String? id,
@@ -191,6 +209,7 @@ class AppConfig implements HasAppHandle {
       dashboardSize: dashboardSize ?? this.dashboardSize,
       trustLevel: trustLevel ?? this.trustLevel,
       viewMode: viewMode ?? this.viewMode,
+      folder: folder,
     );
   }
 

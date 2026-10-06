@@ -9,6 +9,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.0"
+  app_folders:
+    dependency: "direct main"
+    description:
+      path: "../../../core/brain_kernel/recipes/app_folders"
+      relative: true
+    source: path
+    version: "0.0.1"
   app_links:
     dependency: "direct main"
     description:
@@ -44,10 +51,11 @@ packages:
   appplayer_core:
     dependency: "direct main"
     description:
-      path: "/Users/jsha/Desktop/Works/workspace/makemind/os/core/appplayer/dart"
-      relative: false
-    source: path
-    version: "0.2.3"
+      name: appplayer_core
+      sha256: "516dc5e7ccba84459520180b248b4b3f47fe4228832cd780b600538189dca617"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   archive:
     dependency: transitive
     description:
@@ -99,10 +107,11 @@ packages:
   brain_kernel:
     dependency: "direct main"
     description:
-      path: "/Users/jsha/Desktop/Works/workspace/makemind/os/core/brain_kernel/dart"
-      relative: false
-    source: path
-    version: "0.2.2"
+      name: brain_kernel
+      sha256: c425ee46d5509730e327eb55affdcc7ca945639270c66b9487315f73956b397c
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.3"
   characters:
     dependency: transitive
     description:
@@ -630,9 +639,10 @@ packages:
   mcp_client:
     dependency: "direct main"
     description:
-      path: "/Users/jsha/Desktop/Works/workspace/makemind/packages/mcp_client/dart"
-      relative: false
-    source: path
+      name: mcp_client
+      sha256: "29fd5e5592016d141b481b2ada0459332058e263b3c44aba8a7819983e4f8eea"
+      url: "https://pub.dev"
+    source: hosted
     version: "2.2.1"
   mcp_fact_graph:
     dependency: transitive
@@ -734,10 +744,10 @@ packages:
     dependency: "direct dev"
     description:
       name: mcp_server
-      sha256: "58ab3ac35c97afcabc79c2667750007409b9e8e7e86e5027841679d0be3743ba"
+      sha256: a98090ccefc85811f91d3a72768b05775ba863b9e40e0cc0ade122077c421d17
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.3"
+    version: "2.2.4"
   mcp_skill:
     dependency: transitive
     description:
