@@ -14,11 +14,11 @@ import 'package:http/http.dart' as http;
 
 import 'entry_controller.dart';
 
-/// The demo host this open-source build claims (§3.4).
+/// The demo host this open-source build resolves entry links for (§3.4).
 ///
-/// Production media belong to the shipped product; a concept build that
-/// intercepted them would take over scans it cannot fully serve, and a domain
-/// is claimable by exactly one application.
+/// It is not declared to the operating system: the app registers no App Link
+/// and no associated domain, so a link opens here only when it reaches the app
+/// another way (the code scanner, the install referrer).
 const String kDemoEntryHost = 'demo.appplayer.app';
 
 /// Where codes are dereferenced.

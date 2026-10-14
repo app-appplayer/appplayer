@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+- **App icon** on iOS and Android (adaptive icon on Android 8 and later); the
+  Android app name is `AppPlayer`. Build number `1` (`0.1.6+1`).
+- **No link claim.** The app no longer declares `demo.appplayer.app` as an
+  Android App Link or an iOS associated domain. Scanner and install-referrer
+  entry still resolve against it.
+- **iOS usage descriptions** for Bluetooth, the local network, location and
+  photos; each is used only when a connection or an opened app asks for it.
 - **Quitting ends the servers it started.** A local (stdio) server is the
   player's child process; quitting from the menu or being told to end
   (`SIGTERM`) now closes it first. Left open it outlived the player and kept
