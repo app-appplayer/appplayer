@@ -87,7 +87,7 @@ class _EntryScanScreenState extends State<EntryScanScreen> {
     if (!mounted || choice == null || choice == _ScanChoice.scanAgain) return;
 
     switch ((choice, content)) {
-      case (_ScanChoice.install, QrBundleLink(:final uri)):
+      case (_ScanChoice.addBundle, QrBundleLink(:final uri)):
         _openForm('bundle', uri);
       case (_ScanChoice.addServer, QrServerLink(:final uri)):
         _openForm('server', uri);
@@ -128,7 +128,7 @@ class _EntryScanScreenState extends State<EntryScanScreen> {
 }
 
 /// What the person chose on the result dialog.
-enum _ScanChoice { install, addServer, openLink, scanAgain }
+enum _ScanChoice { addBundle, addServer, openLink, scanAgain }
 
 /// Shows what was read and the actions that fit it (FR-ENTRY-STD-010).
 class ScanResultDialog extends StatelessWidget {
@@ -141,9 +141,9 @@ class ScanResultDialog extends StatelessWidget {
     final (String shown, String title, List<Widget> actions) = switch (content) {
       QrBundleLink(:final uri) => (
           uri.toString(),
-          'App bundle',
+          'Bundle link',
           <Widget>[
-            _action(context, 'scan.install', 'Install', _ScanChoice.install),
+            _action(context, 'scan.add_bundle', 'Add bundle', _ScanChoice.addBundle),
           ],
         ),
       QrServerLink(:final uri) => (
