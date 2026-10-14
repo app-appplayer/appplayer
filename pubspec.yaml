@@ -13,14 +13,6 @@ dependencies:
     sdk: flutter
 
   appplayer_core: ^0.4.1
-  # Registers and opens the app's open-source notices; its tool/licenses
-  # generators write assets/licenses/ (shared with Studio).
-  open_source_licenses:
-    path: ../../../core/brain_kernel/recipes/open_source_licenses
-  # Folders the person makes on the home: grouping, folder tile and screen,
-  # move dialog (FR-HOME-011).
-  app_folders:
-    path: ../../../core/brain_kernel/recipes/app_folders
 
   # UI DSL runtime capability types (§6.13) + the platform powers behind
   # them. Vendored rather than path-consumed (lib/adapters/host_media/):

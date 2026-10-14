@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app_folders/app_folders.dart' show normalizeFolderName;
+import 'package:appplayer/adapters/app_folders/app_folders.dart' show normalizeFolderName;
 
 import 'package:appplayer_core/appplayer_core.dart' show HasAppHandle, ViewMode;
 

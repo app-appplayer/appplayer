@@ -1,4 +1,4 @@
-import 'package:app_folders/app_folders.dart';
+import 'package:appplayer/adapters/app_folders/app_folders.dart';
 import 'package:appplayer_core/appplayer_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

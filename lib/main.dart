@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:open_source_licenses/open_source_licenses.dart';
+import 'package:appplayer/adapters/open_source_licenses/open_source_licenses.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
