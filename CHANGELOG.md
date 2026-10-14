@@ -1,5 +1,17 @@
 ## [Unreleased]
 
+- **Report and block a server.** A server app reached over the network has
+  Report (a mail draft to `support@makemind.app` with its address) and Block
+  (removes the app and refuses the same address until it is unblocked) in its
+  menu. Blocked servers are listed in Settings, where each can be unblocked.
+- **Age rating.** A server or bundle app can carry an age label you choose
+  (all ages, 12+, 17+). It shows under the name on its tile and in its info
+  dialog.
+- **No Debug MCP in a mobile release build.** The setting and the endpoint
+  exist on desktop, and on mobile only in debug and profile builds.
+- **Fewer Android permissions.** The foreground-service permissions, the
+  keep-alive service and the exact-alarm permission are no longer declared.
+  A scheduled notification is delivered at an inexact time.
 - **App icon** on iOS and Android (adaptive icon on Android 8 and later); the
   Android app name is `AppPlayer`. Build number `1` (`0.1.6+1`).
 - **No link claim.** The app no longer declares `demo.appplayer.app` as an

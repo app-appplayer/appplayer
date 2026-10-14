@@ -30,8 +30,16 @@ class AppMetadataDialog extends StatelessWidget {
       content: SizedBox(
         width: 400,
         child: meta == null
-            ? Text(S.get('meta.dialog.not_received'),
-                style: theme.textTheme.bodyMedium)
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (app.ageRating != AgeRating.unrated)
+                    _row(S.get('meta.age'), app.ageRating.label, theme),
+                  Text(S.get('meta.dialog.not_received'),
+                      style: theme.textTheme.bodyMedium),
+                ],
+              )
             : SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,6 +60,8 @@ class AppMetadataDialog extends StatelessWidget {
                           ),
                         ),
                       ),
+                    if (app.ageRating != AgeRating.unrated)
+                      _row(S.get('meta.age'), app.ageRating.label, theme),
                     if (meta['version'] is String)
                       _row(S.get('meta.version'), meta['version'] as String, theme),
                     if (meta['description'] is String)

@@ -1,13 +1,14 @@
 import 'package:appplayer_core/appplayer_core.dart';
 import 'package:appplayer/adapters/open_source_licenses/open_source_licenses.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../adapters/secure_credential_vault.dart';
 import '../../adapters/shared_prefs_server_storage.dart';
 import '../../app/app_settings.dart';
+import '../../app/debug_mcp_availability.dart';
 import '../../l10n/app_strings.dart';
+import 'blocked_servers_screen.dart';
 
 /// MOD-UI-005 — global app settings: theme, locale, log level, data reset.
 class SettingsScreen extends StatefulWidget {
@@ -200,9 +201,9 @@ class SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
 
           // ── Developer ────────────────────────────────────────────────────
-          // Debug MCP endpoint — opt-in test-automation surface (non-web).
-          // Hidden on mobile / web where it never binds.
-          if (_isDesktop) ...<Widget>[
+          // Debug MCP endpoint — opt-in test-automation surface. Hidden on web
+          // and in mobile release builds (see debug_mcp_availability.dart).
+          if (debugMcpAvailable) ...<Widget>[
             const _SectionTitle('Developer'),
             SwitchListTile(
               key: const Key('settings.debug_mcp'),
@@ -213,6 +214,20 @@ class SettingsScreenState extends State<SettingsScreen> {
             ),
             const Divider(),
           ],
+
+          // ── Blocked servers (FR-SET-008) ─────────────────────────────────
+          ListTile(
+            key: const Key('settings.blocked'),
+            contentPadding: EdgeInsets.zero,
+            title: Text(S.get('settings.blocked')),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const BlockedServersScreen(),
+              ),
+            ),
+          ),
+          const Divider(),
 
           // ── App info ─────────────────────────────────────────────────────
           _SectionTitle(S.get('settings.info')),
@@ -238,11 +253,6 @@ class SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
-
-/// True on every native platform where the Debug MCP endpoint can bind
-/// (desktop AND mobile — reach a mobile endpoint via adb forward / iOS-sim
-/// loopback). Only web is excluded (no dart:io HttpServer).
-bool get _isDesktop => !kIsWeb;
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle(this.text);

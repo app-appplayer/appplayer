@@ -22,6 +22,7 @@ import '../models/app_config.dart';
 import '../models/apps_list_notifier.dart';
 import 'app_metadata_merge.dart';
 import 'app_settings.dart';
+import 'debug_mcp_availability.dart';
 import 'host_brightness.dart';
 
 /// Assembled services + settings exposed to the widget tree.
@@ -159,10 +160,11 @@ class CompositionRoot {
           stackTrace: record.stackTrace,
         ));
       },
-      // Debug MCP (desktop-only, settings-gated). The desktop gate is
-      // enforced inside core, so pass the raw pref. Port 7931 keeps
+      // Debug MCP (settings-gated). Core binds it on every native platform,
+      // so the build decides whether it can run at all: not in a mobile
+      // release build, whatever the stored pref says. Port 7931 keeps
       // Standard clear of Pro's 7930 when both run on one machine.
-      enableDebugMcp: settings.debugMcpEnabled,
+      enableDebugMcp: debugMcpAvailable && settings.debugMcpEnabled,
       debugMcpPort: 7931,
     );
 

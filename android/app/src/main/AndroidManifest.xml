@@ -1,11 +1,26 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Scanning a code is one acquisition source for an entry
          (platform spec 19 §9.2). -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- The core plugin declares these for background connection keep-alive
+         and exact-time reminders. This app runs the default background policy
+         (connections pause in the background) and never asks for a keep-alive
+         service, so it declares neither the service nor its permissions. A
+         scheduled notification is still delivered, at an inexact time. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+        tools:node="remove"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+        tools:node="remove"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        tools:node="remove"/>
     <application
         android:label="AppPlayer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <service
+            android:name="com.makemind.appplayer_core.BackgroundService"
+            tools:node="remove"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
