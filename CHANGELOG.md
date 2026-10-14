@@ -13,7 +13,7 @@
   keep-alive service and the exact-alarm permission are no longer declared.
   A scheduled notification is delivered at an inexact time.
 - **App icon** on iOS and Android (adaptive icon on Android 8 and later); the
-  Android app name is `AppPlayer`. Build number `1` (`0.1.6+1`).
+  Android app name is `AppPlayer`. Build number `3` (`0.1.6+3`).
 - **No link claim.** The app no longer declares `demo.appplayer.app` as an
   Android App Link or an iOS associated domain. Scanner and install-referrer
   entry still resolve against it.
