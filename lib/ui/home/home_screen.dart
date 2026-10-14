@@ -22,13 +22,17 @@ import '../../widgets/app_metadata_dialog.dart';
 /// [AppConfig.decodeList]. Each icon opens the app on tap and shows the
 /// edit screen on long-press.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.entryRecoveryOffer});
+  const HomeScreen({super.key, this.entryRecoveryOffer, this.scanSupported});
 
   /// Set by the shell when an install may have come from an entry this
   /// platform could not carry across it (§3.5). Optional so the screen mounts
   /// anywhere — a required provider would make the chrome unmountable in
   /// tests and in any host that does not run entry links.
   final ValueListenable<bool>? entryRecoveryOffer;
+
+  /// Whether this screen offers scanning. Null follows [entryScanSupported];
+  /// a test passes a value to see the screen with scanning on.
+  final bool? scanSupported;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -561,7 +565,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Scanning is an acquisition source for an entry (§9.2). It sits
           // in the chrome rather than behind a setting because a code in
           // front of someone is a now-or-never affordance.
-          if (entryScanSupported())
+          if (widget.scanSupported ?? entryScanSupported())
             IconButton(
               key: const Key('home.scan'),
               icon: const Icon(Icons.qr_code_scanner),
@@ -592,7 +596,9 @@ class _HomeScreenState extends State<HomeScreen> {
             children: <Widget>[
               // The banner's one action is scanning; where there is no camera
               // scanner it would offer something the build cannot do.
-              if (offer && !_recoveryDismissed && entryScanSupported())
+              if (offer &&
+                  !_recoveryDismissed &&
+                  (widget.scanSupported ?? entryScanSupported()))
                 _entryRecoveryBanner(),
               Expanded(child: _buildBody()),
             ],

@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+- **No scan entry point.** The scan button on the home screen, and the scan
+  offer after an install, are not shown: the entry host this build resolves
+  codes against is not served yet, so a scan opened nothing. The camera
+  permission is no longer declared on Android. The scan screen itself stays and
+  comes back with one switch (`kEntryScanOffered`) once the host answers.
 - **Report and block a server.** A server app reached over the network has
   Report (a mail draft to `support@makemind.app` with its address) and Block
   (removes the app and refuses the same address until it is unblocked) in its
@@ -13,7 +18,7 @@
   keep-alive service and the exact-alarm permission are no longer declared.
   A scheduled notification is delivered at an inexact time.
 - **App icon** on iOS and Android (adaptive icon on Android 8 and later); the
-  Android app name is `AppPlayer`. Build number `3` (`0.1.6+3`).
+  Android app name is `AppPlayer`. Build number `4` (`0.1.6+4`).
 - **No link claim.** The app no longer declares `demo.appplayer.app` as an
   Android App Link or an iOS associated domain. Scanner and install-referrer
   entry still resolve against it.

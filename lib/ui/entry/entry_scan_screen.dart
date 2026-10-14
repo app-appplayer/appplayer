@@ -14,10 +14,21 @@ import 'package:provider/provider.dart';
 import '../../entry/entry_controller.dart';
 import '../../entry/entry_outcome_router.dart';
 
+/// Whether this build offers scanning at all. The entry host it resolves
+/// codes against is not served yet, so a scan opens nothing; a button that
+/// does nothing, and the camera permission it needs, are left out. Turn this
+/// on when the host answers.
+const bool kEntryScanOffered = false;
+
 /// Whether this build can open a camera scanner — the platforms the scanner
 /// plugin implements. Elsewhere scanning is not offered at all, rather than
 /// offered and opening a screen with no camera behind it.
-bool entryScanSupported({bool isWeb = kIsWeb, TargetPlatform? platform}) {
+bool entryScanSupported({
+  bool isWeb = kIsWeb,
+  TargetPlatform? platform,
+  bool offered = kEntryScanOffered,
+}) {
+  if (!offered) return false;
   if (isWeb) return true;
   switch (platform ?? defaultTargetPlatform) {
     case TargetPlatform.android:

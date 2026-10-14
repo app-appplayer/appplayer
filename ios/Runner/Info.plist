@@ -5,7 +5,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Used to scan codes that open an app.</string>
+	<string>AppPlayer does not use the camera by itself. An app you open can use it only if you allow it.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Connects to nearby MCP-serving devices over Bluetooth.</string>
 	<key>NSLocalNetworkUsageDescription</key>

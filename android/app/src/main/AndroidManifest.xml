@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- Scanning a code is one acquisition source for an entry
-         (platform spec 19 §9.2). -->
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- No camera: the scan entry point is not offered in this build
+         (FR-ENTRY-STD-008), so the scanner plugin's camera declarations are
+         taken out too. -->
+    <uses-permission android:name="android.permission.CAMERA"
+        tools:node="remove"/>
+    <uses-feature android:name="android.hardware.camera"
+        tools:node="remove"/>
     <!-- The core plugin declares these for background connection keep-alive
          and exact-time reminders. This app runs the default background policy
          (connections pause in the background) and never asks for a keep-alive

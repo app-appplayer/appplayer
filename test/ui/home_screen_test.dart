@@ -1,5 +1,6 @@
 import 'package:appplayer/app/app_settings.dart';
 import 'package:appplayer/models/app_config.dart';
+import 'package:appplayer/ui/entry/entry_scan_screen.dart';
 import 'package:appplayer/ui/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -133,13 +134,31 @@ void main() {
       expect(find.byKey(const Key('home.entry_recovery')), findsNothing);
     });
 
-    testWidgets('the banner appears when recovery is offered', (tester) async {
+    testWidgets('no banner while scanning is not offered', (tester) async {
+      // Its one action is scanning; offering it where the build has no scan
+      // entry point would point at something that is not there.
       final settings = await _setupPrefs();
       final offer = ValueNotifier<bool>(true);
       addTearDown(offer.dispose);
       await tester.pumpWidget(
         wrapScreen(
           child: HomeScreen(entryRecoveryOffer: offer),
+          core: core,
+          settings: settings,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('home.entry_recovery')), findsNothing);
+    });
+
+    testWidgets('the banner appears when recovery is offered', (tester) async {
+      final settings = await _setupPrefs();
+      final offer = ValueNotifier<bool>(true);
+      addTearDown(offer.dispose);
+      await tester.pumpWidget(
+        wrapScreen(
+          child: HomeScreen(entryRecoveryOffer: offer, scanSupported: true),
           core: core,
           settings: settings,
         ),
@@ -157,7 +176,7 @@ void main() {
       addTearDown(offer.dispose);
       await tester.pumpWidget(
         wrapScreen(
-          child: HomeScreen(entryRecoveryOffer: offer),
+          child: HomeScreen(entryRecoveryOffer: offer, scanSupported: true),
           core: core,
           settings: settings,
         ),
@@ -176,16 +195,49 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TC-HOME-007 scan button', () {
-    testWidgets('home.scan icon button is present', (tester) async {
-      // A code in front of someone is a now-or-never affordance, so the way
-      // to scan one lives in the chrome rather than behind a setting.
+    testWidgets('home.scan is not offered while no entry host is served',
+        (tester) async {
+      // The only host this build resolves codes against does not answer, so
+      // a scan would open nothing (FR-ENTRY-STD-008).
       final settings = await _setupPrefs();
       await tester.pumpWidget(
         wrapScreen(child: const HomeScreen(), core: core, settings: settings),
       );
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const Key('home.scan')), findsNothing);
+    });
+
+    testWidgets('home.scan shows when scanning is switched on', (tester) async {
+      final settings = await _setupPrefs();
+      await tester.pumpWidget(
+        wrapScreen(
+          child: const HomeScreen(scanSupported: true),
+          core: core,
+          settings: settings,
+        ),
+      );
+      await tester.pumpAndSettle();
+
       expect(find.byKey(const Key('home.scan')), findsOneWidget);
+    });
+
+    test('scanning is off in every platform until it is switched on', () {
+      for (final platform in TargetPlatform.values) {
+        expect(entryScanSupported(isWeb: false, platform: platform), isFalse);
+      }
+      expect(entryScanSupported(isWeb: true), isFalse);
+    });
+
+    test('switched on, it follows the platforms the scanner plugin has', () {
+      expect(
+          entryScanSupported(
+              isWeb: false, platform: TargetPlatform.android, offered: true),
+          isTrue);
+      expect(
+          entryScanSupported(
+              isWeb: false, platform: TargetPlatform.windows, offered: true),
+          isFalse);
     });
   });
 
