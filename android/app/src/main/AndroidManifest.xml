@@ -3,7 +3,7 @@
          (platform spec 19 §9.2). -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <application
-        android:label="appplayer"
+        android:label="AppPlayer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

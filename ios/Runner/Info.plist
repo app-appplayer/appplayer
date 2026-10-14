@@ -6,6 +6,14 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Used to scan codes that open an app.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Connects to nearby MCP-serving devices over Bluetooth.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Connects to MCP servers and devices on your local network.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>AppPlayer shares your location only when an app you opened asks for it, and only while you use that app.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>AppPlayer opens your photos only when an app you opened asks you to attach one, and sends only the photo you choose.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
