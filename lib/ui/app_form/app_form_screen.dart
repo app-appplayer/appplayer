@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../adapters/console_logger.dart';
+import '../../entry/qr_content.dart';
 import '../../l10n/app_strings.dart';
 import '../../models/app_config.dart';
 import 'server_config_dialog.dart';
@@ -24,9 +25,17 @@ class AppFormScreen extends StatefulWidget {
     super.key,
     required this.mode,
     this.appId,
+    this.initialType,
+    this.initialUrl,
   });
 
   final AppFormMode mode;
+
+  /// Create mode only: open on this app type, with [initialUrl] filled in
+  /// (a scanned QR code, FR-ENTRY-STD-010). Nothing is saved until the person
+  /// presses Add.
+  final AppType? initialType;
+  final String? initialUrl;
 
   /// Non-null when [mode] is [AppFormMode.edit].
   final String? appId;
@@ -121,6 +130,9 @@ class _AppFormScreenState extends State<AppFormScreen> {
           orElse: () => throw StateError('App not found: ${widget.appId}'),
         );
         _prefill(cfg);
+      } else if (widget.mode == AppFormMode.create &&
+          widget.initialUrl != null) {
+        _prefillFromScan(widget.initialType, widget.initialUrl!);
       }
 
       if (!mounted) return;
@@ -184,6 +196,21 @@ class _AppFormScreenState extends State<AppFormScreen> {
         _layout = cfg.dashboardLayout;
         _gridSize = cfg.dashboardSize;
     }
+  }
+
+  /// Fills the create form from a scanned address (FR-ENTRY-STD-010): a
+  /// bundle link opens the bundle form on its URL, anything else the server
+  /// form on a network transport. The person still presses Add.
+  void _prefillFromScan(AppType? type, String url) {
+    if (type == AppType.bundle) {
+      _selectedType = AppType.bundle;
+      _bundleFromFile = false;
+      _bundleUrlCtrl.text = url;
+      return;
+    }
+    _selectedType = AppType.server;
+    _transportType = QrServerLink(Uri.parse(url)).suggestedTransport;
+    _urlCtrl.text = url;
   }
 
   // ── Bundle file picker ─────────────────────────────────────────────────────

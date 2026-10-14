@@ -1,10 +1,5 @@
 ## [Unreleased]
 
-- **No scan entry point.** The scan button on the home screen, and the scan
-  offer after an install, are not shown: the entry host this build resolves
-  codes against is not served yet, so a scan opened nothing. The camera
-  permission is no longer declared on Android. The scan screen itself stays and
-  comes back with one switch (`kEntryScanOffered`) once the host answers.
 - **Report and block a server.** A server app reached over the network has
   Report (a mail draft to `support@makemind.app` with its address) and Block
   (removes the app and refuses the same address until it is unblocked) in its
@@ -12,16 +7,17 @@
 - **Age rating.** A server or bundle app can carry an age label you choose
   (all ages, 12+, 17+). It shows under the name on its tile and in its info
   dialog.
-- **No Debug MCP in a mobile release build.** The setting and the endpoint
-  exist on desktop, and on mobile only in debug and profile builds.
 - **Fewer Android permissions.** The foreground-service permissions, the
   keep-alive service and the exact-alarm permission are no longer declared.
   A scheduled notification is delivered at an inexact time.
 - **App icon** on iOS and Android (adaptive icon on Android 8 and later); the
-  Android app name is `AppPlayer`. Build number `4` (`0.1.6+4`).
-- **No link claim.** The app no longer declares `demo.appplayer.app` as an
-  Android App Link or an iOS associated domain. Scanner and install-referrer
-  entry still resolve against it.
+  Android app name is `AppPlayer`. Build number `5` (`0.1.6+5`).
+- **The scan button is a plain QR reader.** It shows what the code holds and
+  offers what fits: *Install* for a `.mcpb` link and *Add as server* for any
+  other web link, each opening the add-app form with the address filled in,
+  and *Open link* to hand it to the system. No host is checked and nothing is
+  connected or opened until you choose. Before, a code had to be on
+  `demo.appplayer.app`, which was never served, so no scan opened anything.
 - **iOS usage descriptions** for Bluetooth, the local network, location and
   photos; each is used only when a connection or an opened app asks for it.
 - **Quitting ends the servers it started.** A local (stdio) server is the

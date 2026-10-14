@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../entry/entry_controller.dart';
+import '../models/app_config.dart' show AppType;
 import '../ui/app/app_renderer_screen.dart';
 import '../ui/entry/entry_gate_screen.dart';
 import '../ui/entry/entry_scan_screen.dart';
@@ -55,7 +56,16 @@ class AppRouter {
         ),
         GoRoute(
           path: '/apps/new',
-          builder: (_, __) => const AppFormScreen(mode: AppFormMode.create),
+          builder: (_, state) => AppFormScreen(
+            mode: AppFormMode.create,
+            // A scanned code arrives as `?type=server|bundle&url=…`.
+            initialType: switch (state.uri.queryParameters['type']) {
+              'bundle' => AppType.bundle,
+              'server' => AppType.server,
+              _ => null,
+            },
+            initialUrl: state.uri.queryParameters['url'],
+          ),
         ),
         GoRoute(
           path: '/apps/:id/edit',

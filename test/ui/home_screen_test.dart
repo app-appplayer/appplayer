@@ -142,7 +142,7 @@ void main() {
       addTearDown(offer.dispose);
       await tester.pumpWidget(
         wrapScreen(
-          child: HomeScreen(entryRecoveryOffer: offer),
+          child: HomeScreen(entryRecoveryOffer: offer, scanSupported: false),
           core: core,
           settings: settings,
         ),
@@ -195,48 +195,40 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TC-HOME-007 scan button', () {
-    testWidgets('home.scan is not offered while no entry host is served',
-        (tester) async {
-      // The only host this build resolves codes against does not answer, so
-      // a scan would open nothing (FR-ENTRY-STD-008).
+    testWidgets('home.scan icon button is present', (tester) async {
+      // A code in front of someone is a now-or-never affordance, so the way
+      // to scan one lives in the chrome rather than behind a setting.
       final settings = await _setupPrefs();
       await tester.pumpWidget(
         wrapScreen(child: const HomeScreen(), core: core, settings: settings),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('home.scan')), findsNothing);
+      expect(find.byKey(const Key('home.scan')), findsOneWidget);
     });
 
-    testWidgets('home.scan shows when scanning is switched on', (tester) async {
+    testWidgets('home.scan can be left out of a build', (tester) async {
       final settings = await _setupPrefs();
       await tester.pumpWidget(
         wrapScreen(
-          child: const HomeScreen(scanSupported: true),
+          child: const HomeScreen(scanSupported: false),
           core: core,
           settings: settings,
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('home.scan')), findsOneWidget);
+      expect(find.byKey(const Key('home.scan')), findsNothing);
     });
 
-    test('scanning is off in every platform until it is switched on', () {
-      for (final platform in TargetPlatform.values) {
-        expect(entryScanSupported(isWeb: false, platform: platform), isFalse);
-      }
-      expect(entryScanSupported(isWeb: true), isFalse);
-    });
-
-    test('switched on, it follows the platforms the scanner plugin has', () {
-      expect(
-          entryScanSupported(
-              isWeb: false, platform: TargetPlatform.android, offered: true),
+    test('scanning is offered on the platforms the scanner plugin has', () {
+      expect(entryScanSupported(isWeb: false, platform: TargetPlatform.android),
           isTrue);
+      expect(entryScanSupported(isWeb: false, platform: TargetPlatform.windows),
+          isFalse);
       expect(
           entryScanSupported(
-              isWeb: false, platform: TargetPlatform.windows, offered: true),
+              isWeb: false, platform: TargetPlatform.android, offered: false),
           isFalse);
     });
   });

@@ -18,7 +18,8 @@ import 'entry_controller.dart';
 ///
 /// It is not declared to the operating system: the app registers no App Link
 /// and no associated domain, so a link opens here only when it reaches the app
-/// another way (the code scanner, the install referrer).
+/// another way (the install referrer). The code scanner does not use it — it
+/// reads any link (see `qr_content.dart`).
 const String kDemoEntryHost = 'demo.appplayer.app';
 
 /// Where codes are dereferenced.
