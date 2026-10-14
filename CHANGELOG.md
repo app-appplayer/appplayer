@@ -11,7 +11,7 @@
   keep-alive service and the exact-alarm permission are no longer declared.
   A scheduled notification is delivered at an inexact time.
 - **App icon** on iOS and Android (adaptive icon on Android 8 and later); the
-  Android app name is `AppPlayer`. Build number `5` (`0.1.6+5`).
+  Android app name is `AppPlayer`. Build number `6` (`0.1.6+6`).
 - **The scan button is a plain QR reader.** It shows what the code holds and
   offers what fits: *Install* for a `.mcpb` link and *Add as server* for any
   other web link, each opening the add-app form with the address filled in,

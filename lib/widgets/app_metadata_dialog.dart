@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/design_tokens.dart';
+import '../l10n/age_rating_label.dart';
 import '../l10n/app_strings.dart';
 import '../models/app_config.dart';
 
@@ -35,7 +36,7 @@ class AppMetadataDialog extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   if (app.ageRating != AgeRating.unrated)
-                    _row(S.get('meta.age'), app.ageRating.label, theme),
+                    _row(S.get('meta.age'), ageRatingLabel(app.ageRating), theme),
                   Text(S.get('meta.dialog.not_received'),
                       style: theme.textTheme.bodyMedium),
                 ],
@@ -61,7 +62,7 @@ class AppMetadataDialog extends StatelessWidget {
                         ),
                       ),
                     if (app.ageRating != AgeRating.unrated)
-                      _row(S.get('meta.age'), app.ageRating.label, theme),
+                      _row(S.get('meta.age'), ageRatingLabel(app.ageRating), theme),
                     if (meta['version'] is String)
                       _row(S.get('meta.version'), meta['version'] as String, theme),
                     if (meta['description'] is String)

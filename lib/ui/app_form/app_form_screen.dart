@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../adapters/console_logger.dart';
 import '../../entry/qr_content.dart';
+import '../../l10n/age_rating_label.dart';
 import '../../l10n/app_strings.dart';
 import '../../models/app_config.dart';
 import 'server_config_dialog.dart';
@@ -1092,7 +1093,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
               DropdownMenuItem(
                 value: r,
                 child: Text(
-                  r == AgeRating.unrated ? S.get('form.age.unrated') : r.label,
+                  ageRatingLabel(r),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
