@@ -47,7 +47,7 @@ void main() {
       description: 'set the on-board LED',
       inputSchema: const {'type': 'object'},
       handler: (args) async =>
-          const srv.CallToolResult(content: [srv.TextContent(text: 'ok')]),
+          srv.CallToolResult(content: [srv.TextContent(text: 'ok')]),
     );
     final serverTransport =
         br.TcpServerTransport({'host': 'localhost', 'port': port});

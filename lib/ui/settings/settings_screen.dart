@@ -217,7 +217,7 @@ class SettingsScreenState extends State<SettingsScreen> {
           // ── App info ─────────────────────────────────────────────────────
           _SectionTitle(S.get('settings.info')),
           // Kept in sync with pubspec.yaml `version` by hand.
-          const Text('App version: 0.1.3'),
+          const Text('App version: 0.1.6'),
           const Text(
             'Core DSL: ${MCPUIDSLVersion.current}',
             key: Key('settings.core_version'),
@@ -228,7 +228,7 @@ class SettingsScreenState extends State<SettingsScreen> {
             title: Text(S.get('settings.licenses')),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => OpenSourceLicenses.open(context,
-                appName: S.get('app.title'), version: '0.1.3'),
+                appName: S.get('app.title'), version: '0.1.6'),
           ),
               ],
             ),

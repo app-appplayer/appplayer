@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  appplayer_core: ^0.3.0
+  appplayer_core: ^0.4.1
   # Registers and opens the app's open-source notices; its tool/licenses
   # generators write assets/licenses/ (shared with Studio).
   open_source_licenses:
@@ -26,7 +26,7 @@ dependencies:
   # them. Vendored rather than path-consumed (lib/adapters/host_media/):
   # this tier ships from a public repository and a path dep reaching
   # outside it would not resolve for whoever checks that repo out.
-  flutter_mcp_ui_runtime: ^0.8.4
+  flutter_mcp_ui_runtime: ^0.8.6
   just_audio: ^0.10.6
   video_player: ^2.13.0
   webview_flutter: ^4.14.1
@@ -52,7 +52,7 @@ dependencies:
   collection: ^1.19.0
   # Desktop io capability (process + device adapters). dart:io-based, kept out
   # of web builds via the conditional import in lib/adapters/io_capability.dart.
-  mcp_bundle: ^0.4.9
+  mcp_bundle: ^0.4.11
   mcp_io: ^0.2.2
   # io drivers — the wiring in lib/adapters/io_drivers/ is vendored; these
   # are the real published driver packages it imports. process is desktop
@@ -71,8 +71,8 @@ dependencies:
   # is required. brain_kernel is already in the app's graph via
   # appplayer_core; it is direct here because the BLE entry API
   # (lib/adapters/ble_extension.dart) names KernelClientConnection.
-  mcp_client: ^2.1.0
-  brain_kernel: ^0.2.2
+  mcp_client: ^3.0.0
+  brain_kernel: ^0.3.0
   universal_ble: ^2.1.0
 
 dev_dependencies:
@@ -83,7 +83,7 @@ dev_dependencies:
   # dependency above, and declaring it twice is the same package with two
   # constraints to keep in step — the analyzer flags it, and the day they
   # drift the tests resolve a different runtime than the app does.
-  flutter_mcp_ui_core: ^0.6.9
+  flutter_mcp_ui_core: ^0.6.12
   # Test-only: the widget screen matrix reads the spec's widget registry to
   # enumerate every declared widget and its examples, so the suite cannot
   # quietly cover less than the spec declares.
@@ -95,10 +95,9 @@ dev_dependencies:
   mocktail: ^1.0.4
   # Extension-transport integration test only — the standard app injects an
   # mcp_bridge transport into appplayer_core's connectExtensionTransport.
-  # Resolved to the local checkout via pubspec_overrides.
-  mcp_bridge: any
-  mcp_server: ^2.1.1
-
+  # A pre-release, so it is named: `any` would never pick it.
+  mcp_bridge: ^0.2.0-rc.3
+  mcp_server: ^3.0.0
 flutter:
   uses-material-design: true
   assets:
