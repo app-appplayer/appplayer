@@ -11,7 +11,6 @@ import '../entry/entry_scan_screen.dart' show entryScanSupported;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../l10n/age_rating_label.dart';
 import '../../l10n/app_strings.dart';
 import '../../models/app_config.dart';
 import '../../models/apps_list_notifier.dart';
@@ -293,13 +292,12 @@ class _HomeScreenState extends State<HomeScreen> {
   /// sends nothing itself; without a mail app the address is shown instead.
   Future<void> _reportApp(AppConfig app, String address) async {
     final messenger = ScaffoldMessenger.of(context);
-    final rating = ageRatingLabel(app.ageRating);
     final uri = Uri(
       scheme: 'mailto',
       path: reportAddress,
       query: <String>[
         'subject=${Uri.encodeComponent(S.get('menu.report.subject').replaceAll(r'${name}', app.name))}',
-        'body=${Uri.encodeComponent(S.get('menu.report.body').replaceAll(r'${address}', address).replaceAll(r'${rating}', rating))}',
+        'body=${Uri.encodeComponent(S.get('menu.report.body').replaceAll(r'${address}', address))}',
       ].join('&'),
     );
     var opened = false;
@@ -781,16 +779,6 @@ class _AppIcon extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              if (app.ageRating != AgeRating.unrated)
-                Text(
-                  ageRatingLabel(app.ageRating),
-                  key: const Key('home.app.age'),
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontSize: 9,
-                        color: cs.onSurfaceVariant,
-                      ),
-                ),
             ],
           ),
         ),

@@ -17,21 +17,6 @@ enum DashboardLayout { grid, card }
 /// at open time in [_HomeScreenState._openApp].
 enum AppTrustLevel { untrusted, basic, elevated, full }
 
-/// The age rating a person puts on an app (FR-FORM-009). It is the person's
-/// own label — nothing checks it against what the app shows.
-enum AgeRating {
-  unrated(''),
-  everyone('All ages'),
-  age12('12+'),
-  age17('17+');
-
-  const AgeRating(this.label);
-
-  /// The short text shown on a tile and in the info dialog; empty when
-  /// unrated.
-  final String label;
-}
-
 /// Grid size preset for dashboard layout.
 enum DashboardSize {
   twoByTwo('2×2', 2, 2),
@@ -63,7 +48,6 @@ class AppConfig implements HasAppHandle {
     this.trustLevel = AppTrustLevel.basic,
     this.viewMode = ViewMode.auto,
     this.folder,
-    this.ageRating = AgeRating.unrated,
   });
 
   @override
@@ -132,9 +116,6 @@ class AppConfig implements HasAppHandle {
   /// when it sits on the home itself.
   final String? folder;
 
-  /// The age rating the person put on this app (FR-FORM-009).
-  final AgeRating ageRating;
-
   factory AppConfig.fromJson(Map<String, dynamic> json) {
     return AppConfig(
       id: json['id'] as String,
@@ -165,10 +146,6 @@ class AppConfig implements HasAppHandle {
       ),
       viewMode: ViewMode.parse(json['viewMode']),
       folder: normalizeFolderName(json['folder'] as String?),
-      ageRating: AgeRating.values.firstWhere(
-        (e) => e.name == json['ageRating'],
-        orElse: () => AgeRating.unrated,
-      ),
     );
   }
 
@@ -189,7 +166,6 @@ class AppConfig implements HasAppHandle {
         'trustLevel': trustLevel.name,
         if (viewMode != ViewMode.auto) 'viewMode': viewMode.value,
         if (folder != null) 'folder': folder,
-        if (ageRating != AgeRating.unrated) 'ageRating': ageRating.name,
       };
 
   /// This app moved into [name] — or out of any folder when it is null or
@@ -216,7 +192,6 @@ class AppConfig implements HasAppHandle {
     DashboardSize? dashboardSize,
     AppTrustLevel? trustLevel,
     ViewMode? viewMode,
-    AgeRating? ageRating,
   }) {
     return AppConfig(
       id: id ?? this.id,
@@ -235,7 +210,6 @@ class AppConfig implements HasAppHandle {
       trustLevel: trustLevel ?? this.trustLevel,
       viewMode: viewMode ?? this.viewMode,
       folder: folder,
-      ageRating: ageRating ?? this.ageRating,
     );
   }
 

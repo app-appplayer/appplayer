@@ -1,4 +1,4 @@
-// FR-FORM-009 age rating · FR-HOME-013 a blocked address is not registered.
+// FR-HOME-013 a blocked address is not registered.
 import 'package:appplayer/adapters/blocked_servers.dart';
 import 'package:appplayer/adapters/prefs_apps_registry.dart';
 import 'package:appplayer/app/app_settings.dart';
@@ -90,46 +90,6 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
   }
-
-  testWidgets('the age rating is offered for a server and a bundle, not a '
-      'dashboard', (tester) async {
-    await pumpForm(tester);
-    final age = find.byKey(const Key('app_form.age_rating'));
-    await tester.ensureVisible(age);
-    expect(age, findsOneWidget);
-
-    Finder segment(String label) => find.descendant(
-        of: find.byKey(const Key('app_form.type')), matching: find.text(label));
-
-    await tester.ensureVisible(segment('Bundle'));
-    await tester.tap(segment('Bundle'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('app_form.age_rating')), findsOneWidget);
-
-    await tester.ensureVisible(segment('Dashboard'));
-    await tester.tap(segment('Dashboard'));
-    await tester.pumpAndSettle();
-    // The dashboard form is showing, and it has no age rating.
-    expect(find.byKey(const Key('app_form.connections')), findsOneWidget);
-    expect(find.byKey(const Key('app_form.age_rating')), findsNothing);
-  });
-
-  testWidgets('a chosen rating is saved with the app', (tester) async {
-    await pumpForm(tester);
-    await chooseSse(tester, 'https://ok.example/sse');
-    final age = find.byKey(const Key('app_form.age_rating'));
-    await tester.ensureVisible(age);
-    await tester.pumpAndSettle();
-    await tester.tap(age);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('12+').last);
-    await tester.pumpAndSettle();
-    await save(tester);
-
-    expect(registry.value, hasLength(1));
-    expect(registry.value.single.ageRating, AgeRating.age12);
-    verify(() => core.saveServer(any())).called(1);
-  });
 
   testWidgets('a blocked address is refused and nothing is saved',
       (tester) async {

@@ -1,4 +1,4 @@
-// FR-HOME-012 report · FR-HOME-013 block · FR-FORM-009 age rating on the home.
+// FR-HOME-012 report · FR-HOME-013 block on the home.
 import 'package:appplayer/adapters/blocked_servers.dart';
 import 'package:appplayer/adapters/prefs_apps_registry.dart';
 import 'package:appplayer/app/app_settings.dart';
@@ -54,13 +54,12 @@ void main() {
         transportConfig: <String, dynamic>{'serverUrl': url},
       );
 
-  AppConfig serverApp(String id, {AgeRating rating = AgeRating.unrated}) =>
+  AppConfig serverApp(String id) =>
       AppConfig(
         id: id,
         name: 'Server $id',
         type: AppType.server,
         serverConfigId: id,
-        ageRating: rating,
       );
 
   setUpAll(() {
@@ -72,52 +71,6 @@ void main() {
     stubCoreLifecycle(core);
     when(() => core.closeApp(any())).thenAnswer((_) async {});
     when(() => core.deleteServer(any())).thenAnswer((_) async {});
-  });
-
-  group('age rating', () {
-    test('is stored with the app; unrated writes no key', () {
-      final rated = serverApp('a', rating: AgeRating.age12);
-      expect(rated.toJson()['ageRating'], 'age12');
-      expect(AppConfig.decodeList(AppConfig.encodeList([rated])).single.ageRating,
-          AgeRating.age12);
-      expect(serverApp('b').toJson().containsKey('ageRating'), isFalse);
-    });
-
-    test('an entry from before the field reads as unrated', () {
-      final json = serverApp('a').toJson()..remove('ageRating');
-      expect(AppConfig.fromJson(json).ageRating, AgeRating.unrated);
-    });
-
-    test('an unknown stored value reads as unrated', () {
-      final json = serverApp('a').toJson()..['ageRating'] = 'age99';
-      expect(AppConfig.fromJson(json).ageRating, AgeRating.unrated);
-    });
-
-    test('moving to a folder keeps it', () {
-      final moved = serverApp('a', rating: AgeRating.age17).withFolder('Work');
-      expect(moved.ageRating, AgeRating.age17);
-    });
-
-    testWidgets('a rated app shows its label under the name; unrated none',
-        (tester) async {
-      await pumpHome(tester, [
-        serverApp('a', rating: AgeRating.age12),
-        serverApp('b'),
-      ]);
-      expect(
-        find.descendant(
-            of: find.byKey(const Key('home.app.a')),
-            matching: find.byKey(const Key('home.app.age'))),
-        findsOneWidget,
-      );
-      expect(find.text('12+'), findsOneWidget);
-      expect(
-        find.descendant(
-            of: find.byKey(const Key('home.app.b')),
-            matching: find.byKey(const Key('home.app.age'))),
-        findsNothing,
-      );
-    });
   });
 
   group('app menu', () {

@@ -4,14 +4,11 @@
   Report (a mail draft to `support@makemind.app` with its address) and Block
   (removes the app and refuses the same address until it is unblocked) in its
   menu. Blocked servers are listed in Settings, where each can be unblocked.
-- **Age rating.** A server or bundle app can carry an age label you choose
-  (all ages, 12+, 17+). It shows under the name on its tile and in its info
-  dialog.
 - **Fewer Android permissions.** The foreground-service permissions, the
   keep-alive service and the exact-alarm permission are no longer declared.
   A scheduled notification is delivered at an inexact time.
 - **App icon** on iOS and Android (adaptive icon on Android 8 and later); the
-  Android app name is `AppPlayer`. Build number `6` (`0.1.6+6`).
+  Android app name is `AppPlayer`. Build number `7` (`0.1.6+7`).
 - **The scan button is a plain QR reader.** It shows what the code holds and
   offers what fits: *Install* for a `.mcpb` link and *Add as server* for any
   other web link, each opening the add-app form with the address filled in,

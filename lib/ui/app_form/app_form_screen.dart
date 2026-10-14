@@ -12,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../adapters/console_logger.dart';
 import '../../entry/qr_content.dart';
-import '../../l10n/age_rating_label.dart';
 import '../../l10n/app_strings.dart';
 import '../../models/app_config.dart';
 import 'server_config_dialog.dart';
@@ -88,9 +87,6 @@ class _AppFormScreenState extends State<AppFormScreen> {
   AppTrustLevel _trustLevel = AppTrustLevel.basic;
   ViewMode _viewMode = ViewMode.auto;
 
-  // The person's own age label for the app (FR-FORM-009).
-  AgeRating _ageRating = AgeRating.unrated;
-
   // Populated once we load existing servers for the connection picker
   List<ServerConfig> _availableServers = <ServerConfig>[];
 
@@ -156,7 +152,6 @@ class _AppFormScreenState extends State<AppFormScreen> {
     _selectedType = cfg.type;
     _trustLevel = cfg.trustLevel;
     _viewMode = cfg.viewMode;
-    _ageRating = cfg.ageRating;
     switch (cfg.type) {
       case AppType.server:
         _nameCtrl.text = cfg.name;
@@ -526,7 +521,6 @@ class _AppFormScreenState extends State<AppFormScreen> {
           serverConfigId: id, // 1-to-1 mapping: appId == serverConfigId
           trustLevel: _trustLevel,
           viewMode: _viewMode,
-          ageRating: _ageRating,
         );
       case AppType.bundle:
         final bundleId = _installedBundleId!;
@@ -548,7 +542,6 @@ class _AppFormScreenState extends State<AppFormScreen> {
           bundleVersion: _installedBundleVersion,
           trustLevel: _trustLevel,
           viewMode: _viewMode,
-          ageRating: _ageRating,
         );
       case AppType.dashboard:
         return AppConfig(
@@ -674,12 +667,6 @@ class _AppFormScreenState extends State<AppFormScreen> {
                 if (_selectedType == AppType.server) _buildServerFields(),
                 if (_selectedType == AppType.bundle) _buildBundleFields(),
                 if (_selectedType == AppType.dashboard) _buildDashboardFields(),
-
-                // ── Age rating (server and bundle apps) ─────────────────────────
-                if (_selectedType != AppType.dashboard) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  _buildAgeRatingSelector(),
-                ],
 
                 // ── Trust level ──────────────────────────────────────────────────
                 const SizedBox(height: AppSpacing.lg),
@@ -1069,43 +1056,6 @@ class _AppFormScreenState extends State<AppFormScreen> {
   /// * **basic** — system info, notification, clipboard read
   /// * **elevated** — file read, HTTP, clipboard write
   /// * **full** — file write, shell exec
-  Widget _buildAgeRatingSelector() {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(S.get('form.age'), style: theme.textTheme.titleSmall),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          S.get('form.age.help'),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        DropdownButtonFormField<AgeRating>(
-          key: const Key('app_form.age_rating'),
-          initialValue: _ageRating,
-          isExpanded: true,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
-          items: <DropdownMenuItem<AgeRating>>[
-            for (final r in AgeRating.values)
-              DropdownMenuItem(
-                value: r,
-                child: Text(
-                  ageRatingLabel(r),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-          ],
-          onChanged: (v) {
-            if (v != null) setState(() => _ageRating = v);
-          },
-        ),
-      ],
-    );
-  }
-
   Widget _buildTrustLevelSelector() {
     final theme = Theme.of(context);
     return Column(
