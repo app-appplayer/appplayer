@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'dart:io';
 
-import 'package:appplayer/adapters/blocked_servers.dart';
 import 'package:appplayer_core/appplayer_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -332,15 +331,6 @@ class _AppFormScreenState extends State<AppFormScreen> {
     // async gaps (the bundle install + manifest dialog awaits push state
     // off the BuildContext).
     final appsRegistry = context.read<AppsRegistry<AppConfig>>();
-
-    // A blocked server address is not registered again (FR-HOME-013).
-    if (_selectedType == AppType.server) {
-      final blocked = await BlockedServers.open();
-      if (blocked.isServerBlocked(_buildServerConfig(id: 'check'))) {
-        _showError(S.get('form.blocked'));
-        return;
-      }
-    }
 
     if (_selectedType == AppType.bundle) {
       final proceed = await _showManifestDialog();

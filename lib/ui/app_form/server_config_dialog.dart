@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:appplayer/adapters/blocked_servers.dart';
 import 'package:appplayer_core/appplayer_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +93,7 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
     }
   }
 
-  Future<void> _submit() async {
+  void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final cfg = ServerConfig(
       id: widget.initial?.id ?? _generateId(),
@@ -103,14 +102,6 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
       transportType: _transportType,
       transportConfig: _buildTransportConfig(),
     );
-    // A blocked server address is not added again (FR-HOME-013).
-    final blocked = await BlockedServers.open();
-    if (!mounted) return;
-    if (blocked.isServerBlocked(cfg)) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(S.get('form.blocked'))));
-      return;
-    }
     Navigator.of(context).pop(cfg);
   }
 

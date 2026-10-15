@@ -8,7 +8,6 @@ import '../../adapters/secure_credential_vault.dart';
 import '../../adapters/shared_prefs_server_storage.dart';
 import '../../app/app_settings.dart';
 import '../../l10n/app_strings.dart';
-import 'blocked_servers_screen.dart';
 
 /// MOD-UI-005 — global app settings: theme, locale, log level, data reset.
 class SettingsScreen extends StatefulWidget {
@@ -214,20 +213,6 @@ class SettingsScreenState extends State<SettingsScreen> {
             ),
             const Divider(),
           ],
-
-          // ── Blocked servers (FR-SET-008) ─────────────────────────────────
-          ListTile(
-            key: const Key('settings.blocked'),
-            contentPadding: EdgeInsets.zero,
-            title: Text(S.get('settings.blocked')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const BlockedServersScreen(),
-              ),
-            ),
-          ),
-          const Divider(),
 
           // ── App info ─────────────────────────────────────────────────────
           _SectionTitle(S.get('settings.info')),

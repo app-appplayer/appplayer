@@ -1,5 +1,4 @@
 import 'package:appplayer/adapters/app_folders/app_folders.dart';
-import 'package:appplayer/adapters/blocked_servers.dart';
 import 'package:appplayer_core/appplayer_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,6 @@ import 'package:provider/provider.dart';
 import '../../entry/entry_outcome_router.dart';
 import '../entry/entry_scan_screen.dart' show entryScanSupported;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../l10n/app_strings.dart';
 import '../../models/app_config.dart';
@@ -106,11 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Shows a context menu on long-press with edit / delete options.
-  Future<void> _showAppMenu(BuildContext ctx, AppConfig app) async {
-    // Report and block apply to a server reached over the network; the
-    // address comes from its stored configuration (FR-HOME-012 / 013).
-    final address = await _serverAddressOf(app);
-    if (!mounted || !ctx.mounted) return;
+  void _showAppMenu(BuildContext ctx, AppConfig app) {
     final renderBox = ctx.findRenderObject()! as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
@@ -213,32 +207,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        if (address != null)
-          PopupMenuItem(
-            height: 28,
-            value: 'report',
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              children: [
-                Icon(Icons.flag_outlined, size: 14, color: Theme.of(ctx).colorScheme.onSurface),
-                const SizedBox(width: 6),
-                Text(S.get('menu.report'), style: const TextStyle(fontSize: 12)),
-              ],
-            ),
-          ),
-        if (address != null)
-          PopupMenuItem(
-            height: 28,
-            value: 'block',
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              children: [
-                Icon(Icons.block, size: 14, color: Theme.of(ctx).colorScheme.error),
-                const SizedBox(width: 6),
-                Text(S.get('menu.block'), style: TextStyle(fontSize: 12, color: Theme.of(ctx).colorScheme.error)),
-              ],
-            ),
-          ),
         PopupMenuItem(
           height: 28,
           value: 'delete',
@@ -266,85 +234,10 @@ class _HomeScreenState extends State<HomeScreen> {
         await _moveToFolder(app);
       } else if (value == 'disconnect') {
         _disconnectApp(app);
-      } else if (value == 'report' && address != null) {
-        await _reportApp(app, address);
-      } else if (value == 'block' && address != null) {
-        await _blockApp(app, address);
       } else if (value == 'delete') {
         _deleteApp(app);
       }
     });
-  }
-
-  /// The network address of a server app, or null when [app] is not a server
-  /// or has none (a local process).
-  Future<String?> _serverAddressOf(AppConfig app) async {
-    if (app.type != AppType.server) return null;
-    final core = context.read<AppPlayerCoreService>();
-    final server = await core.getServer(app.serverConfigId ?? app.id);
-    return server == null ? null : BlockedServers.addressOf(server);
-  }
-
-  /// Address reports are sent to (FR-HOME-012).
-  static const String reportAddress = 'support@makemind.app';
-
-  /// Opens a mail draft to [reportAddress] about [app] (FR-HOME-012). The app
-  /// sends nothing itself; without a mail app the address is shown instead.
-  Future<void> _reportApp(AppConfig app, String address) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final uri = Uri(
-      scheme: 'mailto',
-      path: reportAddress,
-      query: <String>[
-        'subject=${Uri.encodeComponent(S.get('menu.report.subject').replaceAll(r'${name}', app.name))}',
-        'body=${Uri.encodeComponent(S.get('menu.report.body').replaceAll(r'${address}', address))}',
-      ].join('&'),
-    );
-    var opened = false;
-    try {
-      opened = await launchUrl(uri);
-    } catch (_) {
-      opened = false;
-    }
-    if (!opened) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            S.get('menu.report.nomail').replaceAll(r'${address}', reportAddress),
-          ),
-        ),
-      );
-    }
-  }
-
-  /// Blocks the server behind [app] and removes the app (FR-HOME-013).
-  Future<void> _blockApp(AppConfig app, String address) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(S.get('menu.block.title')),
-        content: Text(S.get('menu.block.content').replaceAll(r'${name}', app.name)),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(S.get('menu.delete.cancel')),
-          ),
-          TextButton(
-            key: const Key('home.block.confirm'),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(S.get('menu.block.confirm')),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-    final blocked = await BlockedServers.open();
-    await blocked.block(address, name: app.name);
-    await _removeApp(app);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(S.get('menu.block.done'))),
-    );
   }
 
   static AppFolderLabels get _folderLabels => AppFolderLabels(
@@ -468,6 +361,10 @@ class _HomeScreenState extends State<HomeScreen> {
   /// runtime is left live, reinstalling the same id later would reuse
   /// the cached runtime and render the prior (now stale) definition.
   Future<void> _deleteApp(AppConfig app) async {
+    final core = context.read<AppPlayerCoreService>();
+    // Capture the registry up front so we don't reach for `context` after
+    // an async gap (the close-session step awaits a runtime tear-down).
+    final appsRegistry = context.read<AppsRegistry<AppConfig>>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -486,16 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     if (confirmed != true) return;
-    await _removeApp(app);
-  }
 
-  /// The removal itself (FR-HOME-009 steps 1–3), without asking. Block uses
-  /// it after its own confirmation.
-  Future<void> _removeApp(AppConfig app) async {
-    final core = context.read<AppPlayerCoreService>();
-    // Capture the registry up front so we don't reach for `context` after
-    // an async gap (the close-session step awaits a runtime tear-down).
-    final appsRegistry = context.read<AppsRegistry<AppConfig>>();
     try {
       // 1. Close active session — drops runtime cache, disconnects server
       //    transport, unsubscribes resources. Silent failure here is OK:
