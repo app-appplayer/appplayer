@@ -28,13 +28,13 @@ void main() {
     expect(find.text('https://e.example/mcp'), findsOneWidget);
     expect(find.byKey(const Key('scan.add_server')), findsOneWidget);
     expect(find.byKey(const Key('scan.open_link')), findsOneWidget);
-    expect(find.byKey(const Key('scan.add_bundle')), findsNothing);
+    expect(find.byKey(const Key('scan.install')), findsNothing);
     expect(find.byKey(const Key('scan.again')), findsOneWidget);
   });
 
-  testWidgets('a bundle link offers Add bundle', (tester) async {
+  testWidgets('a bundle link offers Install', (tester) async {
     await pumpDialog(tester, QrContent.classify('https://e.example/a.mcpb'));
-    expect(find.byKey(const Key('scan.add_bundle')), findsOneWidget);
+    expect(find.byKey(const Key('scan.install')), findsOneWidget);
     expect(find.byKey(const Key('scan.add_server')), findsNothing);
     expect(find.byKey(const Key('scan.open_link')), findsNothing);
   });
@@ -47,7 +47,7 @@ void main() {
     expect(find.byKey(const Key('scan.again')), findsOneWidget);
     expect(find.byKey(const Key('scan.add_server')), findsNothing);
     expect(find.byKey(const Key('scan.open_link')), findsNothing);
-    expect(find.byKey(const Key('scan.add_bundle')), findsNothing);
+    expect(find.byKey(const Key('scan.install')), findsNothing);
   });
 
   testWidgets('Scan again closes the dialog', (tester) async {
