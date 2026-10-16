@@ -81,6 +81,55 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
+  // TC-ONB-004 — bottom row: back, page dots, next / start
+  // ---------------------------------------------------------------------------
+
+  group('TC-ONB-004 back, dots, next', () {
+    testWidgets('no back on page 1; back goes to the page before',
+        (tester) async {
+      final settings = await makeSettings(onboardingCompleted: false);
+      await tester.pumpWidget(_wrap(settings: settings));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('onboarding.previous')), findsNothing);
+
+      await _tapNext(tester);
+      expect(find.byKey(const Key('onboarding.previous')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('onboarding.previous')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('onboarding.previous')), findsNothing);
+      expect(find.byKey(const Key('onboarding.dot.0.on')), findsOneWidget);
+    });
+
+    testWidgets('three dots, only the current page filled', (tester) async {
+      final settings = await makeSettings(onboardingCompleted: false);
+      await tester.pumpWidget(_wrap(settings: settings));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('onboarding.dot.0.on')), findsOneWidget);
+      expect(find.byKey(const Key('onboarding.dot.1')), findsOneWidget);
+      expect(find.byKey(const Key('onboarding.dot.2')), findsOneWidget);
+
+      await _tapNext(tester);
+      expect(find.byKey(const Key('onboarding.dot.1.on')), findsOneWidget);
+      expect(find.byKey(const Key('onboarding.dot.0')), findsOneWidget);
+    });
+
+    testWidgets('next and start sit at the right edge, back at the left',
+        (tester) async {
+      final settings = await makeSettings(onboardingCompleted: false);
+      await tester.pumpWidget(_wrap(settings: settings));
+      await tester.pumpAndSettle();
+      await _tapNext(tester);
+      final width =
+          tester.view.physicalSize.width / tester.view.devicePixelRatio;
+      final next = tester.getCenter(find.byKey(const Key('onboarding.next')));
+      final back =
+          tester.getCenter(find.byKey(const Key('onboarding.previous')));
+      expect(next.dx, greaterThan(width / 2));
+      expect(back.dx, lessThan(width / 2));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // TC-ONB-002 — "Start" tap → markOnboardingCompleted called
   // ---------------------------------------------------------------------------
 

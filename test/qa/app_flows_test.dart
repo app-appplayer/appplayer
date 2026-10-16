@@ -338,7 +338,7 @@ void main() {
       // Theme -> dark.
       final darkSegment = find.descendant(
         of: find.byKey(const Key('settings.theme')),
-        matching: find.text('dark'),
+        matching: find.text('Dark'),
       );
       await tester.tap(darkSegment);
       await _settle(tester);
@@ -380,7 +380,7 @@ void main() {
       // Toggle theme.
       await tester.tap(find.descendant(
         of: find.byKey(const Key('settings.theme')),
-        matching: find.text('dark'),
+        matching: find.text('Dark'),
       ));
       await _settle(tester);
 

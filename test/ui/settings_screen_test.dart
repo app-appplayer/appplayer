@@ -93,7 +93,7 @@ void main() {
         // The default theme is ThemeMode.system — tap 'dark' to change it.
         final darkSegment = find.descendant(
           of: find.byKey(const Key('settings.theme')),
-          matching: find.text('dark'),
+          matching: find.text('Dark'),
         );
         expect(darkSegment, findsOneWidget);
         await tester.tap(darkSegment);
@@ -102,6 +102,41 @@ void main() {
         expect(settings.themeMode, ThemeMode.dark);
       },
     );
+  });
+
+  // -------------------------------------------------------------------------
+  // TC-SET-001b — View mode is a dropdown with translated labels
+  // -------------------------------------------------------------------------
+
+  group('TC-SET-001b view mode dropdown', () {
+    testWidgets('choosing Compact from the dropdown pins the view mode',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'settings.onboarding_completed': true,
+      });
+      final settings = await makeSettings();
+      final List<SingleChildWidget> extra = [
+        Provider<SharedPrefsServerStorage>.value(value: storage),
+        Provider<SecureCredentialVault>.value(value: vault),
+      ];
+      await tester.pumpWidget(
+        wrapScreenWithGoRouter(
+          child: const SettingsScreen(),
+          core: core,
+          settings: settings,
+          extraProviders: extra,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SegmentedButton<ViewMode>), findsNothing);
+      await tester.tap(find.byKey(const Key('settings.view_mode')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Compact').last);
+      await tester.pumpAndSettle();
+
+      expect(settings.defaultViewMode, ViewMode.compact);
+    });
   });
 
   // -------------------------------------------------------------------------

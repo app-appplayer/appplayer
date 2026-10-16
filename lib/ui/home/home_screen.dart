@@ -1,4 +1,5 @@
 import 'package:appplayer/adapters/app_folders/app_folders.dart';
+import 'package:appplayer/adapters/open_source_licenses/open_source_licenses.dart';
 import 'package:appplayer_core/appplayer_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       setState(() => _loaded = true);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.get('home.load.fail').replaceAll(r'${error}', '$e'))),
+        SnackBar(
+            content:
+                Text(S.get('home.load.fail').replaceAll(r'${error}', '$e'))),
       );
     }
   }
@@ -141,7 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             children: [
-              Icon(Icons.info_outline, size: 14, color: Theme.of(ctx).colorScheme.onSurface),
+              Icon(Icons.info_outline,
+                  size: 14, color: Theme.of(ctx).colorScheme.onSurface),
               const SizedBox(width: 6),
               Text(S.get('home.info'), style: const TextStyle(fontSize: 12)),
             ],
@@ -153,7 +157,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             children: [
-              Icon(Icons.settings_outlined, size: 14, color: Theme.of(ctx).colorScheme.onSurface),
+              Icon(Icons.settings_outlined,
+                  size: 14, color: Theme.of(ctx).colorScheme.onSurface),
               const SizedBox(width: 6),
               Text(S.get('menu.edit'), style: const TextStyle(fontSize: 12)),
             ],
@@ -203,7 +208,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Theme.of(ctx).colorScheme.onSurface,
               ),
               const SizedBox(width: 6),
-              Text(S.get('menu.disconnect'), style: const TextStyle(fontSize: 12)),
+              Text(S.get('menu.disconnect'),
+                  style: const TextStyle(fontSize: 12)),
             ],
           ),
         ),
@@ -213,9 +219,12 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             children: [
-              Icon(Icons.delete_outline, size: 14, color: Theme.of(ctx).colorScheme.error),
+              Icon(Icons.delete_outline,
+                  size: 14, color: Theme.of(ctx).colorScheme.error),
               const SizedBox(width: 6),
-              Text(S.get('menu.delete'), style: TextStyle(fontSize: 12, color: Theme.of(ctx).colorScheme.error)),
+              Text(S.get('menu.delete'),
+                  style: TextStyle(
+                      fontSize: 12, color: Theme.of(ctx).colorScheme.error)),
             ],
           ),
         ),
@@ -256,7 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final registry = context.read<AppsRegistry<AppConfig>>();
     final choice = await showMoveToFolderDialog(
       context,
-      existing: FolderLayout<AppConfig>.of(registry.value, (a) => a.folder).names,
+      existing:
+          FolderLayout<AppConfig>.of(registry.value, (a) => a.folder).names,
       current: app.folder,
       labels: _folderLabels,
     );
@@ -290,7 +300,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onLongPress: (iconCtx) => _showAppMenu(iconCtx, app),
           ),
           onRename: (from, to) async {
-            for (final a in registry.value.where((a) => a.folder == from).toList()) {
+            for (final a
+                in registry.value.where((a) => a.folder == from).toList()) {
               await registry.update(a.withFolder(to));
             }
           },
@@ -321,7 +332,9 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.get('menu.disconnect.fail').replaceAll(r'${error}', '$e'))),
+        SnackBar(
+            content: Text(
+                S.get('menu.disconnect.fail').replaceAll(r'${error}', '$e'))),
       );
     }
   }
@@ -369,7 +382,8 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (_) => AlertDialog(
         title: Text(S.get('menu.delete.title')),
-        content: Text(S.get('menu.delete.content').replaceAll(r'${name}', app.name)),
+        content:
+            Text(S.get('menu.delete.content').replaceAll(r'${name}', app.name)),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -394,7 +408,10 @@ class _HomeScreenState extends State<HomeScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(S.get('home.session.close.fail').replaceAll(r'${error}', '$e'))),
+            SnackBar(
+                content: Text(S
+                    .get('home.session.close.fail')
+                    .replaceAll(r'${error}', '$e'))),
           );
         }
       }
@@ -406,7 +423,10 @@ class _HomeScreenState extends State<HomeScreen> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(S.get('home.bundle.remove.fail').replaceAll(r'${error}', '$e'))),
+              SnackBar(
+                  content: Text(S
+                      .get('home.bundle.remove.fail')
+                      .replaceAll(r'${error}', '$e'))),
             );
           }
         }
@@ -417,7 +437,10 @@ class _HomeScreenState extends State<HomeScreen> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(S.get('home.server_config.remove.fail').replaceAll(r'${error}', '$e'))),
+              SnackBar(
+                  content: Text(S
+                      .get('home.server_config.remove.fail')
+                      .replaceAll(r'${error}', '$e'))),
             );
           }
         }
@@ -436,7 +459,9 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.get('menu.delete.fail').replaceAll(r'${error}', '$e'))),
+        SnackBar(
+            content:
+                Text(S.get('menu.delete.fail').replaceAll(r'${error}', '$e'))),
       );
     }
   }
@@ -445,7 +470,36 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AppPlayer'),
+        // The logo, the name, and a small ⓘ for the open-source notices
+        // (reachable from the first screen, not buried in settings).
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/appplayer_logo.png',
+                width: 28,
+                height: 28,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text('AppPlayer'),
+            IconButton(
+              key: const Key('home.licenses'),
+              tooltip: S.get('settings.licenses'),
+              visualDensity: VisualDensity.compact,
+              iconSize: 18,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              icon: const Icon(Icons.info_outline),
+              onPressed: () => OpenSourceLicenses.open(
+                context,
+                appName: S.get('app.title'),
+                version: '0.1.6',
+              ),
+            ),
+          ],
+        ),
         actions: <Widget>[
           // Scanning is an acquisition source for an entry (§9.2). It sits
           // in the chrome rather than behind a setting because a code in
@@ -551,7 +605,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: _AppIcon.tileWidth,
                   iconSize: _AppIcon.iconBoxSize,
                   previews: [
-                    for (final app in apps.take(4)) _AppIcon.preview(context, app),
+                    for (final app in apps.take(4))
+                      _AppIcon.preview(context, app),
                   ],
                   onTap: () => _openFolder(name),
                 ),
@@ -612,9 +667,11 @@ class _AppIcon extends StatelessWidget {
 
   /// The app's icon alone, for a folder tile's preview.
   static Widget preview(BuildContext context, AppConfig app) {
-    final tile = _AppIcon(app: app, active: false, onTap: () {}, onLongPress: (_) {});
+    final tile =
+        _AppIcon(app: app, active: false, onTap: () {}, onLongPress: (_) {});
     return tile._buildIcon(context, Theme.of(context).colorScheme);
   }
+
   static const double _badgeSize = 12;
 
   /// Default fallback icon per app type.
@@ -653,24 +710,24 @@ class _AppIcon extends StatelessWidget {
           onTap: onTap,
           onLongPress: () => onLongPress(context),
           borderRadius: BorderRadius.circular(_iconRadius),
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              _buildIcon(context, cs),
-              const SizedBox(height: 4),
-              Text(
-                app.name,
-                maxLines: 2,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                _buildIcon(context, cs),
+                const SizedBox(height: 4),
+                Text(
+                  app.name,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -682,7 +739,8 @@ class _AppIcon extends StatelessWidget {
       width: _iconBoxSize,
       height: _iconBoxSize,
       decoration: BoxDecoration(
-        color: hasNetworkIcon ? null : _fallbackColor(cs).withValues(alpha: 0.12),
+        color:
+            hasNetworkIcon ? null : _fallbackColor(cs).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(_iconRadius),
       ),
       clipBehavior: Clip.antiAlias,

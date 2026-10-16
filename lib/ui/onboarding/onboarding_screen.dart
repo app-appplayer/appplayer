@@ -46,7 +46,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                 onPageChanged: (i) => setState(() => _index = i),
                 children: <Widget>[
                   _Page(
-                    icon: Icons.play_circle_outline,
+                    logo: 'assets/images/appplayer_logo.png',
                     title: S.get('onboarding.intro.title'),
                     body: S.get('onboarding.intro.body'),
                   ),
@@ -66,23 +66,48 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: AppSpacing.screenPadding,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  if (_index < 2)
-                    TextButton(
-                      key: const Key('onboarding.next'),
-                      onPressed: () => _pages.nextPage(
-                        duration: AppMotion.normal,
-                        curve: AppMotion.standard,
-                      ),
-                      child: Text(S.get('onboarding.next')),
-                    )
-                  else
-                    FilledButton(
-                      key: const Key('onboarding.start'),
-                      onPressed: () => _finish(context),
-                      child: Text(S.get('onboarding.start')),
+                  // Back on the left (none on the first page, the space stays
+                  // so the dots remain centred), the dots in the middle, and
+                  // next / start on the right.
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: _index == 0
+                          ? const SizedBox.shrink()
+                          : TextButton(
+                              key: const Key('onboarding.previous'),
+                              onPressed: () => _pages.previousPage(
+                                duration: AppMotion.normal,
+                                curve: AppMotion.standard,
+                              ),
+                              child: Text(S.get('onboarding.previous')),
+                            ),
                     ),
+                  ),
+                  _Dots(
+                      key: const Key('onboarding.dots'),
+                      count: 3,
+                      index: _index),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: _index < 2
+                          ? TextButton(
+                              key: const Key('onboarding.next'),
+                              onPressed: () => _pages.nextPage(
+                                duration: AppMotion.normal,
+                                curve: AppMotion.standard,
+                              ),
+                              child: Text(S.get('onboarding.next')),
+                            )
+                          : FilledButton(
+                              key: const Key('onboarding.start'),
+                              onPressed: () => _finish(context),
+                              child: Text(S.get('onboarding.start')),
+                            ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -95,12 +120,16 @@ class OnboardingScreenState extends State<OnboardingScreen> {
 
 class _Page extends StatelessWidget {
   const _Page({
-    required this.icon,
+    this.icon,
+    this.logo,
     required this.title,
     required this.body,
   });
 
-  final IconData icon;
+  final IconData? icon;
+
+  /// An image shown in place of [icon] (the app's logo on the first page).
+  final String? logo;
   final String title;
   final String body;
 
@@ -112,13 +141,49 @@ class _Page extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           // Onboarding hero icon uses 1.5× the xl token (48 → 72).
-          Icon(icon, size: AppIconSizes.xl * 1.5),
+          if (logo != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(logo!, width: 112, height: 112),
+            )
+          else
+            Icon(icon, size: AppIconSizes.xl * 1.5),
           const SizedBox(height: AppSpacing.base),
           Text(title, style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: AppSpacing.md),
           Text(body, textAlign: TextAlign.center),
         ],
       ),
+    );
+  }
+}
+
+/// The page dots: the current page filled, the others outlined.
+class _Dots extends StatelessWidget {
+  const _Dots({super.key, required this.count, required this.index});
+
+  final int count;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.primary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        for (var i = 0; i < count; i++)
+          Container(
+            key: Key('onboarding.dot.$i${i == index ? '.on' : ''}'),
+            width: 10,
+            height: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: i == index ? color : Colors.transparent,
+              border: Border.all(color: color, width: 1.5),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -93,6 +93,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/appplayer_logo.png
     # Notices for native code Flutter does not collect — generated, see
     # open_source_licenses recipe tool/licenses.
     - path: assets/licenses/android.json

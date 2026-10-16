@@ -1,5 +1,4 @@
 import 'package:appplayer_core/appplayer_core.dart';
-import 'package:appplayer/adapters/open_source_licenses/open_source_licenses.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -56,7 +55,9 @@ class SettingsScreenState extends State<SettingsScreen> {
     await settings.resetToDefaults();
     final msg = errors.isEmpty
         ? S.get('settings.reset.done')
-        : S.get('settings.reset.partial').replaceAll('\${errors}', errors.join(', '));
+        : S
+            .get('settings.reset.partial')
+            .replaceAll('\${errors}', errors.join(', '));
     messenger.showSnackBar(SnackBar(content: Text(msg)));
   }
 
@@ -68,7 +69,8 @@ class SettingsScreenState extends State<SettingsScreen> {
     // On expanded / large windows, cap settings to a readable column
     // width — a 2000-px-wide list of controls reads as cold. Compact /
     // medium keep the full-width list native to mobile.
-    final maxListWidth = formFactor.isExpandedOrLarger ? 720.0 : double.infinity;
+    final maxListWidth =
+        formFactor.isExpandedOrLarger ? 720.0 : double.infinity;
 
     return Scaffold(
       appBar: AppBar(title: Text(S.get('settings.title'))),
@@ -81,155 +83,172 @@ class SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-          // ── Display ──────────────────────────────────────────────────────
-          _SectionTitle(S.get('settings.display')),
-          SegmentedButton<ThemeMode>(
-            key: const Key('settings.theme'),
-            segments: const <ButtonSegment<ThemeMode>>[
-              ButtonSegment(value: ThemeMode.system, label: Text('system')),
-              ButtonSegment(value: ThemeMode.light, label: Text('light')),
-              ButtonSegment(value: ThemeMode.dark, label: Text('dark')),
-            ],
-            selected: <ThemeMode>{settings.themeMode},
-            onSelectionChanged: (s) => settings.setThemeMode(s.first),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // ── View mode ────────────────────────────────────────────────────
-          // Pins the global form factor. `auto` defers to MediaQuery;
-          // other values override regardless of window width, with per-app
-          // pins taking higher priority. The secondary label shows the
-          // currently resolved class when `auto` is selected so the user
-          // sees which physical form factor is in effect right now.
-          _SectionTitle(S.get('settings.view_mode')),
-          SegmentedButton<ViewMode>(
-            key: const Key('settings.view_mode'),
-            segments: const <ButtonSegment<ViewMode>>[
-              ButtonSegment(value: ViewMode.auto, label: Text('auto')),
-              ButtonSegment(value: ViewMode.compact, label: Text('compact')),
-              ButtonSegment(value: ViewMode.medium, label: Text('medium')),
-              ButtonSegment(value: ViewMode.expanded, label: Text('expanded')),
-              ButtonSegment(value: ViewMode.large, label: Text('large')),
-            ],
-            selected: <ViewMode>{settings.defaultViewMode},
-            onSelectionChanged: (s) => settings.setDefaultViewMode(s.first),
-          ),
-          if (settings.defaultViewMode == ViewMode.auto)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
-              child: Text(
-                S.get('settings.viewmode.auto.current').replaceAll(
-                    r'${mode}', FormFactor.of(context).name),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          const SizedBox(height: AppSpacing.md),
-          _SectionTitle(S.get('settings.language')),
-          DropdownButton<String>(
-            key: const Key('settings.locale'),
-            value: settings.locale.languageCode,
-            isExpanded: true,
-            items: [
-              DropdownMenuItem(value: 'auto', child: Text(S.get('locale.auto'))),
-              DropdownMenuItem(value: 'en', child: Text(S.get('locale.en'))),
-              DropdownMenuItem(value: 'ko', child: Text(S.get('locale.ko'))),
-              DropdownMenuItem(value: 'ja', child: Text(S.get('locale.ja'))),
-              DropdownMenuItem(value: 'zh', child: Text(S.get('locale.zh'))),
-            ],
-            onChanged: (v) {
-              if (v != null) {
-                settings.setLocale(Locale(v));
-                FocusScope.of(context).unfocus();
-              }
-            },
-          ),
-          const Divider(),
+                // ── Display ──────────────────────────────────────────────────────
+                _SectionTitle(S.get('settings.display')),
+                SegmentedButton<ThemeMode>(
+                  key: const Key('settings.theme'),
+                  segments: <ButtonSegment<ThemeMode>>[
+                    ButtonSegment(
+                      value: ThemeMode.system,
+                      label: Text(S.get('settings.theme.system')),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.light,
+                      label: Text(S.get('settings.theme.light')),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.dark,
+                      label: Text(S.get('settings.theme.dark')),
+                    ),
+                  ],
+                  selected: <ThemeMode>{settings.themeMode},
+                  onSelectionChanged: (s) => settings.setThemeMode(s.first),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                // ── View mode ────────────────────────────────────────────────────
+                // Pins the global form factor. `auto` defers to MediaQuery;
+                // other values override regardless of window width, with per-app
+                // pins taking higher priority. The secondary label shows the
+                // currently resolved class when `auto` is selected so the user
+                // sees which physical form factor is in effect right now.
+                _SectionTitle(S.get('settings.view_mode')),
+                // A dropdown, not five segments: five labels in one row break
+                // mid-word on a narrow screen.
+                DropdownButton<ViewMode>(
+                  key: const Key('settings.view_mode'),
+                  value: settings.defaultViewMode,
+                  isExpanded: true,
+                  items: <DropdownMenuItem<ViewMode>>[
+                    for (final m in _offeredViewModes)
+                      DropdownMenuItem<ViewMode>(
+                        value: m,
+                        child: Text(_viewModeLabel(m)),
+                      ),
+                  ],
+                  onChanged: (m) {
+                    if (m != null) settings.setDefaultViewMode(m);
+                  },
+                ),
+                if (settings.defaultViewMode == ViewMode.auto)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: Text(
+                      S
+                          .get('settings.viewmode.auto.current')
+                          .replaceAll(r'${mode}', FormFactor.of(context).name),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.md),
+                _SectionTitle(S.get('settings.language')),
+                DropdownButton<String>(
+                  key: const Key('settings.locale'),
+                  value: settings.locale.languageCode,
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem(
+                        value: 'auto', child: Text(S.get('locale.auto'))),
+                    DropdownMenuItem(
+                        value: 'en', child: Text(S.get('locale.en'))),
+                    DropdownMenuItem(
+                        value: 'ko', child: Text(S.get('locale.ko'))),
+                    DropdownMenuItem(
+                        value: 'ja', child: Text(S.get('locale.ja'))),
+                    DropdownMenuItem(
+                        value: 'zh', child: Text(S.get('locale.zh'))),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) {
+                      settings.setLocale(Locale(v));
+                      FocusScope.of(context).unfocus();
+                    }
+                  },
+                ),
+                const Divider(),
 
-          // ── Connection ──────────────────────────────────────────────────
-          _SectionTitle(S.get('settings.connection')),
-          OutlinedButton.icon(
-            key: const Key('settings.disconnect_all'),
-            icon: const Icon(Icons.link_off, size: 16),
-            label: Text(S.get('settings.disconnect.all')),
-            onPressed: () async {
-              final core = context.read<AppPlayerCoreService>();
-              try {
-                for (final id in core.connections.keys.toList()) {
-                  await core.closeApp(AppHandle.server(id));
-                }
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(S.get('settings.disconnect.all.done'))),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(S.get('settings.disconnect.all.fail').replaceAll('\${error}', '$e'))),
-                  );
-                }
-              }
-            },
-          ),
-          const Divider(),
+                // ── Connection ──────────────────────────────────────────────────
+                _SectionTitle(S.get('settings.connection')),
+                OutlinedButton.icon(
+                  key: const Key('settings.disconnect_all'),
+                  icon: const Icon(Icons.link_off, size: 16),
+                  label: Text(S.get('settings.disconnect.all')),
+                  onPressed: () async {
+                    final core = context.read<AppPlayerCoreService>();
+                    try {
+                      for (final id in core.connections.keys.toList()) {
+                        await core.closeApp(AppHandle.server(id));
+                      }
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text(S.get('settings.disconnect.all.done'))),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(S
+                                  .get('settings.disconnect.all.fail')
+                                  .replaceAll('\${error}', '$e'))),
+                        );
+                      }
+                    }
+                  },
+                ),
+                const Divider(),
 
-          // ── Logging ──────────────────────────────────────────────────────
-          _SectionTitle(S.get('settings.logging')),
-          DropdownButton<LogLevel>(
-            key: const Key('settings.log_level'),
-            value: settings.logLevel,
-            items: LogLevel.values
-                .map((l) =>
-                    DropdownMenuItem(value: l, child: Text(l.name)))
-                .toList(),
-            onChanged: (v) {
-              if (v != null) {
-                settings.setLogLevel(v);
-                FocusScope.of(context).unfocus();
-              }
-            },
-          ),
-          const Divider(),
+                // ── Logging ──────────────────────────────────────────────────────
+                _SectionTitle(S.get('settings.logging')),
+                DropdownButton<LogLevel>(
+                  key: const Key('settings.log_level'),
+                  value: settings.logLevel,
+                  items: LogLevel.values
+                      .map((l) =>
+                          DropdownMenuItem(value: l, child: Text(l.name)))
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) {
+                      settings.setLogLevel(v);
+                      FocusScope.of(context).unfocus();
+                    }
+                  },
+                ),
+                const Divider(),
 
-          // ── Data reset ───────────────────────────────────────────────────
-          _SectionTitle(S.get('settings.data')),
-          OutlinedButton(
-            key: const Key('settings.reset_all'),
-            onPressed: () => _resetAll(context),
-            child: Text(S.get('settings.reset.all')),
-          ),
-          const Divider(),
+                // ── Data reset ───────────────────────────────────────────────────
+                _SectionTitle(S.get('settings.data')),
+                OutlinedButton(
+                  key: const Key('settings.reset_all'),
+                  onPressed: () => _resetAll(context),
+                  child: Text(S.get('settings.reset.all')),
+                ),
+                const Divider(),
 
-          // ── Developer ────────────────────────────────────────────────────
-          // Debug MCP endpoint — opt-in test-automation surface (non-web).
-          // The person turns it on; it is off by default.
-          if (_isDesktop) ...<Widget>[
-            const _SectionTitle('Developer'),
-            SwitchListTile(
-              key: const Key('settings.debug_mcp'),
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Debug MCP'),
-              value: settings.debugMcpEnabled,
-              onChanged: (v) => settings.setDebugMcpEnabled(v),
-            ),
-            const Divider(),
-          ],
+                // ── Developer ────────────────────────────────────────────────────
+                // Debug MCP endpoint — opt-in test-automation surface (non-web).
+                // The person turns it on; it is off by default.
+                if (_isDesktop) ...<Widget>[
+                  const _SectionTitle('Developer'),
+                  SwitchListTile(
+                    key: const Key('settings.debug_mcp'),
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Debug MCP'),
+                    value: settings.debugMcpEnabled,
+                    onChanged: (v) => settings.setDebugMcpEnabled(v),
+                  ),
+                  const Divider(),
+                ],
 
-          // ── App info ─────────────────────────────────────────────────────
-          _SectionTitle(S.get('settings.info')),
-          // Kept in sync with pubspec.yaml `version` by hand.
-          const Text('App version: 0.1.6'),
-          const Text(
-            'Core DSL: ${MCPUIDSLVersion.current}',
-            key: Key('settings.core_version'),
-          ),
-          ListTile(
-            key: const Key('settings.licenses'),
-            contentPadding: EdgeInsets.zero,
-            title: Text(S.get('settings.licenses')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => OpenSourceLicenses.open(context,
-                appName: S.get('app.title'), version: '0.1.6'),
-          ),
+                // ── App info ─────────────────────────────────────────────────────
+                _SectionTitle(S.get('settings.info')),
+                // Kept in sync with pubspec.yaml `version` by hand.
+                const Text('App version: 0.1.6'),
+                const Text(
+                  'Core DSL: ${MCPUIDSLVersion.current}',
+                  key: Key('settings.core_version'),
+                ),
               ],
             ),
           ),
@@ -243,6 +262,24 @@ class SettingsScreenState extends State<SettingsScreen> {
 /// (desktop AND mobile — reach a mobile endpoint via adb forward / iOS-sim
 /// loopback). Only web is excluded (no dart:io HttpServer).
 bool get _isDesktop => !kIsWeb;
+
+/// The view modes the setting offers, as before.
+const List<ViewMode> _offeredViewModes = <ViewMode>[
+  ViewMode.auto,
+  ViewMode.compact,
+  ViewMode.medium,
+  ViewMode.expanded,
+  ViewMode.large,
+];
+
+String _viewModeLabel(ViewMode mode) => switch (mode) {
+      ViewMode.auto => S.get('settings.viewmode.auto'),
+      ViewMode.compact => S.get('form.viewmode.compact'),
+      ViewMode.medium => S.get('form.viewmode.medium'),
+      ViewMode.expanded => S.get('form.viewmode.expanded'),
+      ViewMode.large => S.get('form.viewmode.large'),
+      ViewMode.extraLarge => S.get('form.viewmode.large'),
+    };
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle(this.text);
