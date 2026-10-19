@@ -49,7 +49,8 @@ void main() {
       expect(find.byKey(const Key('home.empty')), findsOneWidget);
     });
 
-    testWidgets('shows home.empty when apps.v1 is an empty list', (tester) async {
+    testWidgets('shows home.empty when apps.v1 is an empty list',
+        (tester) async {
       final settings = await _setupPrefs(apps: <AppConfig>[]);
       await tester.pumpWidget(
         wrapScreen(child: const HomeScreen(), core: core, settings: settings),
@@ -65,7 +66,8 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TC-HOME-001 grid renders app icons', () {
-    testWidgets('renders home.app.{id} key for each stored app', (tester) async {
+    testWidgets('renders home.app.{id} key for each stored app',
+        (tester) async {
       final apps = <AppConfig>[
         AppConfig(id: 'app-1', name: 'App One', type: AppType.bundle),
         AppConfig(
@@ -87,7 +89,8 @@ void main() {
       expect(find.byKey(const Key('home.empty')), findsNothing);
     });
 
-    testWidgets('displays the app name label beneath each icon', (tester) async {
+    testWidgets('displays the app name label beneath each icon',
+        (tester) async {
       final apps = <AppConfig>[
         AppConfig(id: 'dash-1', name: 'My Dashboard', type: AppType.dashboard),
       ];
@@ -98,6 +101,28 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('My Dashboard'), findsOneWidget);
+    });
+  });
+
+  // TC-HOME-013 — a name with no space is never cut mid-number
+  group('TC-HOME-013 unbroken tile name stays on one line', () {
+    testWidgets('an address is scaled down inside a FittedBox', (tester) async {
+      final apps = <AppConfig>[
+        AppConfig(id: 'ip-1', name: '127.0.0.1', type: AppType.dashboard),
+      ];
+      final settings = await _setupPrefs(apps: apps);
+      await tester.pumpWidget(
+        wrapScreen(child: const HomeScreen(), core: core, settings: settings),
+      );
+      await tester.pumpAndSettle();
+
+      final label = find.text('127.0.0.1');
+      expect(label, findsOneWidget);
+      expect(tester.widget<Text>(label).maxLines, 1);
+      expect(
+        find.ancestor(of: label, matching: find.byType(FittedBox)),
+        findsOneWidget,
+      );
     });
   });
 

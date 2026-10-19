@@ -2,7 +2,8 @@ import 'package:appplayer/app/app_settings.dart';
 import 'package:appplayer/models/app_config.dart';
 import 'package:appplayer/ui/app_form/app_form_screen.dart';
 import 'package:appplayer_core/appplayer_core.dart';
-import 'package:flutter/material.dart';
+import 'package:appplayer/ui/app_form/transport_options.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +24,20 @@ Future<AppSettings> _setupPrefs({List<AppConfig>? apps}) async {
   SharedPreferences.setMockInitialValues(values);
   final prefs = await SharedPreferences.getInstance();
   return AppSettings.load(prefs);
+}
+
+/// Runs [body] with the host platform forced to [platform]. The override must
+/// be cleared before the test body ends, so it cannot go through addTearDown.
+Future<void> _onPlatform(
+  TargetPlatform platform,
+  Future<void> Function() body,
+) async {
+  debugDefaultTargetPlatformOverride = platform;
+  try {
+    await body();
+  } finally {
+    debugDefaultTargetPlatformOverride = null;
+  }
 }
 
 void main() {
@@ -68,28 +83,30 @@ void main() {
   group('TC-FORM-009 required field validation blocks save', () {
     testWidgets('server type: empty name shows validation error on save tap',
         (tester) async {
-      final settings = await _setupPrefs();
-      await tester.pumpWidget(
-        wrapScreen(
-          child: const AppFormScreen(mode: AppFormMode.create),
-          core: core,
-          settings: settings,
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _onPlatform(TargetPlatform.macOS, () async {
+        final settings = await _setupPrefs();
+        await tester.pumpWidget(
+          wrapScreen(
+            child: const AppFormScreen(mode: AppFormMode.create),
+            core: core,
+            settings: settings,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      // Default type is server; name field is empty. The form is
-      // taller than the 800×600 test viewport once the trust-level
-      // selector is rendered, so scroll the save button into view
-      // before tapping.
-      final saveFinder = find.byKey(const Key('app_form.save'));
-      await tester.ensureVisible(saveFinder);
-      await tester.pumpAndSettle();
-      await tester.tap(saveFinder);
-      await tester.pumpAndSettle();
+        // Default type is server; name field is empty. The form is
+        // taller than the 800×600 test viewport once the trust-level
+        // selector is rendered, so scroll the save button into view
+        // before tapping.
+        final saveFinder = find.byKey(const Key('app_form.save'));
+        await tester.ensureVisible(saveFinder);
+        await tester.pumpAndSettle();
+        await tester.tap(saveFinder);
+        await tester.pumpAndSettle();
 
-      // Command is required (server name auto-assigns when empty).
-      expect(find.text('Enter a command'), findsOneWidget);
+        // Command is required (server name auto-assigns when empty).
+        expect(find.text('Enter a command'), findsOneWidget);
+      });
     });
   });
 
@@ -98,30 +115,119 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('TC-FORM-010 transport switch changes fields', () {
-    testWidgets('switching from STDIO to SSE shows URL field instead of command',
+    testWidgets(
+        'switching from STDIO to SSE shows URL field instead of command',
         (tester) async {
-      final settings = await _setupPrefs();
-      await tester.pumpWidget(
-        wrapScreen(
-          child: const AppFormScreen(mode: AppFormMode.create),
-          core: core,
-          settings: settings,
-        ),
+      await _onPlatform(TargetPlatform.macOS, () async {
+        final settings = await _setupPrefs();
+        await tester.pumpWidget(
+          wrapScreen(
+            child: const AppFormScreen(mode: AppFormMode.create),
+            core: core,
+            settings: settings,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Default transport is STDIO; command field hint should be visible.
+        expect(find.text('npx'), findsOneWidget);
+
+        // Open the transport dropdown and select SSE.
+        await tester.tap(find.text('STDIO (Process)'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('SSE (Server-Sent Events)').last);
+        await tester.pumpAndSettle();
+
+        // After switching: URL field should appear, command field should be gone.
+        expect(find.text('npx'), findsNothing);
+        expect(find.text('URL *'), findsOneWidget);
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // TC-FORM-011 ~ 013 - STDIO is desktop-only (FR-FORM-009)
+  // ---------------------------------------------------------------------------
+
+  group('TC-FORM-011 mobile has no STDIO and defaults to HTTP', () {
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    ]) {
+      testWidgets('$platform: default Streamable HTTP, list without STDIO',
+          (tester) async {
+        await _onPlatform(platform, () async {
+          final settings = await _setupPrefs();
+          await tester.pumpWidget(
+            wrapScreen(
+              child: const AppFormScreen(mode: AppFormMode.create),
+              core: core,
+              settings: settings,
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.text('HTTP (Streamable)'), findsOneWidget);
+          expect(find.text('URL *'), findsOneWidget);
+          expect(find.text('Command *'), findsNothing);
+
+          await tester.tap(find.text('HTTP (Streamable)'));
+          await tester.pumpAndSettle();
+          expect(find.text('STDIO (Process)'), findsNothing);
+          expect(find.text('SSE (Server-Sent Events)'), findsOneWidget);
+        });
+      });
+    }
+  });
+
+  group('TC-FORM-012 desktop keeps STDIO', () {
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    ]) {
+      testWidgets('$platform: default STDIO, list with all three',
+          (tester) async {
+        await _onPlatform(platform, () async {
+          final settings = await _setupPrefs();
+          await tester.pumpWidget(
+            wrapScreen(
+              child: const AppFormScreen(mode: AppFormMode.create),
+              core: core,
+              settings: settings,
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.text('STDIO (Process)'), findsOneWidget);
+          await tester.tap(find.text('STDIO (Process)'));
+          await tester.pumpAndSettle();
+          expect(find.text('SSE (Server-Sent Events)'), findsOneWidget);
+          expect(find.text('HTTP (Streamable)'), findsOneWidget);
+        });
+      });
+    }
+  });
+
+  group('TC-FORM-013 a saved STDIO server stays editable on mobile', () {
+    test('its own transport stays in the choices, others cannot add it', () {
+      expect(
+        transportChoices(TransportType.stdio, platform: TargetPlatform.android),
+        contains(TransportType.stdio),
       );
-      await tester.pumpAndSettle();
-
-      // Default transport is STDIO; command field hint should be visible.
-      expect(find.text('npx'), findsOneWidget);
-
-      // Open the transport dropdown and select SSE.
-      await tester.tap(find.text('STDIO (Process)'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('SSE (Server-Sent Events)').last);
-      await tester.pumpAndSettle();
-
-      // After switching: URL field should appear, command field should be gone.
-      expect(find.text('npx'), findsNothing);
-      expect(find.text('URL *'), findsOneWidget);
+      expect(
+        transportChoices(
+          TransportType.streamableHttp,
+          platform: TargetPlatform.android,
+        ),
+        isNot(contains(TransportType.stdio)),
+      );
+      expect(
+        availableTransports(platform: TargetPlatform.iOS, isWeb: false),
+        <TransportType>[TransportType.sse, TransportType.streamableHttp],
+      );
+      expect(availableTransports(isWeb: true),
+          isNot(contains(TransportType.stdio)));
     });
   });
 

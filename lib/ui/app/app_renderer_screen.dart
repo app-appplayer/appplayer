@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/app_strings.dart';
 import '../../models/app_config.dart';
 import '../../utils/trust_level_mapping.dart';
+import '../app_form/transport_options.dart';
 
 /// MOD-UI-003 — hosts an [AppSession] for a single app screen.
 ///
@@ -49,6 +50,7 @@ class AppRendererScreenState extends State<AppRendererScreen> {
 
   AppSession? _session;
   Object? _error;
+  bool _stdioBlocked = false;
 
   @override
   void initState() {
@@ -94,8 +96,29 @@ class AppRendererScreenState extends State<AppRendererScreen> {
       _coreRef?.setActiveSession(session.handle);
       setState(() => _session = session);
     } catch (e) {
+      final blocked = await _isBlockedStdio();
       if (!mounted) return;
-      setState(() => _error = e);
+      setState(() {
+        _stdioBlocked = blocked;
+        _error = e;
+      });
+    }
+  }
+
+  /// True when the server being opened is a saved STDIO one on a host that
+  /// cannot start child processes.
+  Future<bool> _isBlockedStdio() async {
+    if (stdioAvailable()) return false;
+    try {
+      final app = await _loadAppConfig(widget.serverId);
+      final id = app?.serverConfigId ?? widget.serverId;
+      final servers = await _coreRef?.listServers() ?? <ServerConfig>[];
+      return servers
+          .any((c) => c.id == id && c.transportType == TransportType.stdio);
+    } catch (_) {
+      // Only picks the wording of the error screen; the failure is reported
+      // either way.
+      return false;
     }
   }
 
@@ -153,9 +176,7 @@ class AppRendererScreenState extends State<AppRendererScreen> {
     final apps = AppConfig.decodeList(raw);
     return apps
         .where((a) =>
-            a.id == appId ||
-            a.serverConfigId == appId ||
-            a.bundleId == appId)
+            a.id == appId || a.serverConfigId == appId || a.bundleId == appId)
         .firstOrNull;
   }
 
@@ -166,6 +187,7 @@ class AppRendererScreenState extends State<AppRendererScreen> {
         appBar: AppBar(leading: const BackButton()),
         body: _ErrorBanner(
           error: _error!,
+          stdioBlocked: _stdioBlocked,
           onRetry: () {
             setState(() => _error = null);
             _ensureSession();
@@ -200,43 +222,73 @@ class AppRendererScreenState extends State<AppRendererScreen> {
 }
 
 class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.error, required this.onRetry});
+  const _ErrorBanner({
+    required this.error,
+    required this.onRetry,
+    this.stdioBlocked = false,
+  });
 
   final Object error;
+  final bool stdioBlocked;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final String msg;
-    if (error is ServerNotFoundException) {
+    String? details;
+    if (stdioBlocked) {
+      msg = S.get('renderer.error.stdio');
+      details = error is ConnectionFailedException
+          ? (error as ConnectionFailedException).message
+          : '$error';
+    } else if (error is ServerNotFoundException) {
       msg = S.get('renderer.error.notfound');
     } else if (error is ConnectionFailedException) {
-      msg = S.get('renderer.error.connection')
-          .replaceAll(r'${msg}', (error as ConnectionFailedException).message);
+      msg = S.get('renderer.error.connection');
+      details = (error as ConnectionFailedException).message;
     } else if (error is BundleLoadException) {
       final e = error as BundleLoadException;
-      msg = S.get('form.bundle.install.fail')
+      msg = S
+          .get('form.bundle.install.fail')
           .replaceAll(r'${type}', 'bundle.load')
           .replaceAll(r'${error}', e.reason.name);
     } else if (error is BundleAdaptException) {
       final e = error as BundleAdaptException;
-      msg = S.get('form.bundle.install.fail')
+      msg = S
+          .get('form.bundle.install.fail')
           .replaceAll(r'${type}', 'bundle.adapt')
           .replaceAll(r'${error}', e.reason.name);
     } else {
-      msg = S.get('renderer.error.generic').replaceAll(r'${error}', '$error');
+      msg = S.get('renderer.error.generic');
+      details = '$error';
     }
     return Center(
       key: const Key('app_renderer.error_banner'),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const Icon(Icons.error_outline, size: AppIconSizes.xl),
-          const SizedBox(height: AppSpacing.sm),
-          Text(msg),
-          const SizedBox(height: AppSpacing.base),
-          FilledButton(onPressed: onRetry, child: Text(S.get('renderer.retry'))),
-        ],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Icon(Icons.error_outline, size: AppIconSizes.xl),
+            const SizedBox(height: AppSpacing.sm),
+            Text(msg, textAlign: TextAlign.center),
+            if (details != null)
+              ExpansionTile(
+                key: const Key('app_renderer.error_details'),
+                title: Text(
+                  S.get('renderer.error.details'),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                shape: const Border(),
+                collapsedShape: const Border(),
+                children: <Widget>[SelectableText(details)],
+              ),
+            const SizedBox(height: AppSpacing.base),
+            FilledButton(
+                onPressed: onRetry, child: Text(S.get('renderer.retry'))),
+          ],
+        ),
       ),
     );
   }

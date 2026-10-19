@@ -717,17 +717,36 @@ class _AppIcon extends StatelessWidget {
               children: <Widget>[
                 _buildIcon(context, cs),
                 const SizedBox(height: 4),
-                Text(
-                  app.name,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
+                _buildName(context),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// A name with no space (an address, an id) is shrunk to fit one line
+  /// instead of being cut in the middle of a number or word.
+  Widget _buildName(BuildContext context) {
+    final style = Theme.of(context).textTheme.labelSmall;
+    if (RegExp(r'\s').hasMatch(app.name.trim())) {
+      return Text(
+        app.name,
+        maxLines: 2,
+        textAlign: TextAlign.center,
+        overflow: TextOverflow.ellipsis,
+        style: style,
+      );
+    }
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(
+        app.name,
+        maxLines: 1,
+        softWrap: false,
+        textAlign: TextAlign.center,
+        style: style,
       ),
     );
   }

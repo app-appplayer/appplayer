@@ -14,6 +14,7 @@ import '../../entry/qr_content.dart';
 import '../../l10n/app_strings.dart';
 import '../../models/app_config.dart';
 import 'server_config_dialog.dart';
+import 'transport_options.dart';
 
 /// Form mode — create a new app or edit an existing one.
 enum AppFormMode { create, edit }
@@ -52,7 +53,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
   // ── Server fields ──────────────────────────────────────────────────────────
   final _nameCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
-  TransportType _transportType = TransportType.stdio;
+  TransportType _transportType = defaultTransport();
 
   // STDIO-specific
   final _commandCtrl = TextEditingController();
@@ -735,7 +736,7 @@ class _AppFormScreenState extends State<AppFormScreen> {
         DropdownButtonFormField<TransportType>(
           initialValue: _transportType,
           decoration: InputDecoration(labelText: S.get('form.transport')),
-          items: TransportType.values
+          items: transportChoices(_transportType)
               .map(
                 (t) => DropdownMenuItem(
                   value: t,

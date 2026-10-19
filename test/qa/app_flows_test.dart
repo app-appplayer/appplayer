@@ -217,17 +217,16 @@ void main() {
       await _settle(tester);
       expect(find.byKey(const Key('app_form.type')), findsOneWidget);
 
-      // Default type is Server / STDIO transport. Fill name + command
-      // (required) + args. Fields have no dedicated Keys beyond `name`,
-      // so index into the rendered TextFormFields in DOM order:
-      // 0 = name, 1 = description, 2 = command, 3 = args.
+      // Default type is Server; on mobile the transport is Streamable HTTP.
+      // Fill name + URL (required). Fields have no dedicated Keys beyond
+      // `name`, so index into the rendered TextFormFields in DOM order:
+      // 0 = name, 1 = description, 2 = url.
       await tester.enterText(
         find.byKey(const Key('app_form.name')),
         'My Test Server',
       );
       final fields = find.byType(TextFormField);
-      await tester.enterText(fields.at(2), 'echo');
-      await tester.enterText(fields.at(3), 'hello');
+      await tester.enterText(fields.at(2), 'http://localhost:9000/mcp');
       await _settle(tester, steps: 2);
 
       final saveButton = find.byKey(const Key('app_form.save'));

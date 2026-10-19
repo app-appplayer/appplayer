@@ -5,7 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_strings.dart';
-
+import 'transport_options.dart';
 
 /// Modal form that creates or edits a [ServerConfig] independently of
 /// the launcher's app-form flow.
@@ -48,9 +48,10 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
     final init = widget.initial;
     _nameCtrl = TextEditingController(text: init?.name ?? '');
     _descCtrl = TextEditingController(text: init?.description ?? '');
-    _transportType = init?.transportType ?? TransportType.stdio;
+    _transportType = init?.transportType ?? defaultTransport();
     final cfg = init?.transportConfig;
-    _commandCtrl = TextEditingController(text: cfg?['command'] as String? ?? '');
+    _commandCtrl =
+        TextEditingController(text: cfg?['command'] as String? ?? '');
     final args = cfg?['arguments'];
     _argsCtrl = TextEditingController(
       text: args is List ? args.join(' ') : '',
@@ -109,7 +110,8 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
   Widget build(BuildContext context) {
     final isEdit = widget.initial != null;
     return AlertDialog(
-      title: Text(S.get(isEdit ? 'form.edit.connection' : 'form.add.connection')),
+      title:
+          Text(S.get(isEdit ? 'form.edit.connection' : 'form.add.connection')),
       content: SizedBox(
         width: 460,
         child: Form(
@@ -137,8 +139,9 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
                 const SizedBox(height: AppSpacing.sm),
                 DropdownButtonFormField<TransportType>(
                   initialValue: _transportType,
-                  decoration: InputDecoration(labelText: S.get('form.transport')),
-                  items: TransportType.values
+                  decoration:
+                      InputDecoration(labelText: S.get('form.transport')),
+                  items: transportChoices(_transportType)
                       .map(
                         (t) => DropdownMenuItem(
                           value: t,
@@ -199,8 +202,7 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
                     tooltip: 'Browse',
                     onPressed: () async {
                       final result = await FilePicker.platform.pickFiles();
-                      if (result != null &&
-                          result.files.single.path != null) {
+                      if (result != null && result.files.single.path != null) {
                         _commandCtrl.text = result.files.single.path!;
                       }
                     },

@@ -164,8 +164,12 @@ class S {
       'form.viewmode.expanded': 'Expanded',
       'form.viewmode.large': 'Large',
       'renderer.error.notfound': 'Server not found',
-      'renderer.error.connection': 'Connection failed: \${msg}',
-      'renderer.error.generic': 'Error: \${error}',
+      'renderer.error.connection':
+          'Could not connect. Check the server address and that the server is running.',
+      'renderer.error.stdio':
+          'This device cannot run STDIO servers. Edit the server and choose HTTP.',
+      'renderer.error.generic': 'Something went wrong while opening this app.',
+      'renderer.error.details': 'Details',
       'renderer.retry': 'Retry',
       'onboarding.intro.title': 'AppPlayer',
       'onboarding.guide.title': 'How to use',
@@ -316,22 +320,26 @@ class S {
       'form.dash.layout.card': 'Card',
       'form.trust.title': '신뢰 수준',
       'form.trust.description':
-          '이 앱이 실행할 수 있는 client 리소스 범위를 제어합니다',
-      'form.trust.untrusted': 'Untrusted — 모든 client 액션 차단',
+          '이 앱이 실행할 수 있는 클라이언트 리소스 범위를 제어합니다',
+      'form.trust.untrusted': 'Untrusted — 모든 클라이언트 액션 차단',
       'form.trust.basic': 'Basic — 시스템 정보·알림·클립보드 읽기',
       'form.trust.elevated': 'Elevated — + 파일 읽기·HTTP·클립보드 쓰기',
       'form.trust.full': 'Full — + 파일 쓰기·Shell 실행',
       'form.viewmode.title': '이 앱 보기 고정',
       'form.viewmode.description':
-          '기본(자동) 외 선택 시 전역 설정을 override 합니다',
+          '기본(자동) 외 선택 시 전역 설정을 덮어씁니다',
       'form.viewmode.auto': '기본(자동)',
       'form.viewmode.compact': '컴팩트',
       'form.viewmode.medium': '미디엄',
       'form.viewmode.expanded': '익스팬디드',
       'form.viewmode.large': '라지',
       'renderer.error.notfound': '서버를 찾을 수 없습니다',
-      'renderer.error.connection': '연결실패: \${msg}',
-      'renderer.error.generic': '오류: \${error}',
+      'renderer.error.connection':
+          '연결할 수 없습니다. 서버 주소와 서버 실행 상태를 확인하세요.',
+      'renderer.error.stdio':
+          '이 기기에서는 STDIO 서버를 쓸 수 없습니다. 편집에서 HTTP로 바꾸세요.',
+      'renderer.error.generic': '앱을 여는 중 문제가 생겼습니다.',
+      'renderer.error.details': '상세',
       'renderer.retry': '재시도',
       'onboarding.intro.title': 'AppPlayer',
       'onboarding.guide.title': '사용 방법',
@@ -474,8 +482,8 @@ class S {
       'form.dash.layout.card': 'Card',
       'form.trust.title': '信頼レベル',
       'form.trust.description':
-          'このアプリが実行できる client リソースの範囲を制御します',
-      'form.trust.untrusted': 'Untrusted — 全 client アクション遮断',
+          'このアプリが実行できるクライアントリソースの範囲を制御します',
+      'form.trust.untrusted': 'Untrusted — 全クライアントアクション遮断',
       'form.trust.basic':
           'Basic — システム情報・通知・クリップボード読取',
       'form.trust.elevated':
@@ -490,8 +498,12 @@ class S {
       'form.viewmode.expanded': 'エクスパンデッド',
       'form.viewmode.large': 'ラージ',
       'renderer.error.notfound': 'サーバーが見つかりません',
-      'renderer.error.connection': '接続失敗: \${msg}',
-      'renderer.error.generic': 'エラー: \${error}',
+      'renderer.error.connection':
+          '接続できません。サーバーのアドレスと起動状態を確認してください。',
+      'renderer.error.stdio':
+          'この端末では STDIO サーバーは使えません。編集で HTTP に変更してください。',
+      'renderer.error.generic': 'アプリを開く際に問題が発生しました。',
+      'renderer.error.details': '詳細',
       'renderer.retry': 'リトライ',
       'onboarding.intro.title': 'AppPlayer',
       'onboarding.guide.title': '使い方',
@@ -633,8 +645,8 @@ class S {
       'form.dash.layout.grid': 'Grid',
       'form.dash.layout.card': 'Card',
       'form.trust.title': '信任级别',
-      'form.trust.description': '控制此应用可执行的 client 资源范围',
-      'form.trust.untrusted': 'Untrusted — 阻止所有 client 动作',
+      'form.trust.description': '控制此应用可执行的客户端资源范围',
+      'form.trust.untrusted': 'Untrusted — 阻止所有客户端动作',
       'form.trust.basic':
           'Basic — 系统信息·通知·剪贴板读取',
       'form.trust.elevated':
@@ -649,8 +661,10 @@ class S {
       'form.viewmode.expanded': '扩展',
       'form.viewmode.large': '大',
       'renderer.error.notfound': '找不到服务器',
-      'renderer.error.connection': '连接失败: \${msg}',
-      'renderer.error.generic': '错误: \${error}',
+      'renderer.error.connection': '无法连接。请检查服务器地址以及服务器是否正在运行。',
+      'renderer.error.stdio': '此设备无法运行 STDIO 服务器。请在编辑中改为 HTTP。',
+      'renderer.error.generic': '打开此应用时出现问题。',
+      'renderer.error.details': '详情',
       'renderer.retry': '重试',
       'onboarding.intro.title': 'AppPlayer',
       'onboarding.guide.title': '使用方法',

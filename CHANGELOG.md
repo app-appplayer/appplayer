@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+- **Connection failure screen.** It shows one plain line (what failed and
+  to check the server address) with side margins; the raw error text sits in a
+  folded *Details* section. A server saved with STDIO that cannot open on a
+  phone or tablet says so and points to Edit.
+- **Tile names stay whole.** A name with no space, such as `127.0.0.1`, shrinks
+  to fit one line instead of wrapping inside the number.
+- **Trust level text** in Korean, Japanese and Chinese no longer mixes in the
+  English words *client* and *override*.
+- **No STDIO on phones and tablets.** Adding a server on iOS or Android offers
+  only SSE and Streamable HTTP, and a new server starts as Streamable HTTP; a
+  phone cannot start a program as a child process. macOS, Windows and Linux are
+  unchanged. A server already saved with STDIO still opens for editing and
+  keeps its value.
 - **Fewer Android permissions.** The foreground-service permissions, the
   keep-alive service and the exact-alarm permission are no longer declared.
   A scheduled notification is delivered at an inexact time.
