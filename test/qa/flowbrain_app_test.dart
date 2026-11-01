@@ -43,6 +43,9 @@ class _Server {
   final turns = <Map<String, dynamic>>[];
   bool modelFails = false;
 
+  /// A server that knows nothing yet answers with no sections at all.
+  bool empty = false;
+
   /// Tools that refuse the way the real server does for a caller who may not.
   final refused = <String>{};
 
@@ -193,7 +196,7 @@ class _Server {
             {'id': 'u-kim', 'kind': 'person', 'displayName': 'Kim', 'units': ['sales']},
           ],
         });
-    on('bk.knowledge.export', (a) async => {
+    on('bk.knowledge.export', (a) async => empty ? {'ok': true, 'statements': 0, 'bundle': {}} : {
           'ok': true,
           'statements': 1,
           'bundle': {
@@ -215,11 +218,14 @@ class _Server {
           'dataFolder': '/data',
           'layers': {'factGraph': true, 'skill': true, 'profile': true, 'philosophy': true, 'ops': true},
         });
+    on('system.bundle.deactivate', (a) async => {'ok': true});
+    on('system.bundle.activate', (a) async => {'ok': true});
     on('system.config.read', (a) async => {'provider': 'anthropic', 'model': 'claude'});
     on('system.bundle.list', (a) async => {
           'ok': true,
           'bundles': [
             {'name': 'flowbrain', 'active': true},
+            {'name': 'extra', 'active': false},
           ],
         });
   }
@@ -244,13 +250,16 @@ const _errorMarkers = <String>[
 ];
 
 Future<_Server> _open(WidgetTester tester, double width,
-    {bool modelFails = false, Set<String> refused = const {}}) async {
+    {bool modelFails = false,
+    bool empty = false,
+    Set<String> refused = const {}}) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
   final server = _Server()
     ..modelFails = modelFails
+    ..empty = empty
     ..refused.addAll(refused);
   final runtime = MCPUIRuntime();
   await runtime.initialize(
@@ -418,6 +427,21 @@ void main() {
         reason: 'the made document is put away once issued');
   });
 
+  testWidgets('a server that knows nothing yet shows empty places, not errors',
+      (tester) async {
+    await _open(tester, 1200, empty: true);
+    for (final place in ['Knowledge', 'People', 'Work', 'Trace', 'System']) {
+      await tester.tap(find.text(place).first);
+      await settle(tester);
+      _noErrorWidgets(tester);
+    }
+    await tester.tap(find.text('Knowledge').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(find.text('No statements at this point in time.'), findsOneWidget,
+        reason: shown(tester));
+  });
+
   testWidgets('people: the agent list and the organisation', (tester) async {
     final s = await _open(tester, 1200);
     await tester.tap(find.text('People').first);
@@ -513,12 +537,34 @@ void main() {
 
   testWidgets('the system place shows the model, the layers and the bundles',
       (tester) async {
-    await _open(tester, 1200);
+    final s = await _open(tester, 1200);
     await tester.tap(find.text('System').first);
     await settle(tester);
     _noErrorWidgets(tester);
     expect(find.textContaining('anthropic'), findsWidgets);
     expect(find.text('flowbrain'), findsOneWidget);
+    expect(find.text('factGraph ✓'), findsOneWidget, reason: shown(tester));
+    expect(find.text('Active'), findsOneWidget);
+    expect(find.text('Not active'), findsOneWidget);
+
+    // Turning a bundle off asks first, and Cancel leaves it.
+    await tester.tap(find.text('Deactivate'));
+    await settle(tester);
+    expect(find.textContaining('turning one off takes its screens away'),
+        findsOneWidget, reason: shown(tester));
+    await tester.tap(find.text('Cancel'));
+    await settle(tester);
+    expect(s.calls, isNot(contains('system.bundle.deactivate')));
+    await tester.tap(find.text('Deactivate'));
+    await settle(tester);
+    await tester.tap(find.text('Deactivate'));
+    await settle(tester);
+    expect(s.args['system.bundle.deactivate']!.single['name'], 'flowbrain');
+
+    // Turning one on does not ask.
+    await tester.tap(find.text('Activate'));
+    await settle(tester);
+    expect(s.args['system.bundle.activate']!.single['name'], 'extra');
   });
 
   testWidgets('the app asks again when something changes, not forever',
