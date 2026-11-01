@@ -90,6 +90,30 @@ class _Server {
             },
           ],
         });
+    on('form.list_templates', (a) async => {
+          'templates': [
+            {'templateId': 'weekly', 'name': 'Weekly report', 'version': '1.0.0', 'value': 'weekly', 'label': 'Weekly report'},
+          ],
+        });
+    on('form.template_schema', (a) async => {
+          'templateId': a['templateId'],
+          'fields': [
+            {'value': 'title', 'label': 'title'},
+            {'value': 'summary', 'label': 'summary'},
+          ],
+        });
+    on('form_builder.fill', (a) async => {
+          'ok': true,
+          'documentId': 'doc-1',
+          'filled': {'summary': 'Closed the Acme deal.'},
+          'filledFields': [
+            {'field': 'summary', 'text': 'Closed the Acme deal.'},
+          ],
+          'unfilled': [
+            {'field': 'title', 'reason': 'no facts match', 'required': false},
+          ],
+        });
+    on('form_builder.issue', (a) async => {'ok': true, 'issueId': 'issue-2', 'issueNumber': '2026-002'});
     on('bk.knowledge.pending', (a) async => {'ok': true, 'candidates': List.of(candidates)});
     on('bk.proposal.list', (a) async => {
           'ok': true,
@@ -337,6 +361,49 @@ void main() {
     expect(find.textContaining('2026-001 · weekly-report'), findsOneWidget,
         reason: shown(tester));
     expect(find.textContaining('kim · 2026-11-01 10:30'), findsOneWidget);
+  });
+
+  testWidgets('a document is made from the facts, looked at, and issued',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('Knowledge').first);
+    await settle(tester);
+    await tester.tap(find.text('Documents').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(s.calls, contains('form.list_templates'));
+
+    expect(find.text('Pick a template'), findsOneWidget);
+    await tester.tap(find.byType(PopupMenuButton<int>).at(1));
+    await settle(tester);
+    await tester.tap(find.text('Weekly report').last);
+    await settle(tester);
+    expect(s.args['form.template_schema']!.single['templateId'], 'weekly');
+
+    await tester.tap(find.byType(PopupMenuButton<int>).at(2));
+    await settle(tester);
+    await tester.tap(find.text('summary').last);
+    await settle(tester);
+    await tester.tap(find.text('Add'));
+    await settle(tester);
+    expect(find.textContaining('summary ← decision'), findsOneWidget,
+        reason: shown(tester));
+
+    await tester.tap(find.text('Fill from facts'));
+    await settle(tester);
+    final fill = s.args['form_builder.fill']!.single;
+    expect(fill['templateId'], 'weekly');
+    expect((fill['bindings'] as List).single['field'], 'summary');
+    expect((fill['bindings'] as List).single['params']['kinds'], ['decision']);
+    expect(find.text('Closed the Acme deal.'), findsOneWidget,
+        reason: shown(tester));
+    expect(find.text('no facts match'), findsOneWidget);
+
+    await tester.tap(find.text('Issue'));
+    await settle(tester);
+    expect(s.args['form_builder.issue']!.single['documentId'], 'doc-1');
+    expect(find.text('Closed the Acme deal.'), findsNothing,
+        reason: 'the made document is put away once issued');
   });
 
   testWidgets('people: the agent list and the organisation', (tester) async {
