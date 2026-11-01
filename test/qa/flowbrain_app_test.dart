@@ -49,8 +49,96 @@ class _Server {
   /// Tools that refuse the way the real server does for a caller who may not.
   final refused = <String>{};
 
+  /// What the app subscribed to (address → the state it is bound to), and the
+  /// runtime to put what the server says into — the way the player's
+  /// subscriber does: the first read, and a read at every notice.
+  final subs = <String, String>{};
+  late MCPUIRuntime runtime;
+  final _handlers = <String, Future<dynamic> Function(Map<String, dynamic>)>{};
+
+  static final _read = RegExp(
+      r'(\.|_)(list|get|read|pending|trace|export|history|compose|status|mine|'
+      r'template_schema|list_templates|issue_list)$');
+
+  /// The read tool a data address is the answer of, and its arguments (the
+  /// server's data resources, platform spec 32 §4.4).
+  (String, Map<String, dynamic>)? _route(String uri) {
+    if (!uri.startsWith('fb://')) return null;
+    final seg = uri.substring(5).split('/');
+    Map<String, dynamic> ws(String w) => w == 'own' ? {} : {'workspaceId': w};
+    String? at(String a) => a == 'now' ? null : a;
+    switch (seg) {
+      case ['me', 'workspaces']:
+        return ('org.workspace.mine', {});
+      case ['proposals']:
+        return ('bk.proposal.list', {});
+      case ['agents']:
+        return ('bk.agent.list', {});
+      case ['org', 'workspaces']:
+        return ('org.workspace.list', {});
+      case ['org', 'members']:
+        return ('org.member.list', {});
+      case ['system', 'status']:
+        return ('system.status', {});
+      case ['system', 'llm']:
+        return ('system.config.read', {'path': 'llm'});
+      case ['system', 'bundles']:
+        return ('system.bundle.list', {});
+      case ['chat', 'history']:
+        return ('chat.history', {});
+      case [final w, 'work', final a]:
+        return ('bk.knowledge.compose', {
+          'task': 'current state of the work',
+          'budgetTokens': 1500,
+          ...ws(w),
+          if (at(a) != null) 'asOf': a,
+        });
+      case [final w, 'facts', final a]:
+        return ('bk.knowledge.export', {...ws(w), if (at(a) != null) 'asOf': a});
+      case [final w, 'pending']:
+        return ('bk.knowledge.pending', ws(w));
+      case [final w, 'trace']:
+        return ('bk.knowledge.trace', ws(w));
+      case [final w, 'templates']:
+        return ('form.list_templates', ws(w));
+      case [final w, 'issues']:
+        return ('form_builder.issue_list', ws(w));
+    }
+    return null;
+  }
+
+  Future<dynamic> _answer(String uri) async {
+    final route = _route(uri);
+    if (route == null) throw StateError('no such resource: $uri');
+    final (tool, a) = route;
+    calls.add(tool);
+    // A tool that refuses answers a read as the real server does: with the
+    // refusal in the answer.
+    if (refused.contains(tool)) {
+      return {'ok': false, 'error': 'not available to this caller'};
+    }
+    return _handlers[tool]!(a);
+  }
+
+  Future<void> subscribe(String uri, String binding) async {
+    subs[uri] = binding;
+    runtime.stateManager.set(binding, await _answer(uri));
+  }
+
+  void unsubscribe(String uri) => subs.remove(uri);
+
+  /// What the server does when something changed: every subscriber is told and
+  /// reads again.
+  Future<void> notifyAll() async {
+    for (final e in Map<String, String>.of(subs).entries) {
+      runtime.stateManager.set(e.value, await _answer(e.key));
+    }
+  }
+
   void register(MCPUIRuntime runtime) {
+    this.runtime = runtime;
     void on(String tool, Future<dynamic> Function(Map<String, dynamic>) f) {
+      _handlers[tool] = f;
       runtime.registerToolExecutor(tool, (params) async {
         calls.add(tool);
         if (refused.contains(tool)) {
@@ -58,7 +146,9 @@ class _Server {
         }
         final a = Map<String, dynamic>.from((params as Map?) ?? const {});
         args.putIfAbsent(tool, () => []).add(a);
-        return f(a);
+        final answer = await f(a);
+        if (!_read.hasMatch(tool)) Future<void>.microtask(notifyAll);
+        return answer;
       });
     }
 
@@ -273,7 +363,12 @@ Future<_Server> _open(WidgetTester tester, double width,
   server.register(runtime);
   addTearDown(runtime.dispose);
 
-  await tester.pumpWidget(MaterialApp(home: Scaffold(body: runtime.buildUI())));
+  await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+          body: runtime.buildUI(
+    onResourceSubscribe: (uri, binding) => server.subscribe(uri, binding),
+    onResourceUnsubscribe: (uri) => server.unsubscribe(uri),
+  ))));
   await settle(tester);
   return server;
 }
@@ -567,16 +662,44 @@ void main() {
     expect(s.args['system.bundle.activate']!.single['name'], 'extra');
   });
 
-  testWidgets('the app asks again when something changes, not forever',
+  testWidgets('the screen subscribes to what it shows and is told, rather '
+      'than asking again', (tester) async {
+    final s = await _open(tester, 1200);
+    // Everything it shows is subscribed (read once, then told).
+    expect(s.subs.keys, containsAll(<String>[
+      'fb://own/pending',
+      'fb://own/work/now',
+      'fb://own/facts/now',
+      'fb://own/trace',
+      'fb://me/workspaces',
+      'fb://chat/history',
+    ]));
+    final first = s.calls.where((c) => c == 'bk.knowledge.pending').length;
+    await settle(tester);
+    await settle(tester);
+    expect(s.calls.where((c) => c == 'bk.knowledge.pending').length, first,
+        reason: 'nothing changed, nothing was asked again');
+
+    // Something changes on the server: what it shows follows, unasked.
+    expect(find.textContaining('Candidates 1'), findsWidgets);
+    s.candidates.clear();
+    await s.notifyAll();
+    await settle(tester);
+    expect(find.textContaining('Candidates 0'), findsWidgets,
+        reason: shown(tester));
+  });
+
+  testWidgets('another workspace is another set of subscriptions',
       (tester) async {
     final s = await _open(tester, 1200);
-    final first = s.calls.where((c) => c == 'bk.knowledge.compose').length;
-    expect(first, inInclusiveRange(1, 3),
-        reason: 'once on start (and what the start itself changed)');
+    await tester.tap(find.byType(PopupMenuButton<int>).first);
     await settle(tester);
+    await tester.tap(find.text('Sales').last);
     await settle(tester);
-    expect(s.calls.where((c) => c == 'bk.knowledge.compose').length, first,
-        reason: 'nothing changed, nothing was asked again');
+    expect(s.subs.keys, contains('fb://sales/pending'));
+    expect(s.subs.keys, contains('fb://sales/work/now'));
+    expect(s.subs.keys, isNot(contains('fb://own/pending')),
+        reason: 'the old workspace is let go');
   });
 
   testWidgets('a tool that fails shows why, in its own place, and the rest '
