@@ -199,6 +199,10 @@ const _errorMarkers = <String>[
   'Unknown widget type:',
   'Error rendering',
   'Widget type is required',
+  // A string the runtime could not resolve is on the screen as it was written.
+  '{{',
+  '!!',
+  'i18n.',
 ];
 
 Future<_Server> _open(WidgetTester tester, double width,
@@ -300,6 +304,9 @@ void main() {
     _noErrorWidgets(tester);
     expect(find.text('Use the east supplier'), findsWidgets);
     expect(s.calls, contains('bk.knowledge.export'));
+    expect(find.textContaining('2026-11-01 09:00'), findsOneWidget,
+        reason: 'the time of a statement, as the spec writes a date format: '
+            '${shown(tester)}');
 
     await tester.tap(find.text('To confirm').first);
     await settle(tester);
@@ -324,7 +331,7 @@ void main() {
   testWidgets('the conversation: sent, answered, shown with the tools used',
       (tester) async {
     final s = await _open(tester, 1200);
-    await tester.tap(find.byType(IconButton).last);
+    await tester.tap(find.byTooltip('Conversation').first);
     await settle(tester);
     expect(find.text('Conversation'), findsWidgets);
 
@@ -341,7 +348,7 @@ void main() {
   testWidgets('a conversation the model fails keeps what was typed and says '
       'why', (tester) async {
     await _open(tester, 1200, modelFails: true);
-    await tester.tap(find.byType(IconButton).last);
+    await tester.tap(find.byTooltip('Conversation').first);
     await settle(tester);
     final input = find.byType(TextField).last;
     await tester.enterText(input, 'hello');
