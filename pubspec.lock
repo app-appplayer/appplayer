@@ -173,10 +173,10 @@ packages:
     dependency: transitive
     description:
       name: crypto
-      sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
+      sha256: e3626ae6270383c9e3a549f34c9e4cd26c09ae6a9adaab2bf4737a00340efdc4
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.7"
+    version: "3.0.8"
   csslib:
     dependency: transitive
     description:
@@ -625,18 +625,18 @@ packages:
     dependency: "direct main"
     description:
       name: mcp_bundle
-      sha256: b654d52d0496822a9a19e2e8f654ccd9e0217bd403ae7191ca3b5ce7fb800c54
+      sha256: "52a25c4f0911a5a3ad82d02f8ea4ff8ae78c9b36e1858cff8c4cf8f4d6bc8c9a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.12"
+    version: "0.4.13"
   mcp_client:
     dependency: "direct main"
     description:
       name: mcp_client
-      sha256: "679aba997e1e19891c96ba864c72249d78b1c80df61c461f75737ad7f708f694"
+      sha256: "59d160b697080ca6f5b368d12b70b2040f593ce138b105de9d9720d63fdb42f5"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   mcp_fact_graph:
     dependency: transitive
     description:
@@ -697,26 +697,26 @@ packages:
     dependency: transitive
     description:
       name: mcp_knowledge
-      sha256: "8b1d6276f20d338ec5e2ae021c4515263fab5ba6c4cbd3591faace08beb8445e"
+      sha256: "9d101f11cda2b8b54644ce1b22ea963b3203ee31f1eaf05872ffbbe4d005ce74"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.6"
+    version: "0.2.7"
   mcp_knowledge_ops:
     dependency: transitive
     description:
       name: mcp_knowledge_ops
-      sha256: "3a38fd03b87ea1a67fed9aeef8e065457ddcfa39f4ca32196aaae57c853adee3"
+      sha256: bbb121cd0a0207bf038ff74e0746a29085cfa44392d3c1087f2c91e817c00cbd
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.2"
   mcp_llm:
     dependency: transitive
     description:
       name: mcp_llm
-      sha256: "1e29f0457d948c8b4d683f2183d7c064c388beb1f3c1e1c01572e289d162119a"
+      sha256: f65b7c93ec6d9b42bc97b0d0cfac03b78606a146f0767352114f37217e430281
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.2"
   mcp_philosophy:
     dependency: transitive
     description:
@@ -737,10 +737,10 @@ packages:
     dependency: "direct dev"
     description:
       name: mcp_server
-      sha256: d1facf66c6f5ab9072d5e94b6b70fac45f940f048462d57a45f0057a6d230950
+      sha256: "83787855a849be022ca892258779f5f14dafa36ea75751085c7a0855f293842f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.1.0"
   mcp_skill:
     dependency: transitive
     description:
@@ -1017,10 +1017,10 @@ packages:
     dependency: transitive
     description:
       name: shelf
-      sha256: e7dd780a7ffb623c57850b33f43309312fc863fb6aa3d276a754bb299839ef12
+      sha256: e75e9cf311d7fd712048038cc17c25199c38536c20330d53e7db058b543d5a48
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.2"
+    version: "1.4.3"
   sky_engine:
     dependency: transitive
     description: flutter
