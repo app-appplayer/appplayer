@@ -633,10 +633,10 @@ packages:
     dependency: "direct main"
     description:
       name: mcp_client
-      sha256: "59d160b697080ca6f5b368d12b70b2040f593ce138b105de9d9720d63fdb42f5"
+      sha256: b83f313158b165507fe3496379718cbe21d407a897b41ba3153283c7de3d48c6
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.1"
+    version: "3.0.2"
   mcp_fact_graph:
     dependency: transitive
     description:
