@@ -78,6 +78,18 @@ class _Server {
             {'layer': 'facts', 'kind': 'fact', 'text': 'East supplier is cheaper'},
           ],
         });
+    on('form_builder.issue_list', (a) async => {
+          'ok': true,
+          'issues': [
+            {
+              'issueId': 'issue-1',
+              'issueNumber': '2026-001',
+              'templateId': 'weekly-report',
+              'issuedBy': 'kim',
+              'issuedAt': '2026-11-01T10:30:00.000',
+            },
+          ],
+        });
     on('bk.knowledge.pending', (a) async => {'ok': true, 'candidates': List.of(candidates)});
     on('bk.proposal.list', (a) async => {
           'ok': true,
@@ -149,6 +161,8 @@ class _Server {
             {'id': 'sales', 'title': 'Sales', 'kind': 'unit', 'parentId': 'acme', 'leadMemberId': 'u-kim'},
           ],
         });
+    on('org.workspace.create', (a) async => {'ok': true});
+    on('org.workspace.archive', (a) async => {'ok': true});
     on('org.member.list', (a) async => {
           'ok': true,
           'members': [
@@ -315,6 +329,14 @@ void main() {
     await settle(tester);
     expect(s.args['bk.knowledge.confirm']!.single['candidateId'], 'c1');
     expect(s.candidates, isEmpty);
+
+    await tester.tap(find.text('Documents').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(s.calls, contains('form_builder.issue_list'));
+    expect(find.textContaining('2026-001 · weekly-report'), findsOneWidget,
+        reason: shown(tester));
+    expect(find.textContaining('kim · 2026-11-01 10:30'), findsOneWidget);
   });
 
   testWidgets('people: the agent list and the organisation', (tester) async {
@@ -326,6 +348,35 @@ void main() {
     expect(find.text('Sales'), findsWidgets);
     expect(find.text('Kim'), findsWidgets);
     expect(s.calls, containsAll(<String>['bk.agent.list', 'org.workspace.list']));
+
+    // An administrator puts a workspace in, and away.
+    expect(find.text('Create'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).at(0), 'east');
+    await tester.enterText(find.byType(TextField).at(1), 'East region');
+    await tester.pump();
+    await tester.ensureVisible(find.text('Create'));
+    await tester.tap(find.text('Create'));
+    await settle(tester);
+    expect(s.args['org.workspace.create'], isNotNull,
+        reason: 'fields: ${find.byType(TextField).evaluate().length} ${shown(tester)}');
+    expect(s.args['org.workspace.create']!.single,
+        {'id': 'east', 'title': 'East region'});
+
+    await tester.tap(find.byTooltip('Archive').first);
+    await settle(tester);
+    expect(find.text('The workspace is put away. Everything stays and it can come back.'),
+        findsOneWidget,
+        reason: 'the question before putting away: ${shown(tester)}');
+    await tester.tap(find.text('Cancel').first);
+    await settle(tester);
+    expect(s.args['org.workspace.archive'], isNull);
+    await tester.tap(find.byTooltip('Archive').first);
+    await settle(tester);
+    await tester.tap(find.text('Archive').first);
+    await settle(tester);
+    expect(s.args['org.workspace.archive'], isNotNull,
+        reason: shown(tester));
+    expect(s.args['org.workspace.archive']!.single['id'], 'acme');
   });
 
   testWidgets('the conversation: sent, answered, shown with the tools used',
@@ -343,6 +394,28 @@ void main() {
     expect(s.args['chat.send']!.single['text'], 'where is the quote?');
     expect(find.text('where is the quote?'), findsOneWidget);
     expect(find.text('done'), findsOneWidget);
+  });
+
+  testWidgets('starting the conversation over asks first, then forgets it',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.byTooltip('Conversation').first);
+    await settle(tester);
+    await tester.tap(find.byTooltip('Start over').first);
+    await settle(tester);
+    expect(find.textContaining('Knowledge is not deleted'), findsOneWidget,
+        reason: shown(tester));
+    await tester.tap(find.text('Cancel').first);
+    await settle(tester);
+    expect(s.calls, isNot(contains('chat.clear')));
+    expect(find.textContaining('Knowledge is not deleted'), findsNothing);
+
+    await tester.tap(find.byTooltip('Start over').first);
+    await settle(tester);
+    await tester.tap(find.text('Start over').first);
+    await settle(tester);
+    expect(s.calls, contains('chat.clear'));
+    expect(find.textContaining('Knowledge is not deleted'), findsNothing);
   });
 
   testWidgets('a conversation the model fails keeps what was typed and says '
