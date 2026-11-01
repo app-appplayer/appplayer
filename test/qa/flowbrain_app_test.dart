@@ -384,6 +384,18 @@ void main() {
     await settle(tester);
     await tester.tap(find.text('summary').last);
     await settle(tester);
+    // Any kind first: no kinds in the binding.
+    await tester.tap(find.text('Add'));
+    await settle(tester);
+    expect(find.textContaining('summary ← Any kind'), findsOneWidget,
+        reason: shown(tester));
+    await tester.tap(find.text('Clear'));
+    await settle(tester);
+    // Then one kind.
+    await tester.tap(find.byType(PopupMenuButton<int>).at(3));
+    await settle(tester);
+    await tester.tap(find.text('decision').last);
+    await settle(tester);
     await tester.tap(find.text('Add'));
     await settle(tester);
     expect(find.textContaining('summary ← decision'), findsOneWidget,
