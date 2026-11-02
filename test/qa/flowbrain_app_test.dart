@@ -92,6 +92,10 @@ class _Server {
         return ('system.bundle.list', {});
       case ['system', 'access']:
         return ('system.access.list', {});
+      case ['system', 'events']:
+        return ('system.events.snapshot', {'limit': 40});
+      case ['system', 'cost']:
+        return ('system.cost.totals', {});
       case ['chat', 'history']:
         return ('chat.history', {});
       case [final w, 'work', final a]:
@@ -337,6 +341,17 @@ class _Server {
           ],
         });
     on('org.workspace.create', (a) async => {'ok': true});
+    on('org.workspace.update', (a) async => {'ok': true});
+    on('org.export', (a) async => {
+          'ok': true,
+          'organization': {'workspaces': []},
+          'text': '{"workspaces":[]}',
+        });
+    on('org.import', (a) async => {
+          'ok': true,
+          'created': {'workspaces': ['a', 'b'], 'members': ['m']},
+          'skipped': {'workspaces': ['c'], 'members': []},
+        });
     on('org.workspace.archive', (a) async => {'ok': true});
     final members = <Map<String, dynamic>>[
       {'id': 'u-kim', 'kind': 'person', 'displayName': 'Kim', 'units': ['sales']},
@@ -392,6 +407,17 @@ class _Server {
           'workspaceId': 'acme',
           'dataFolder': '/data',
           'layers': {'factGraph': true, 'skill': true, 'profile': true, 'philosophy': true, 'ops': true},
+        });
+    on('system.events.snapshot', (a) async => {
+          'events': [
+            {'event': 'run.finished', 'timestamp': '2026-11-03T09:00:00', 'summary': 'Run finished', 'payload': {}},
+          ],
+        });
+    on('system.events.clear', (a) async => {'ok': true});
+    on('system.cost.totals', (a) async => {
+          'rows': [
+            {'provider': 'anthropic', 'inputTokens': 120, 'outputTokens': 45, 'callCount': 3},
+          ],
         });
     on('system.bundle.deactivate', (a) async => {'ok': true});
     on('system.bundle.activate', (a) async => {'ok': true});
@@ -787,6 +813,15 @@ void main() {
     expect(find.text('Active'), findsOneWidget);
     expect(find.text('Not active'), findsOneWidget);
 
+    // The model's use and the recent events are listed; events can be cleared.
+    expect(find.textContaining('3 calls · 120 / 45'), findsOneWidget,
+        reason: shown(tester));
+    expect(find.text('Run finished'), findsOneWidget, reason: shown(tester));
+    await tester.ensureVisible(find.text('Clear'));
+    await tester.tap(find.text('Clear'));
+    await settle(tester);
+    expect(s.calls, contains('system.events.clear'));
+
     // Turning a bundle off asks first, and Cancel leaves it.
     await tester.tap(find.text('Deactivate'));
     await settle(tester);
@@ -905,6 +940,51 @@ void main() {
     expect(find.text('Han'), findsNothing, reason: shown(tester));
   });
 
+  testWidgets('people: a workspace is moved and given a lead, the organisation '
+      'is exported and taken in', (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('People').first);
+    await settle(tester);
+
+    Finder field(String hint) => find.widgetWithText(TextField, hint);
+    await tester.ensureVisible(field('Workspace to change'));
+    await tester.enterText(field('Workspace to change'), 'sales');
+    await tester.enterText(
+        field('Parent workspace id / Lead member id'), 'u-han');
+    await tester.pump();
+    await tester.ensureVisible(find.text('Set lead'));
+    await tester.tap(find.text('Set lead'));
+    await settle(tester);
+    expect(s.args['org.workspace.update']!.single,
+        {'id': 'sales', 'leadMemberId': 'u-han'});
+    await tester.enterText(field('Parent workspace id / Lead member id'), 'acme');
+    await tester.pump();
+    await tester.tap(find.text('Move under'));
+    await settle(tester);
+    expect(s.args['org.workspace.update']!.last,
+        {'id': 'sales', 'parentId': 'acme'});
+
+    await tester.ensureVisible(find.text('Export the organisation'));
+    await tester.tap(find.text('Export the organisation'));
+    await settle(tester);
+    expect(find.text('{"workspaces":[]}'), findsOneWidget,
+        reason: shown(tester));
+
+    await tester.enterText(
+        field('Paste an exported organisation here'), '{"workspaces":[]}');
+    await tester.pump();
+    await tester.ensureVisible(find.text('Check'));
+    await tester.tap(find.text('Check'));
+    await settle(tester);
+    expect(s.args['org.import']!.single,
+        {'text': '{"workspaces":[]}', 'dryRun': true});
+    expect(find.textContaining('new: 2 / 1'), findsOneWidget,
+        reason: shown(tester));
+    await tester.tap(find.text('Take in'));
+    await settle(tester);
+    expect(s.args['org.import']!.last['dryRun'], false);
+  });
+
   testWidgets('system: a stopped member is restored, the server is shut down '
       'after asking', (tester) async {
     final s = await _open(tester, 1200);
@@ -912,6 +992,7 @@ void main() {
     await settle(tester);
     _noErrorWidgets(tester);
     expect(find.text('u-lee'), findsOneWidget, reason: shown(tester));
+    await tester.ensureVisible(find.text('Restore'));
     await tester.tap(find.text('Restore'));
     await settle(tester);
     expect(s.args['system.access.restore']!.single, {'memberId': 'u-lee'});
