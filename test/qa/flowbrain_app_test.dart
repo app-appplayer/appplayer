@@ -78,6 +78,8 @@ class _Server {
         return ('bk.behavior.list', {});
       case ['runs']:
         return ('work.run.list', {});
+      case ['tasks']:
+        return ('work.task.list', {});
       case ['org', 'workspaces']:
         return ('org.workspace.list', {});
       case ['org', 'members']:
@@ -283,6 +285,23 @@ class _Server {
           'kind': 'human',
         },
     ];
+    final tasks = <Map<String, dynamic>>[
+      if (!empty)
+        {
+          'taskId': 'quote',
+          'title': 'Send the quote',
+          'kind': 'oneOff',
+          'workspaceId': 'acme',
+          'status': 'pending',
+          'moves': ['cancelled', 'inProgress'],
+        },
+    ];
+    on('work.task.list', (a) async => {'ok': true, 'tasks': tasks});
+    on('work.task.move', (a) async {
+      final t = tasks.firstWhere((t) => t['taskId'] == a['taskId']);
+      t['status'] = a['to'];
+      return {'ok': true, 'status': a['to']};
+    });
     on('work.run.list', (a) async => {'ok': true, 'runs': runs});
     on('work.run.submit', (a) async {
       runs.removeWhere((r) => r['runId'] == a['runId']);
@@ -600,6 +619,24 @@ void main() {
     expect(s.args['work.run.submit']!.single, {'runId': 'acme.chore:2'});
     expect(find.text('Nothing waits for an approval.'), findsOneWidget,
         reason: shown(tester));
+  });
+
+  testWidgets('work: a task handed to the member is started and finished',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('Work').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(find.text('Send the quote'), findsOneWidget, reason: shown(tester));
+    await tester.tap(find.text('Start').first);
+    await settle(tester);
+    expect(s.args['work.task.move']!.last,
+        {'taskId': 'quote', 'to': 'inProgress'});
+    await tester.tap(find.text('Done').last);
+    await settle(tester);
+    expect(s.args['work.task.move']!.last,
+        {'taskId': 'quote', 'to': 'completed'});
+    expect(find.text('Start'), findsNothing);
   });
 
   testWidgets('people: the agent list and the organisation', (tester) async {
