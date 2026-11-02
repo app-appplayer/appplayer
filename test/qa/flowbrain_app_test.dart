@@ -385,6 +385,19 @@ class _Server {
     on('bk.agent.delete', (a) async => {'ok': true});
     on('bk.knowledge.correct', (a) async => {'ok': true, 'factId': 'f2'});
     on('bk.fact.retract', (a) async => {'ok': true});
+    on('bk.knowledge.history', (a) async => {
+          'ok': true,
+          'versions': [
+            {
+              'seq': 1,
+              'ts': '2026-11-02T15:17:12Z',
+              'actor': 'u-a',
+              'via': 'confirm',
+              'removed': false,
+              'data': {'payload': {'text': 'First wording'}},
+            },
+          ],
+        });
     on('bk.behavior.run', (a) async => {'ok': true, 'runId': 'r1'});
     on('bk.knowledge.export', (a) async => empty ? {'ok': true, 'statements': 0, 'bundle': {}} : {
           'ok': true,
@@ -414,6 +427,12 @@ class _Server {
           ],
         });
     on('system.events.clear', (a) async => {'ok': true});
+    on('system.config.validate', (a) async => {
+          'ok': false,
+          'issues': [
+            {'severity': 'error', 'path': 'llm.model', 'message': 'model is empty'},
+          ],
+        });
     on('system.cost.totals', (a) async => {
           'rows': [
             {'provider': 'anthropic', 'inputTokens': 120, 'outputTokens': 45, 'callCount': 3},
@@ -813,6 +832,13 @@ void main() {
     expect(find.text('Active'), findsOneWidget);
     expect(find.text('Not active'), findsOneWidget);
 
+    // Checking the settings lists what is wrong with them.
+    await tester.ensureVisible(find.text('Check the settings'));
+    await tester.tap(find.text('Check the settings'));
+    await settle(tester);
+    expect(s.calls, contains('system.config.validate'));
+    expect(find.text('model is empty'), findsOneWidget, reason: shown(tester));
+
     // The model's use and the recent events are listed; events can be cleared.
     expect(find.textContaining('3 calls · 120 / 45'), findsOneWidget,
         reason: shown(tester));
@@ -1041,6 +1067,16 @@ void main() {
     expect(s.args['bk.knowledge.correct']!.single['factId'], 'f1');
     expect(s.args['bk.knowledge.correct']!.single['text'],
         'Use the west supplier');
+
+    await tester.tap(find.byTooltip('History').first);
+    await settle(tester);
+    expect(s.args['bk.knowledge.history']!.single,
+        {'collection': 'facts', 'id': 'f1'});
+    expect(find.text('First wording'), findsOneWidget, reason: shown(tester));
+    await tester.ensureVisible(find.text('Close history'));
+    await tester.tap(find.text('Close history'));
+    await settle(tester);
+    expect(find.text('First wording'), findsNothing);
 
     await tester.tap(find.byTooltip('Retract').first);
     await settle(tester);
