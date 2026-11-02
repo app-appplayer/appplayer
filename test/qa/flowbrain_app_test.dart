@@ -76,6 +76,8 @@ class _Server {
         return ('bk.agent.list', {});
       case ['processes']:
         return ('bk.behavior.list', {});
+      case ['runs']:
+        return ('work.run.list', {});
       case ['org', 'workspaces']:
         return ('org.workspace.list', {});
       case ['org', 'members']:
@@ -260,6 +262,21 @@ class _Server {
     on('bk.knowledge.confirm', (a) async {
       candidates.removeWhere((c) => c['id'] == a['candidateId']);
       return {'ok': true};
+    });
+    final runs = <Map<String, dynamic>>[
+      if (!empty)
+        {
+          'runId': 'acme.review:1',
+          'processId': 'acme.review',
+          'status': 'suspended',
+          'waiting': true,
+          'stepId': 'sign',
+        },
+    ];
+    on('work.run.list', (a) async => {'ok': true, 'runs': runs});
+    on('work.run.decide', (a) async {
+      runs.removeWhere((r) => r['runId'] == a['runId']);
+      return {'ok': true, 'status': 'completed'};
     });
     on('bk.behavior.list', (a) async => {
           'ok': true,
@@ -551,6 +568,16 @@ void main() {
     _noErrorWidgets(tester);
     expect(find.text('weekly-report'), findsOneWidget, reason: shown(tester));
     expect(s.calls, contains('bk.behavior.list'));
+
+    // A run waits at a gate: a person approves it, and it is no longer there.
+    expect(find.text('acme.review'), findsOneWidget, reason: shown(tester));
+    await tester.tap(find.text('Approve').first);
+    await settle(tester);
+    expect(s.args['work.run.decide']!.single,
+        {'runId': 'acme.review:1', 'decision': 'approve'});
+    expect(find.text('acme.review'), findsNothing, reason: shown(tester));
+    expect(find.text('Nothing waits for an approval.'), findsOneWidget,
+        reason: shown(tester));
   });
 
   testWidgets('people: the agent list and the organisation', (tester) async {
