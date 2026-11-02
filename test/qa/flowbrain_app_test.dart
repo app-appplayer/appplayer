@@ -271,9 +271,23 @@ class _Server {
           'status': 'suspended',
           'waiting': true,
           'stepId': 'sign',
+          'kind': 'approval',
+        },
+      if (!empty)
+        {
+          'runId': 'acme.chore:2',
+          'processId': 'acme.chore',
+          'status': 'suspended',
+          'waiting': true,
+          'stepId': 'do',
+          'kind': 'human',
         },
     ];
     on('work.run.list', (a) async => {'ok': true, 'runs': runs});
+    on('work.run.submit', (a) async {
+      runs.removeWhere((r) => r['runId'] == a['runId']);
+      return {'ok': true, 'status': 'completed'};
+    });
     on('work.run.decide', (a) async {
       runs.removeWhere((r) => r['runId'] == a['runId']);
       return {'ok': true, 'status': 'completed'};
@@ -576,6 +590,14 @@ void main() {
     expect(s.args['work.run.decide']!.single,
         {'runId': 'acme.review:1', 'decision': 'approve'});
     expect(find.text('acme.review'), findsNothing, reason: shown(tester));
+    // A task handed to the member: they say it is done.
+    expect(find.text('Nothing waits for an approval.'), findsNothing);
+    expect(find.text('acme.chore'), findsOneWidget, reason: shown(tester));
+    expect(find.text('Approve'), findsNothing,
+        reason: 'a task is not an approval');
+    await tester.tap(find.text('Done').first);
+    await settle(tester);
+    expect(s.args['work.run.submit']!.single, {'runId': 'acme.chore:2'});
     expect(find.text('Nothing waits for an approval.'), findsOneWidget,
         reason: shown(tester));
   });
