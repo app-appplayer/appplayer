@@ -616,7 +616,8 @@ void main() {
         reason: 'a task is not an approval');
     await tester.tap(find.text('Done').first);
     await settle(tester);
-    expect(s.args['work.run.submit']!.single, {'runId': 'acme.chore:2'});
+    expect(s.args['work.run.submit']!.single,
+        {'runId': 'acme.chore:2', 'text': ''});
     expect(find.text('Nothing waits for an approval.'), findsOneWidget,
         reason: shown(tester));
   });
@@ -631,11 +632,24 @@ void main() {
     await tester.tap(find.text('Start').first);
     await settle(tester);
     expect(s.args['work.task.move']!.last,
-        {'taskId': 'quote', 'to': 'inProgress'});
+        {'taskId': 'quote', 'to': 'inProgress', 'note': ''});
+    // It is blocked with a reason, picked up again, and finished.
+    await tester.enterText(find.byType(TextField).first, 'Waiting for prices');
+    await tester.tap(find.text('Blocked').first);
+    await settle(tester);
+    expect(s.args['work.task.move']!.last,
+        {'taskId': 'quote', 'to': 'blocked', 'note': 'Waiting for prices'});
+    expect(find.text('Blocked'), findsNothing,
+        reason: 'a blocked task offers to resume, not to block again');
+    await tester.tap(find.text('Resume').first);
+    await settle(tester);
+    expect(s.args['work.task.move']!.last,
+        {'taskId': 'quote', 'to': 'inProgress', 'note': ''},
+        reason: 'the note was put away once it was sent');
     await tester.tap(find.text('Done').last);
     await settle(tester);
     expect(s.args['work.task.move']!.last,
-        {'taskId': 'quote', 'to': 'completed'});
+        {'taskId': 'quote', 'to': 'completed', 'note': ''});
     expect(find.text('Start'), findsNothing);
   });
 
