@@ -90,6 +90,8 @@ class _Server {
         return ('system.config.read', {'path': 'llm'});
       case ['system', 'bundles']:
         return ('system.bundle.list', {});
+      case ['system', 'access']:
+        return ('system.access.list', {});
       case ['chat', 'history']:
         return ('chat.history', {});
       case [final w, 'work', final a]:
@@ -336,12 +338,39 @@ class _Server {
         });
     on('org.workspace.create', (a) async => {'ok': true});
     on('org.workspace.archive', (a) async => {'ok': true});
-    on('org.member.list', (a) async => {
-          'ok': true,
-          'members': [
-            {'id': 'u-kim', 'kind': 'person', 'displayName': 'Kim', 'units': ['sales']},
-          ],
-        });
+    final members = <Map<String, dynamic>>[
+      {'id': 'u-kim', 'kind': 'person', 'displayName': 'Kim', 'units': ['sales']},
+    ];
+    on('org.member.list', (a) async => {'ok': true, 'members': members});
+    on('org.member.add', (a) async {
+      members.add({
+        'id': a['id'],
+        'kind': a['kind'],
+        'displayName': a['displayName'],
+        'units': a['units'],
+      });
+      return {'ok': true};
+    });
+    on('org.member.remove', (a) async {
+      members.removeWhere((m) => m['id'] == a['id']);
+      return {'ok': true};
+    });
+    on('org.document.issue', (a) async =>
+        {'ok': true, 'document': 'doc-for-${a['memberId']}.signature', 'text': 'doc-for-${a['memberId']}.signature'});
+    final stopped = <String>['u-lee'];
+    on('system.access.list', (a) async => {'ok': true, 'revoked': stopped});
+    on('system.access.restore', (a) async {
+      stopped.remove(a['memberId']);
+      return {'ok': true};
+    });
+    on('system.shutdown', (a) async => {'ok': true});
+    on('system.config.set', (a) async => {'ok': true});
+    on('system.secret.set', (a) async => {'ok': true});
+    on('bk.agent.create', (a) async => {'ok': true});
+    on('bk.agent.delete', (a) async => {'ok': true});
+    on('bk.knowledge.correct', (a) async => {'ok': true, 'factId': 'f2'});
+    on('bk.fact.retract', (a) async => {'ok': true});
+    on('bk.behavior.run', (a) async => {'ok': true, 'runId': 'r1'});
     on('bk.knowledge.export', (a) async => empty ? {'ok': true, 'statements': 0, 'bundle': {}} : {
           'ok': true,
           'statements': 1,
@@ -665,8 +694,8 @@ void main() {
 
     // An administrator puts a workspace in, and away.
     expect(find.text('Create'), findsOneWidget);
-    await tester.enterText(find.byType(TextField).at(0), 'east');
-    await tester.enterText(find.byType(TextField).at(1), 'East region');
+    await tester.enterText(find.byType(TextField).at(2), 'east');
+    await tester.enterText(find.byType(TextField).at(3), 'East region');
     await tester.pump();
     await tester.ensureVisible(find.text('Create'));
     await tester.tap(find.text('Create'));
@@ -831,6 +860,164 @@ void main() {
     expect(find.textContaining('not available to this caller'), findsWidgets,
         reason: shown(tester));
     expect(s.calls, contains('bk.knowledge.pending'));
+  });
+
+  testWidgets('people: a member is added, given a document, and removed',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('People').first);
+    await settle(tester);
+    final fields = find.byType(TextField);
+    final base = fields.evaluate().length;
+    await tester.enterText(fields.at(base - 3), 'u-han');
+    await tester.enterText(fields.at(base - 2), 'Han');
+    await tester.enterText(fields.at(base - 1), 'sales');
+    await tester.pump();
+    await tester.ensureVisible(find.text('Add member'));
+    await tester.tap(find.text('Add member'));
+    await settle(tester);
+    expect(s.args['org.member.add']!.single, {
+      'id': 'u-han',
+      'kind': 'person',
+      'displayName': 'Han',
+      'units': ['sales'],
+    });
+    expect(find.text('Han'), findsWidgets, reason: shown(tester));
+
+    await tester.ensureVisible(find.byTooltip('Issue a member document').last);
+    await tester.tap(find.byTooltip('Issue a member document').last);
+    await settle(tester);
+    expect(s.args['org.document.issue']!.single, {'memberId': 'u-han'});
+    expect(find.text('doc-for-u-han.signature'), findsOneWidget,
+        reason: shown(tester));
+    await tester.ensureVisible(find.text('Done').last);
+    await tester.tap(find.text('Done').last);
+    await settle(tester);
+    expect(find.text('doc-for-u-han.signature'), findsNothing,
+        reason: shown(tester));
+
+    await tester.tap(find.byTooltip('Remove').last);
+    await settle(tester);
+    expect(s.args['org.member.remove'], isNull, reason: 'it asks first');
+    await tester.tap(find.text('Remove').last);
+    await settle(tester);
+    expect(s.args['org.member.remove']!.single, {'id': 'u-han'});
+    expect(find.text('Han'), findsNothing, reason: shown(tester));
+  });
+
+  testWidgets('system: a stopped member is restored, the server is shut down '
+      'after asking', (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('System').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(find.text('u-lee'), findsOneWidget, reason: shown(tester));
+    await tester.tap(find.text('Restore'));
+    await settle(tester);
+    expect(s.args['system.access.restore']!.single, {'memberId': 'u-lee'});
+    expect(find.text('No member is stopped.'), findsOneWidget,
+        reason: shown(tester));
+
+    await tester.ensureVisible(find.text('Shut down').last);
+    await tester.tap(find.text('Shut down').last);
+    await settle(tester);
+    expect(s.calls, isNot(contains('system.shutdown')));
+    await tester.tap(find.text('Cancel').last);
+    await settle(tester);
+    expect(s.calls, isNot(contains('system.shutdown')));
+    await tester.ensureVisible(find.text('Shut down').last);
+    await tester.tap(find.text('Shut down').last);
+    await settle(tester);
+    await tester.ensureVisible(find.text('Shut down').last);
+    await tester.tap(find.text('Shut down').last);
+    await settle(tester);
+    expect(s.calls, contains('system.shutdown'));
+  });
+
+  testWidgets('work: a process is started by a person', (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('Work').first);
+    await settle(tester);
+    await tester.ensureVisible(find.text('Run'));
+    await tester.tap(find.text('Run'));
+    await settle(tester);
+    expect(s.args['bk.behavior.run']!.single, {'behaviorId': 'weekly-report'});
+  });
+
+  testWidgets('knowledge: a fact is corrected, and retracted after asking',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('Knowledge').first);
+    await settle(tester);
+    await tester.tap(find.byTooltip('Correct').first);
+    await settle(tester);
+    expect(find.text('The earlier version stays; the correction is the one '
+        'that counts now.'), findsOneWidget, reason: shown(tester));
+    await tester.enterText(find.byType(TextField).last, 'Use the west supplier');
+    await tester.pump();
+    await tester.tap(find.text('Save the correction'));
+    await settle(tester);
+    expect(s.args['bk.knowledge.correct']!.single['factId'], 'f1');
+    expect(s.args['bk.knowledge.correct']!.single['text'],
+        'Use the west supplier');
+
+    await tester.tap(find.byTooltip('Retract').first);
+    await settle(tester);
+    expect(s.args['bk.fact.retract'], isNull, reason: 'it asks first');
+    await tester.tap(find.text('Retract').last);
+    await settle(tester);
+    expect(s.args['bk.fact.retract']!.single['id'], 'f1');
+  });
+
+  testWidgets('people: an agent is made, and taken away after asking',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('People').first);
+    await settle(tester);
+    await tester.enterText(find.byType(TextField).at(0), 'scribe');
+    await tester.enterText(find.byType(TextField).at(1), 'Scribe');
+    await tester.pump();
+    await tester.tap(find.text('reviewer'));
+    await settle(tester);
+    await tester.tap(find.text('Add agent'));
+    await settle(tester);
+    expect(s.args['bk.agent.create']!.single, {
+      'id': 'scribe',
+      'displayName': 'Scribe',
+      'role': 'reviewer',
+      'workspaceId': null,
+    });
+    await tester.tap(find.byTooltip('Remove').first);
+    await settle(tester);
+    expect(s.args['bk.agent.delete'], isNull, reason: 'it asks first');
+    await tester.tap(find.text('Remove').first);
+    await settle(tester);
+    expect(s.args['bk.agent.delete']!.single, {'agentId': 'bot'});
+  });
+
+  testWidgets('system: the model and the key are set, and the key is not shown',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('System').first);
+    await settle(tester);
+    await tester.enterText(find.byType(TextField).at(0), 'claude-sonnet-5-5');
+    await tester.enterText(find.byType(TextField).at(1), 'sk-test-secret');
+    await tester.pump();
+    await tester.tap(find.text('Save model'));
+    await settle(tester);
+    expect(s.args['system.config.set']!.single,
+        {'path': 'llm.model', 'value': 'claude-sonnet-5-5'});
+    await tester.enterText(find.byType(TextField).at(1), 'sk-test-secret');
+    await tester.pump();
+    await tester.tap(find.text('Save key'));
+    await settle(tester);
+    expect(s.args['system.secret.set']!.single, {
+      'name': 'llm_api_key',
+      'value': 'sk-test-secret',
+      'bindTo': 'llm.apiKeyRef',
+    });
+    expect(find.text('sk-test-secret'), findsNothing,
+        reason: 'the key is cleared once kept, and was never shown');
   });
 
   testWidgets('what only an administrator may see says so', (tester) async {
