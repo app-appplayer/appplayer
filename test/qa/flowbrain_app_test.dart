@@ -74,6 +74,8 @@ class _Server {
         return ('bk.proposal.list', {});
       case ['agents']:
         return ('bk.agent.list', {});
+      case ['processes']:
+        return ('bk.behavior.list', {});
       case ['org', 'workspaces']:
         return ('org.workspace.list', {});
       case ['org', 'members']:
@@ -259,6 +261,10 @@ class _Server {
       candidates.removeWhere((c) => c['id'] == a['candidateId']);
       return {'ok': true};
     });
+    on('bk.behavior.list', (a) async => {
+          'ok': true,
+          'behaviors': empty ? <String>[] : ['weekly-report'],
+        });
     on('bk.agent.list', (a) async => {
           'ok': true,
           'agents': [
@@ -535,6 +541,16 @@ void main() {
     _noErrorWidgets(tester);
     expect(find.text('No statements at this point in time.'), findsOneWidget,
         reason: shown(tester));
+  });
+
+  testWidgets('work: the processes the server holds are listed',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('Work').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(find.text('weekly-report'), findsOneWidget, reason: shown(tester));
+    expect(s.calls, contains('bk.behavior.list'));
   });
 
   testWidgets('people: the agent list and the organisation', (tester) async {
