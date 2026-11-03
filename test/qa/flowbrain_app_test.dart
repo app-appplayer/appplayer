@@ -70,6 +70,12 @@ class _Server {
     switch (seg) {
       case ['me', 'workspaces']:
         return ('org.workspace.mine', {});
+      case ['skills']:
+        return ('bk.skill.list', {});
+      case ['profiles']:
+        return ('bk.profile.list', {});
+      case ['philosophies']:
+        return ('bk.philosophy.list', {});
       case ['proposals']:
         return ('bk.proposal.list', {});
       case ['agents']:
@@ -220,6 +226,19 @@ class _Server {
         });
     on('form_builder.issue', (a) async => {'ok': true, 'issueId': 'issue-2', 'issueNumber': '2026-002'});
     on('bk.knowledge.pending', (a) async => {'ok': true, 'candidates': List.of(candidates)});
+    on('bk.skill.list', (a) async => {
+          'ok': true,
+          'skills': [
+            {'id': 'sk1', 'name': 'Quote review', 'version': '1.0.0'},
+          ],
+        });
+    on('bk.profile.list', (a) async => {'ok': true, 'profiles': []});
+    on('bk.philosophy.list', (a) async => {
+          'ok': true,
+          'ethos': [
+            {'id': 'default_ethos', 'name': 'Default Ethos', 'version': '1.0.0'},
+          ],
+        });
     on('bk.proposal.list', (a) async => {
           'ok': true,
           'proposals': [
@@ -1081,6 +1100,17 @@ void main() {
     expect(a['origin'], 'human');
     expect(find.text('Put down as knowledge.'), findsOneWidget,
         reason: shown(tester));
+  });
+
+  testWidgets('knowledge: the skills, profiles and philosophies are listed',
+      (tester) async {
+    await _open(tester, 1200);
+    await tester.tap(find.text('Knowledge').first);
+    await settle(tester);
+    await tester.tap(find.text('Skills, profiles, philosophies'));
+    await settle(tester);
+    expect(find.text('Quote review'), findsOneWidget, reason: shown(tester));
+    expect(find.text('Default Ethos'), findsOneWidget, reason: shown(tester));
   });
 
   testWidgets('knowledge: a fact is corrected, and retracted after asking',
