@@ -277,8 +277,17 @@ class _Server {
               'factIds': ['f1', 'f2'],
               'lens': {},
             },
+            {
+              'evidenceId': 'ev2',
+              'kind': 'answer',
+              'who': {'kind': 'agent', 'id': 'scribe'},
+              'at': '2026-11-01T10:30:00Z',
+              'factIds': ['f1'],
+              'lens': {},
+            },
           ],
         });
+    on('bk.knowledge.reinterpret', (a) async => {'ok': true});
     on('chat.history', (a) async => {'ok': true, 'turns': List.of(turns)});
     on('chat.send', (a) async {
       if (modelFails) return {'ok': false, 'error': 'model unavailable'};
@@ -1158,6 +1167,29 @@ void main() {
     await settle(tester);
     expect(s.subs.keys, contains('fb://own/trace'));
     expect(s.subs.keys, isNot(contains('fb://own/trace/workflow/weekly')));
+  });
+
+  testWidgets('trace: what an agent answered is asked again with another lens',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('Trace').first);
+    await settle(tester);
+    // Only an agent's answer has the button.
+    expect(find.text('Reinterpret'), findsOneWidget, reason: shown(tester));
+    await tester.tap(find.text('Reinterpret'));
+    await settle(tester);
+    expect(s.args['bk.knowledge.reinterpret']!.single,
+        {'evidenceId': 'ev2', 'agentId': null});
+    await tester.enterText(
+        find.widgetWithText(TextField, 'Lens agent id (optional)'), 'critic');
+    await tester.pump();
+    await tester.tap(find.text('Reinterpret'));
+    await settle(tester);
+    expect(s.args['bk.knowledge.reinterpret']!.last,
+        {'evidenceId': 'ev2', 'agentId': 'critic'});
+    expect(find.text('Asked again. The new answer is kept beside the old one.'),
+        findsOneWidget,
+        reason: shown(tester));
   });
 
   testWidgets('knowledge: the skills, profiles and philosophies are listed',
