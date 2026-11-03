@@ -236,9 +236,11 @@ class _Server {
     on('bk.philosophy.list', (a) async => {
           'ok': true,
           'ethos': [
-            {'id': 'default_ethos', 'name': 'Default Ethos', 'version': '1.0.0'},
+            {'id': 'default_ethos', 'name': 'Default Ethos', 'version': '1.0.0', 'active': true},
+            {'id': 'strict', 'name': 'Strict Ethos', 'version': '1.0.0', 'active': false},
           ],
         });
+    on('bk.philosophy.activate', (a) async => {'ok': true});
     on('bk.proposal.list', (a) async => {
           'ok': true,
           'proposals': [
@@ -1104,13 +1106,17 @@ void main() {
 
   testWidgets('knowledge: the skills, profiles and philosophies are listed',
       (tester) async {
-    await _open(tester, 1200);
+    final s = await _open(tester, 1200);
     await tester.tap(find.text('Knowledge').first);
     await settle(tester);
     await tester.tap(find.text('Skills, profiles, philosophies'));
     await settle(tester);
     expect(find.text('Quote review'), findsOneWidget, reason: shown(tester));
     expect(find.text('Default Ethos'), findsOneWidget, reason: shown(tester));
+    expect(find.textContaining('In use'), findsOneWidget, reason: shown(tester));
+    await tester.tap(find.text('Activate'));
+    await settle(tester);
+    expect(s.args['bk.philosophy.activate']!.single, {'id': 'strict'});
   });
 
   testWidgets('knowledge: a fact is corrected, and retracted after asking',
