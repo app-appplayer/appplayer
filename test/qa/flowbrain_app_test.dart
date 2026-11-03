@@ -94,6 +94,8 @@ class _Server {
         return ('system.status', {});
       case ['system', 'llm']:
         return ('system.config.read', {'path': 'llm'});
+      case ['system', 'work']:
+        return ('system.config.read', {'path': 'work'});
       case ['system', 'bundles']:
         return ('system.bundle.list', {});
       case ['system', 'access']:
@@ -117,8 +119,14 @@ class _Server {
         return ('bk.knowledge.pending', ws(w));
       case [final w, 'trace']:
         return ('bk.knowledge.trace', ws(w));
-      case [final w, 'trace', final who]:
-        return ('bk.knowledge.trace', {...ws(w), 'actor': who});
+      case [final w, 'trace', final by, final value]:
+        const keys = {
+          'actor': 'actor',
+          'workflow': 'workflowId',
+          'since': 'since',
+          'until': 'until',
+        };
+        return ('bk.knowledge.trace', {...ws(w), keys[by]!: value});
       case [final w, 'templates']:
         return ('form.list_templates', ws(w));
       case [final w, 'issues']:
@@ -313,6 +321,15 @@ class _Server {
           'stepId': 'do',
           'kind': 'human',
         },
+      if (!empty)
+        {
+          'runId': 'acme.late:3',
+          'processId': 'acme.late',
+          'status': 'expired',
+          'waiting': false,
+          'stepId': 'sign',
+          'kind': 'approval',
+        },
     ];
     final tasks = <Map<String, dynamic>>[
       if (!empty)
@@ -464,7 +481,9 @@ class _Server {
         });
     on('system.bundle.deactivate', (a) async => {'ok': true});
     on('system.bundle.activate', (a) async => {'ok': true});
-    on('system.config.read', (a) async => {'provider': 'anthropic', 'model': 'claude'});
+    on('system.config.read', (a) async => a['path'] == 'work'
+        ? {'approvalTimeoutMinutes': 60}
+        : {'provider': 'anthropic', 'model': 'claude'});
     on('system.bundle.list', (a) async => {
           'ok': true,
           'bundles': [
@@ -700,6 +719,11 @@ void main() {
     expect(find.text('weekly-report'), findsOneWidget, reason: shown(tester));
     expect(s.calls, contains('bk.behavior.list'));
 
+    // A wait the server closed for taking too long is listed apart, with no
+    // button.
+    expect(find.text('Expired approvals'), findsOneWidget,
+        reason: shown(tester));
+    expect(find.text('acme.late'), findsOneWidget, reason: shown(tester));
     // A run waits at a gate: a person approves it, and it is no longer there.
     expect(find.text('acme.review'), findsOneWidget, reason: shown(tester));
     await tester.tap(find.text('Approve').first);
@@ -1106,21 +1130,34 @@ void main() {
         reason: shown(tester));
   });
 
-  testWidgets('trace: one member\'s work is asked for, and all again',
+  testWidgets('trace: a member, a flow or a period is asked for, and all again',
       (tester) async {
     final s = await _open(tester, 1200);
     await tester.tap(find.text('Trace').first);
     await settle(tester);
-    await tester.enterText(find.widgetWithText(TextField, 'Member id'), 'u-kim');
+    final value = find.widgetWithText(
+        TextField, 'Member id, flow id or date');
+    await tester.enterText(value, 'u-kim');
     await tester.pump();
     await tester.tap(find.text('Filter'));
     await settle(tester);
-    expect(s.subs.keys, contains('fb://own/trace/u-kim'));
+    expect(s.subs.keys, contains('fb://own/trace/actor/u-kim'));
     expect(s.subs.keys, isNot(contains('fb://own/trace')));
+    // Another thing to narrow by: a flow.
+    await tester.tap(find.text('Member').first);
+    await settle(tester);
+    await tester.tap(find.text('Flow id').last);
+    await settle(tester);
+    await tester.enterText(value, 'weekly');
+    await tester.pump();
+    await tester.tap(find.text('Filter'));
+    await settle(tester);
+    expect(s.subs.keys, contains('fb://own/trace/workflow/weekly'));
+    expect(s.subs.keys, isNot(contains('fb://own/trace/actor/u-kim')));
     await tester.tap(find.text('Show all'));
     await settle(tester);
     expect(s.subs.keys, contains('fb://own/trace'));
-    expect(s.subs.keys, isNot(contains('fb://own/trace/u-kim')));
+    expect(s.subs.keys, isNot(contains('fb://own/trace/workflow/weekly')));
   });
 
   testWidgets('knowledge: the skills, profiles and philosophies are listed',
@@ -1197,6 +1234,24 @@ void main() {
     await tester.tap(find.text('Remove').first);
     await settle(tester);
     expect(s.args['bk.agent.delete']!.single, {'agentId': 'bot'});
+  });
+
+  testWidgets('system: the approval time limit is shown and set',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('System').first);
+    await settle(tester);
+    expect(s.subs, contains('fb://system/work'));
+    expect(find.text('Now: 60'), findsOneWidget, reason: shown(tester));
+    final field = find.byType(TextField).at(2);
+    await tester.ensureVisible(field);
+    await tester.enterText(field, '45');
+    await tester.pump();
+    await tester.ensureVisible(find.text('Save limit'));
+    await tester.tap(find.text('Save limit'));
+    await settle(tester);
+    expect(s.args['system.config.set']!.single,
+        {'path': 'work.approvalTimeoutMinutes', 'value': '45'});
   });
 
   testWidgets('system: the model and the key are set, and the key is not shown',
