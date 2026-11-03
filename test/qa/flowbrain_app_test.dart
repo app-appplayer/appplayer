@@ -117,6 +117,8 @@ class _Server {
         return ('bk.knowledge.pending', ws(w));
       case [final w, 'trace']:
         return ('bk.knowledge.trace', ws(w));
+      case [final w, 'trace', final who]:
+        return ('bk.knowledge.trace', {...ws(w), 'actor': who});
       case [final w, 'templates']:
         return ('form.list_templates', ws(w));
       case [final w, 'issues']:
@@ -1102,6 +1104,23 @@ void main() {
     expect(a['origin'], 'human');
     expect(find.text('Put down as knowledge.'), findsOneWidget,
         reason: shown(tester));
+  });
+
+  testWidgets('trace: one member\'s work is asked for, and all again',
+      (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('Trace').first);
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Member id'), 'u-kim');
+    await tester.pump();
+    await tester.tap(find.text('Filter'));
+    await settle(tester);
+    expect(s.subs.keys, contains('fb://own/trace/u-kim'));
+    expect(s.subs.keys, isNot(contains('fb://own/trace')));
+    await tester.tap(find.text('Show all'));
+    await settle(tester);
+    expect(s.subs.keys, contains('fb://own/trace'));
+    expect(s.subs.keys, isNot(contains('fb://own/trace/u-kim')));
   });
 
   testWidgets('knowledge: the skills, profiles and philosophies are listed',
