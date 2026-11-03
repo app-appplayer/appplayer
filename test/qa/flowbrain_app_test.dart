@@ -1352,6 +1352,18 @@ void main() {
     expect(find.text('Asked again. The new answer is kept beside the old one.'),
         findsOneWidget,
         reason: shown(tester));
+
+    // A line of the trace opens to what was done, read from its original.
+    await tester.tap(find.text('scribe · answer').first);
+    await settle(tester);
+    expect(s.args['kb.evidence.get']!.last['evidenceId'], 'ev2');
+    expect(find.text('What was done'), findsOneWidget, reason: shown(tester));
+    expect(find.text('Kim: east supplier ships Friday, call before noon.'),
+        findsOneWidget,
+        reason: shown(tester));
+    await tester.tap(find.text('Close').first);
+    await settle(tester);
+    expect(find.text('What was done'), findsNothing);
   });
 
   testWidgets('knowledge: the skills, profiles and philosophies are listed',
