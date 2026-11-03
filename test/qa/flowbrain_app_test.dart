@@ -84,6 +84,8 @@ class _Server {
         return ('bk.behavior.list', {});
       case ['runs']:
         return ('work.run.list', {});
+      case ['triggers']:
+        return ('work.trigger.list', {});
       case ['tasks']:
         return ('work.task.list', {});
       case ['org', 'workspaces']:
@@ -358,6 +360,17 @@ class _Server {
       return {'ok': true, 'status': a['to']};
     });
     on('work.run.list', (a) async => {'ok': true, 'runs': runs});
+    on('work.trigger.list', (a) async => {
+          'ok': true,
+          'triggers': [
+            {
+              'id': 'after-review',
+              'workspaceId': 'acme',
+              'on': {'event': 'run.completed'},
+              'start': {'kind': 'process', 'ref': 'announce'},
+            },
+          ],
+        });
     on('work.run.submit', (a) async {
       runs.removeWhere((r) => r['runId'] == a['runId']);
       return {'ok': true, 'status': 'completed'};
@@ -733,6 +746,11 @@ void main() {
     expect(find.text('Expired approvals'), findsOneWidget,
         reason: shown(tester));
     expect(find.text('acme.late'), findsOneWidget, reason: shown(tester));
+    // The triggers are listed: which event starts what.
+    expect(find.text('Triggers'), findsOneWidget, reason: shown(tester));
+    expect(find.text('after-review'), findsOneWidget, reason: shown(tester));
+    expect(find.text('run.completed → process announce'), findsOneWidget,
+        reason: shown(tester));
     // A run waits at a gate: a person approves it, and it is no longer there.
     expect(find.text('acme.review'), findsOneWidget, reason: shown(tester));
     await tester.tap(find.text('Approve').first);
