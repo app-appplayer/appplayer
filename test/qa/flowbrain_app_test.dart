@@ -385,6 +385,7 @@ class _Server {
     on('bk.agent.delete', (a) async => {'ok': true});
     on('bk.knowledge.correct', (a) async => {'ok': true, 'factId': 'f2'});
     on('bk.fact.retract', (a) async => {'ok': true});
+    on('bk.knowledge.checkpoint', (a) async => {'ok': true});
     on('bk.knowledge.history', (a) async => {
           'ok': true,
           'versions': [
@@ -1063,6 +1064,23 @@ void main() {
     await tester.tap(find.text('Run'));
     await settle(tester);
     expect(s.args['bk.behavior.run']!.single, {'behaviorId': 'weekly-report'});
+  });
+
+  testWidgets('today: the work so far is put down as knowledge', (tester) async {
+    final s = await _open(tester, 1200);
+    final hint = find.widgetWithText(TextField, 'What is to be kept (one line)');
+    await tester.ensureVisible(hint);
+    await tester.enterText(hint, 'Ship on Friday');
+    await tester.pump();
+    await tester.tap(find.text('Put down'));
+    await settle(tester);
+    final a = s.args['bk.knowledge.checkpoint']!.single;
+    expect(a['statements'], [
+      {'kind': 'decision', 'text': 'Ship on Friday'}
+    ], reason: '$a');
+    expect(a['origin'], 'human');
+    expect(find.text('Put down as knowledge.'), findsOneWidget,
+        reason: shown(tester));
   });
 
   testWidgets('knowledge: a fact is corrected, and retracted after asking',
