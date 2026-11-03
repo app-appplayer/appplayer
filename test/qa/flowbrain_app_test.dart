@@ -976,19 +976,33 @@ void main() {
     await tester.ensureVisible(field('Workspace to change'));
     await tester.enterText(field('Workspace to change'), 'sales');
     await tester.enterText(
-        field('Parent workspace id / Lead member id'), 'u-han');
+        field('Parent workspace or member id'), 'u-han');
     await tester.pump();
     await tester.ensureVisible(find.text('Set lead'));
     await tester.tap(find.text('Set lead'));
     await settle(tester);
     expect(s.args['org.workspace.update']!.single,
         {'id': 'sales', 'leadMemberId': 'u-han'});
-    await tester.enterText(field('Parent workspace id / Lead member id'), 'acme');
+    await tester.enterText(field('Parent workspace or member id'), 'acme');
     await tester.pump();
     await tester.tap(find.text('Move under'));
     await settle(tester);
     expect(s.args['org.workspace.update']!.last,
         {'id': 'sales', 'parentId': 'acme'});
+
+    await tester.enterText(field('Parent workspace or member id'), 'acme');
+    await tester.pump();
+    await tester.ensureVisible(find.text('Share with'));
+    await tester.tap(find.text('Share with'));
+    await settle(tester);
+    expect(s.args['org.workspace.update']!.last,
+        {'id': 'sales', 'shareTo': 'acme'});
+    await tester.enterText(field('Parent workspace or member id'), 'acme');
+    await tester.pump();
+    await tester.tap(find.text('Stop sharing'));
+    await settle(tester);
+    expect(s.args['org.workspace.update']!.last,
+        {'id': 'sales', 'unshareTo': 'acme'});
 
     await tester.ensureVisible(find.text('Export the organisation'));
     await tester.tap(find.text('Export the organisation'));
