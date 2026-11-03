@@ -975,15 +975,11 @@ void main() {
     expect(s.args['org.workspace.archive']!.single['id'], 'acme');
 
     // The organisation through its other lenses.
-    await tester.ensureVisible(find.text('Structure').first);
-    await tester.tap(find.text('Structure').first);
-    await settle(tester);
-    await tester.tap(find.text('Flow').last);
+    await tester.ensureVisible(find.text('Flow').first);
+    await tester.tap(find.text('Flow').first);
     await settle(tester);
     expect(find.text('u-kim → u-lee'), findsOneWidget, reason: shown(tester));
     expect(find.text('acme.review · draft → check'), findsOneWidget);
-    await tester.tap(find.text('Flow').first);
-    await settle(tester);
     await tester.tap(find.text('Knowledge').last);
     await settle(tester);
     expect(find.textContaining('Skills it owns: 1'), findsOneWidget,

@@ -18,7 +18,7 @@ dependencies:
   # them. Vendored rather than path-consumed (lib/adapters/host_media/):
   # this tier ships from a public repository and a path dep reaching
   # outside it would not resolve for whoever checks that repo out.
-  flutter_mcp_ui_runtime: ^0.8.7
+  flutter_mcp_ui_runtime: ^0.8.8
   just_audio: ^0.10.6
   video_player: ^2.13.0
   webview_flutter: ^4.14.1
