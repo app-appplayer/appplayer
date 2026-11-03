@@ -92,6 +92,8 @@ class _Server {
         return ('org.workspace.list', {});
       case ['org', 'members']:
         return ('org.member.list', {});
+      case ['org', 'lens', final lens]:
+        return ('org.lens.get', {'lens': lens});
       case ['system', 'status']:
         return ('system.status', {});
       case ['system', 'llm']:
@@ -119,6 +121,8 @@ class _Server {
         return ('bk.knowledge.export', {...ws(w), if (at(a) != null) 'asOf': a});
       case [final w, 'pending']:
         return ('bk.knowledge.pending', ws(w));
+      case [final w, 'evidence']:
+        return ('kb.evidence.list', ws(w));
       case [final w, 'trace']:
         return ('bk.knowledge.trace', ws(w));
       case [final w, 'trace', final by, final value]:
@@ -241,7 +245,15 @@ class _Server {
     on('bk.skill.list', (a) async => {
           'ok': true,
           'skills': [
-            {'id': 'sk1', 'name': 'Quote review', 'version': '1.0.0'},
+            {
+              'schemaVersion': '0.1.0',
+              'manifest': {
+                'id': 'sk1',
+                'name': 'Quote review',
+                'version': '1.0.0',
+              },
+              'procedures': [],
+            },
           ],
         });
     on('bk.profile.list', (a) async => {'ok': true, 'profiles': []});
@@ -395,6 +407,65 @@ class _Server {
             },
           ],
         });
+    on('org.lens.get', (a) async => a['lens'] == 'flow'
+        ? {
+            'ok': true,
+            'lens': 'flow',
+            'handoffs': [
+              {
+                'from': 'u-kim',
+                'to': 'u-lee',
+                'processId': 'acme.review',
+                'fromStep': 'draft',
+                'toStep': 'check',
+              },
+            ],
+          }
+        : {
+            'ok': true,
+            'lens': 'knowledge',
+            'owners': {
+              'skill': {
+                'sk1': ['Quote bot'],
+              },
+              'profile': {},
+              'philosophy': {},
+            },
+            'agents': [
+              {
+                'agentId': 'bot',
+                'displayName': 'Quote bot',
+                'owned': {
+                  'skill': [
+                    {'ref': 'bot::quote', 'from': 'pool:quote'},
+                  ],
+                  'profile': [],
+                  'philosophy': [],
+                },
+              },
+            ],
+          });
+    on('org.agent.axes', (a) async => {
+          'ok': true,
+          'agentId': a['agentId'],
+          'growth': {
+            'skillCandidateCount': 2,
+            'profileAdjustmentCount': 0,
+            'philosophyRevisionCount': 1,
+            'factsAccumulationCount': 5,
+          },
+          'owned': {
+            'skill': [
+              {
+                'ref': 'bot::quote',
+                'label': 'Quote bot · bot::quote',
+                'lineage': ['pool:quote', 'agent:bot/skill/bot::quote'],
+              },
+            ],
+            'profile': [],
+            'philosophy': [],
+          },
+        });
     on('org.workspace.list', (a) async => {
           'ok': true,
           'workspaces': [
@@ -443,6 +514,33 @@ class _Server {
     on('system.shutdown', (a) async => {'ok': true});
     on('system.config.set', (a) async => {'ok': true});
     on('system.secret.set', (a) async => {'ok': true});
+    on('kb.evidence.list', (a) async => {
+          'ok': true,
+          'count': 1,
+          'evidence': [
+            {
+              'evidenceId': 'ev2',
+              'sourceType': 'text',
+              'source': 'chat',
+              'at': '2026-11-02T09:30:00Z',
+              'text': true,
+              'bytes': 31,
+              'preview': 'Kim: east supplier ships Friday',
+            },
+          ],
+        });
+    on('kb.evidence.get', (a) async => {
+          'ok': true,
+          'evidence': {
+            'evidenceId': a['evidenceId'],
+            'sourceType': 'text',
+            'source': 'chat',
+            'at': '2026-11-02T09:30:00Z',
+            'text': true,
+            'contentHash': 'h-1',
+            'content': 'Kim: east supplier ships Friday, call before noon.',
+          },
+        });
     on('bk.agent.create', (a) async => {'ok': true});
     on('bk.agent.delete', (a) async => {'ok': true});
     on('bk.knowledge.correct', (a) async => {'ok': true, 'factId': 'f2'});
@@ -660,6 +758,28 @@ void main() {
     expect(find.textContaining('2026-001 · weekly-report'), findsOneWidget,
         reason: shown(tester));
     expect(find.textContaining('kim · 2026-11-01 10:30'), findsOneWidget);
+
+    // The originals as they were put in: listed, and read whole.
+    await tester.tap(find.text('Originals').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(s.calls, contains('kb.evidence.list'));
+    expect(find.text('Kim: east supplier ships Friday'), findsOneWidget,
+        reason: shown(tester));
+    final before = find.text('scribe · answer').evaluate().length;
+    await tester.tap(find.byTooltip('Read the original').first);
+    await settle(tester);
+    expect(s.args['kb.evidence.get']!.single['evidenceId'], 'ev2');
+    // What was read from it: the trace entries that name it.
+    expect(find.text('scribe · answer').evaluate().length, before + 1,
+        reason: shown(tester));
+    expect(find.text('Kim: east supplier ships Friday, call before noon.'),
+        findsOneWidget,
+        reason: shown(tester));
+    await tester.tap(find.text('Close').first);
+    await settle(tester);
+    expect(find.text('Kim: east supplier ships Friday, call before noon.'),
+        findsNothing);
   });
 
   testWidgets('a document is made from the facts, looked at, and issued',
@@ -812,6 +932,19 @@ void main() {
     expect(find.text('Kim'), findsWidgets);
     expect(s.calls, containsAll(<String>['bk.agent.list', 'org.workspace.list']));
 
+    // The member card says what the agent owns of the axes and how it grew.
+    await tester.ensureVisible(find.text('Quote bot').first);
+    await tester.tap(find.text('Quote bot').first);
+    await settle(tester);
+    expect(s.args['org.agent.axes']!.single, {'agentId': 'bot'});
+    expect(find.text('Quote bot · bot::quote'), findsOneWidget,
+        reason: shown(tester));
+    expect(find.text('pool:quote → agent:bot/skill/bot::quote'),
+        findsOneWidget,
+        reason: shown(tester));
+    expect(find.textContaining('skill candidates 2'), findsOneWidget,
+        reason: shown(tester));
+
     // An administrator puts a workspace in, and away.
     expect(find.text('Create'), findsOneWidget);
     await tester.enterText(find.byType(TextField).at(2), 'east');
@@ -840,6 +973,21 @@ void main() {
     expect(s.args['org.workspace.archive'], isNotNull,
         reason: shown(tester));
     expect(s.args['org.workspace.archive']!.single['id'], 'acme');
+
+    // The organisation through its other lenses.
+    await tester.ensureVisible(find.text('Structure').first);
+    await tester.tap(find.text('Structure').first);
+    await settle(tester);
+    await tester.tap(find.text('Flow').last);
+    await settle(tester);
+    expect(find.text('u-kim → u-lee'), findsOneWidget, reason: shown(tester));
+    expect(find.text('acme.review · draft → check'), findsOneWidget);
+    await tester.tap(find.text('Flow').first);
+    await settle(tester);
+    await tester.tap(find.text('Knowledge').last);
+    await settle(tester);
+    expect(find.textContaining('Skills it owns: 1'), findsOneWidget,
+        reason: shown(tester));
   });
 
   testWidgets('the conversation: sent, answered, shown with the tools used',
@@ -1218,6 +1366,8 @@ void main() {
     await tester.tap(find.text('Skills, profiles, philosophies'));
     await settle(tester);
     expect(find.text('Quote review'), findsOneWidget, reason: shown(tester));
+    // Who began from the pool entry is said beside it.
+    expect(find.text('Quote bot'), findsOneWidget, reason: shown(tester));
     expect(find.text('Default Ethos'), findsOneWidget, reason: shown(tester));
     expect(find.textContaining('In use'), findsOneWidget, reason: shown(tester));
     await tester.tap(find.text('Activate'));
