@@ -36,6 +36,9 @@
 - **Application id is `app.appplayer`** on Android, iOS, macOS and Linux — the
   reverse of the product's own domain `appplayer.app`. It was
   `com.makemind.appplayer` / `com.makemind.appPlayer`.
+- **Dependency floors moved to what was published**: `appplayer_core ^0.5.0`,
+  `brain_kernel ^0.4.0`, `mcp_bundle ^0.4.14`, `flutter_mcp_ui_core ^0.6.13`,
+  `flutter_mcp_ui_runtime ^0.8.9`, `mcp_server ^3.1.1`.
 
 ## 0.1.6 — 2026-08-27 — a code is resolved by the registry it came from
 
