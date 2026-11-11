@@ -40,6 +40,40 @@ class _Server {
       'fields': {'text': 'Use the east supplier'},
     },
   ];
+  /// The ways out of a name the store could not settle (see `choices` of
+  /// `bk.knowledge.pending`); empty until a test adds one.
+  final choices = <Map<String, dynamic>>[];
+
+  /// What the statements are about, and the relations among them.
+  final entities = <Map<String, dynamic>>[
+    {
+      'entityId': 'ent-1',
+      'name': 'Dana',
+      'type': 'person',
+      'facts': 3,
+      'related': [
+        {'relationId': 'rel-1'},
+      ],
+    },
+    {
+      'entityId': 'ent-2',
+      'name': 'Shipping team',
+      'type': 'organization',
+      'aliases': ['Logistics'],
+      'facts': 1,
+      'related': [
+        {'relationId': 'rel-1'},
+      ],
+    },
+  ];
+  final relations = <Map<String, dynamic>>[
+    {
+      'relationId': 'rel-1',
+      'label': 'Dana · works_for · Shipping team',
+      'status': 'proposed',
+      'proposed': true,
+    },
+  ];
   final turns = <Map<String, dynamic>>[];
   bool modelFails = false;
 
@@ -121,6 +155,8 @@ class _Server {
         return ('bk.knowledge.export', {...ws(w), if (at(a) != null) 'asOf': a});
       case [final w, 'pending']:
         return ('bk.knowledge.pending', ws(w));
+      case [final w, 'entities']:
+        return ('bk.knowledge.entities', ws(w));
       case [final w, 'evidence']:
         return ('kb.evidence.list', ws(w));
       case [final w, 'trace']:
@@ -241,7 +277,25 @@ class _Server {
           ],
         });
     on('form_builder.issue', (a) async => {'ok': true, 'issueId': 'issue-2', 'issueNumber': '2026-002'});
-    on('bk.knowledge.pending', (a) async => {'ok': true, 'candidates': List.of(candidates)});
+    on('bk.knowledge.entities', (a) async => {
+          'ok': true,
+          'entities': List.of(entities),
+          'relations': List.of(relations),
+        });
+    on('bk.knowledge.relation.confirm', (a) async {
+      for (final r in relations) {
+        if (r['relationId'] == a['relationId']) {
+          r['proposed'] = false;
+          r['status'] = 'confirmed';
+        }
+      }
+      return {'ok': true};
+    });
+    on('bk.knowledge.pending', (a) async => {
+          'ok': true,
+          'candidates': List.of(candidates),
+          'choices': List.of(choices),
+        });
     on('bk.skill.list', (a) async => {
           'ok': true,
           'skills': [
@@ -323,6 +377,7 @@ class _Server {
         });
     on('bk.knowledge.confirm', (a) async {
       candidates.removeWhere((c) => c['id'] == a['candidateId']);
+      choices.removeWhere((c) => c['candidateId'] == a['candidateId']);
       return {'ok': true};
     });
     final runs = <Map<String, dynamic>>[
@@ -635,7 +690,8 @@ const _errorMarkers = <String>[
 Future<_Server> _open(WidgetTester tester, double width,
     {bool modelFails = false,
     bool empty = false,
-    Set<String> refused = const {}}) async {
+    Set<String> refused = const {},
+    void Function(_Server server)? seed}) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
@@ -644,6 +700,7 @@ Future<_Server> _open(WidgetTester tester, double width,
     ..modelFails = modelFails
     ..empty = empty
     ..refused.addAll(refused);
+  seed?.call(server);
   final runtime = MCPUIRuntime();
   await runtime.initialize(
     _app(),
@@ -729,6 +786,90 @@ void main() {
     expect(find.textContaining('Taken in'), findsOneWidget);
     expect(tester.widget<TextField>(find.byType(TextField).first).controller?.text,
         isEmpty);
+  });
+
+  testWidgets('the entities the statements are about are listed with their '
+      'relations, and a person confirms a proposed one', (tester) async {
+    final s = await _open(tester, 1200);
+    await tester.tap(find.text('Knowledge').first);
+    await settle(tester);
+    await tester.tap(find.text('Entities').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(find.text('Dana'), findsOneWidget, reason: shown(tester));
+    expect(find.textContaining('organization · 1 statements'), findsOneWidget);
+    expect(find.textContaining('Logistics'), findsOneWidget);
+    expect(find.text('Dana · works_for · Shipping team'), findsOneWidget);
+    expect(find.text('Proposed'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Confirm').last);
+    await settle(tester);
+    expect(s.args['bk.knowledge.relation.confirm']!.single['relationId'], 'rel-1');
+    expect(find.text('Confirmed'), findsOneWidget, reason: shown(tester));
+    // Confirmed once, it cannot be confirmed again.
+    expect(
+      tester.widget<OutlinedButton>(
+        find.widgetWithText(OutlinedButton, 'Confirm').last,
+      ).onPressed,
+      isNull,
+    );
+  });
+
+  testWidgets('a name the store could not settle is chosen by a person, and '
+      'the statement is confirmed with the choice', (tester) async {
+    final s = await _open(tester, 1200, seed: (server) {
+      server.candidates
+        ..clear()
+        ..add({
+          'id': 'c9',
+          'type': 'fact',
+          'confidence': 0.9,
+          'evidenceIds': ['e9'],
+          'fields': {'text': 'Acme Corp renewed for two years.'},
+          'needsChoice': true,
+          'about': 'Acme Corp',
+          'entities': [],
+        });
+      server.choices
+        ..add({
+          'candidateId': 'c9',
+          'name': 'Acme Corp',
+          'entityId': 'ent-1',
+          'text': 'Acme Corp renewed for two years.',
+          'label': 'Acme Corp = Acme Corporation',
+        })
+        ..add({
+          'candidateId': 'c9',
+          'name': 'Acme Corp',
+          'entityId': null,
+          'text': 'Acme Corp renewed for two years.',
+          'label': 'Acme Corp = new',
+        });
+    });
+    await tester.tap(find.text('Knowledge').first);
+    await settle(tester);
+    await tester.tap(find.text('To confirm').first);
+    await settle(tester);
+    _noErrorWidgets(tester);
+    expect(find.text('Names to settle'), findsOneWidget, reason: shown(tester));
+    expect(find.text('Acme Corp = Acme Corporation'), findsOneWidget);
+    expect(find.text('Acme Corp = new'), findsOneWidget);
+    // The statement cannot be confirmed before its name is settled.
+    expect(
+      tester.widget<OutlinedButton>(
+        find.widgetWithText(OutlinedButton, 'Confirm').first,
+      ).onPressed,
+      isNull,
+    );
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Choose').first);
+    await settle(tester);
+    final sent = s.args['bk.knowledge.confirm']!.single;
+    expect(sent['candidateId'], 'c9');
+    expect(sent['name'], 'Acme Corp');
+    expect(sent['entityId'], 'ent-1');
+    expect(s.candidates, isEmpty);
+    expect(find.text('Acme Corp = new'), findsNothing);
   });
 
   testWidgets('the knowledge place shows the facts and lets a person confirm '
@@ -1451,7 +1592,10 @@ void main() {
     await settle(tester);
     expect(s.subs, contains('fb://system/work'));
     expect(find.text('Now: 60'), findsOneWidget, reason: shown(tester));
-    final field = find.byType(TextField).at(2);
+    // The limit is the field whose hint is the 0 it stands for; the provider
+    // cards above it have fields of their own.
+    final field = find.byWidgetPredicate(
+        (w) => w is TextField && w.decoration?.hintText == '0');
     await tester.ensureVisible(field);
     await tester.enterText(field, '45');
     await tester.pump();
@@ -1470,18 +1614,18 @@ void main() {
     await tester.enterText(find.byType(TextField).at(0), 'claude-sonnet-5-5');
     await tester.enterText(find.byType(TextField).at(1), 'sk-test-secret');
     await tester.pump();
-    await tester.tap(find.text('Save model'));
+    await tester.tap(find.text('Save model').first);
     await settle(tester);
     expect(s.args['system.config.set']!.single,
-        {'path': 'llm.model', 'value': 'claude-sonnet-5-5'});
+        {'path': 'llm.providers.anthropic.model', 'value': 'claude-sonnet-5-5'});
     await tester.enterText(find.byType(TextField).at(1), 'sk-test-secret');
     await tester.pump();
-    await tester.tap(find.text('Save key'));
+    await tester.tap(find.text('Save key').first);
     await settle(tester);
     expect(s.args['system.secret.set']!.single, {
-      'name': 'llm_api_key',
+      'name': 'llm_key_anthropic',
       'value': 'sk-test-secret',
-      'bindTo': 'llm.apiKeyRef',
+      'bindTo': 'llm.providers.anthropic.apiKeyRef',
     });
     expect(find.text('sk-test-secret'), findsNothing,
         reason: 'the key is cleared once kept, and was never shown');
