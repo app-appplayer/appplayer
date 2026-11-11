@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## 0.1.7 — 2026-11-11 — the store builds, and the published package set
+
+Everything the store builds of 0.1.6 (builds 1–12) carried, and the dependency
+floors moved since.
+
 - **Connection failure screen.** It shows one plain line (what failed and
   to check the server address) with side margins; the raw error text sits in a
   folded *Details* section. A server saved with STDIO that cannot open on a

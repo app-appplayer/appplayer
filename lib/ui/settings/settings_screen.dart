@@ -244,7 +244,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 // ── App info ─────────────────────────────────────────────────────
                 _SectionTitle(S.get('settings.info')),
                 // Kept in sync with pubspec.yaml `version` by hand.
-                const Text('App version: 0.1.6'),
+                const Text('App version: 0.1.7'),
                 const Text(
                   'Core DSL: ${MCPUIDSLVersion.current}',
                   key: Key('settings.core_version'),

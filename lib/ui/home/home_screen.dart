@@ -495,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () => OpenSourceLicenses.open(
                 context,
                 appName: S.get('app.title'),
-                version: '0.1.6',
+                version: '0.1.7',
               ),
             ),
           ],
